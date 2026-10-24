@@ -23,7 +23,7 @@ func configure(battle) -> void:
     light_texture.fill_from = Vector2(0.5,0.5); light_texture.fill_to = Vector2(1.0,0.5)
     var g := Gradient.new()
     g.set_color(0,Color(1,1,1,1)); g.set_color(1,Color(1,1,1,0))
-    g.add_point(0.12,Color(1,1,1,0.80));g.add_point(0.40,Color(1,1,1,0.32));g.add_point(0.72,Color(1,1,1,0.06))
+    g.add_point(0.12,Color(1,1,1,0.92));g.add_point(0.40,Color(1,1,1,0.54));g.add_point(0.72,Color(1,1,1,0.14))
     light_texture.gradient = g
     # Shadow walls follow door removal; static large furniture casts short silhouettes.
     for w in b.walls:
@@ -31,14 +31,14 @@ func configure(battle) -> void:
         wall_snapshot.append({"rect":w,"node":occ})
     # Furniture occluders are children of their sprites and share the physical silhouette.
     # Cold ceiling islands leave deliberate dark intervals.
-    for p in [Vector2(440,300),Vector2(1560,450),Vector2(1950,445),Vector2(1120,470),Vector2(2210,690),Vector2(1620,1240),Vector2(2520,1500),Vector2(340,1340),Vector2(890,1530),Vector2(320,2400),Vector2(2070,2200),Vector2(2810,1840)]:
-        _light(p,Color(0.63,0.78,0.85),390 if p.x<880 else 330,0.95,"cold")
+    for p in [Vector2(440,300),Vector2(1560,450),Vector2(1950,445),Vector2(1120,470),Vector2(2210,690),Vector2(1620,1240),Vector2(2520,1500),Vector2(340,1340),Vector2(890,1530),Vector2(560,2030),Vector2(320,2400),Vector2(2070,2200),Vector2(2810,1840)]:
+        _light(p,Color(0.63,0.78,0.85),490 if p.x<880 else 430,0.82,"cold")
     for p in [Vector2(810,510),Vector2(1700,515),Vector2(2185,1030),Vector2(2200,1650),Vector2(950,1230),Vector2(520,2100),Vector2(1110,2580),Vector2(1720,2510),Vector2(2870,2300)]:
-        _light(p,Color(1.0,0.055,0.018),340,1.35,"red")
+        _light(p,Color(1.0,0.055,0.018),320,0.95,"red")
     # Low intensity local monitor spill, never a room fill.
     for p in b.props:
         if p["kind"] in ["cryo_terminal","cams_terminal","exp12_video","journal","obs_terminal","gen_panel"]:
-            _light(p["pos"]+Vector2(0,32),Color(0.30,0.72,0.86),120,0.6,"screen")
+            _light(p["pos"]+Vector2(0,32),Color(0.30,0.72,0.86),150,0.48,"screen")
     effects = Node2D.new()
     effects.z_index = 12
     b.add_child(effects)
@@ -69,7 +69,7 @@ func _light(pos: Vector2, color: Color, radius: float, energy: float, kind: Stri
     p.position = pos; p.color = color; p.energy = energy
     p.range_z_min = -20; p.range_z_max = 30
     p.shadow_filter = Light2D.SHADOW_FILTER_PCF13
-    p.shadow_color = Color(0.015,0.018,0.025,0.84)
+    p.shadow_color = Color(0.04,0.055,0.075,0.68)
     p.shadow_filter_smooth = 4.0
     p.enabled = false
     add_child(p)
@@ -146,7 +146,7 @@ func _process(delta: float) -> void:
     phase += delta
     var prefs: Dictionary = G.zsave.get("bunker_visual",{})
     var brightness: float = clampf(float(prefs.get("brightness",1.0)),0.75,1.3)
-    b.canvas_mod.color = Color(0.18,0.215,0.25)*brightness
+    b.canvas_mod.color = Color(0.34,0.39,0.44)*brightness
     for particle in b.steam_particles:
         if is_instance_valid(particle): particle.emitting = bool(prefs.get("particles",true)) and b.q_level>0 and particle.position.distance_to(b.player["spr"].position)<700
     if muzzle_time > 0:
@@ -155,7 +155,7 @@ func _process(delta: float) -> void:
     refresh -= delta
     if refresh <= 0:
         refresh = 0.25
-        # Camera distance bounds light work. Two lamp shadow maps plus the player cone.
+        # Camera distance bounds work; the quality setting caps local shadow maps.
         var visible: Array = []
         var view: Vector2 = b.get_viewport_rect().size/b.camera.zoom
         var bounds := Rect2(b.camera.get_screen_center_position()-view*0.5,view).grow(520)
@@ -164,15 +164,24 @@ func _process(delta: float) -> void:
             node.enabled = bounds.has_point(node.position)
             node.shadow_enabled = false
             if node.enabled: visible.append(l)
-        # Lamp intensity never changes in response to actor proximity.
-        # Reserve a slot for the alarm. Sorting all sources together used to erase its light.
-        var chosen: Array=visible.duplicate()
+        # Bounded shadow cost: only lamps whose radius intersects the camera.
+        # No unshadowed spill through walls; remaining distant sources are disabled.
+        var camera_center: Vector2=b.camera.get_screen_center_position()
+        visible.sort_custom(func(a,c): return a.node.position.distance_squared_to(camera_center)<c.node.position.distance_squared_to(camera_center))
+        var budget:=5 if b.q_level>1 else (4 if b.q_level>0 else 2)
+        var chosen: Array=[]
+        for kind in ["cold","red"]:
+            for entry in visible:
+                if entry.kind==kind: chosen.append(entry);break
         for entry in visible:
-            var lamp: PointLight2D=entry["node"]
-            lamp.enabled=chosen.has(entry)
-            lamp.shadow_enabled=lamp.enabled and entry["kind"]!="screen"
-            lamp.shadow_filter_smooth=4.0
-            lamp.shadow_filter=Light2D.SHADOW_FILTER_PCF13 if b.q_level>0 else Light2D.SHADOW_FILTER_PCF5
+            if chosen.size()>=budget: break
+            if entry.kind!="screen" and not chosen.has(entry): chosen.append(entry)
+        for entry in visible:
+            var lamp: PointLight2D=entry.node
+            lamp.enabled=chosen.has(entry) or (entry.kind=="screen" and lamp.position.distance_to(camera_center)<520)
+            lamp.shadow_enabled=lamp.enabled and entry.kind!="screen"
+            lamp.shadow_filter_smooth=3.0
+            lamp.shadow_filter=Light2D.SHADOW_FILTER_PCF5
 
     for i in range(lights.size()):
         var l: Dictionary = lights[i]

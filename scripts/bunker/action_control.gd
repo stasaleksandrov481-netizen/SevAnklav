@@ -7,7 +7,7 @@ var signature:=""
 var committed:=false
 func _ready() -> void:
     large=true;symbol="hand"
-    custom_minimum_size=Vector2(136,148)
+    custom_minimum_size=Vector2(112,112)
     super._ready()
     button_down.connect(func():
         if disabled: return
@@ -21,7 +21,7 @@ func _ready() -> void:
 func _signature(info: Dictionary) -> String:
     return str(info.get("kind",""))+str(info.get("action",""))+str(info.get("door_id",""))+str(info.get("pos",Vector2.INF))
 func _process(delta: float) -> void:
-    position=btl._stick_base("r")+Vector2(-256,-60)
+    position=btl._stick_base("r")+Vector2(-220,-40)
     var info: Dictionary=btl.cur_interact
     disabled=info.is_empty() or btl.paused
     caption=_caption(info)

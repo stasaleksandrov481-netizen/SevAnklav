@@ -19,7 +19,7 @@ var story_rooms := [Rect2(40,40,1140,740),Rect2(1220,40,1140,740),Rect2(1220,820
 const ROOM_NAMES := ["01 / МЕДИЦИНСКИЙ БЛОК", "02 / СЛУЖЕБНЫЙ КОРИДОР", "03 / НАУЧНЫЙ СЕКТОР", "04 / РЕЗЕРВНОЕ ПИТАНИЕ", "05 / КАРАНТИН", "06 / ГРУЗОВОЙ ШЛЮЗ"]
 const ART := {
     "z_oxygen_rack":["oxygen_rack",94.0],"z_sink":["sink",110.0],"z_sample_rack":["sample_rack",85.0],"z_first_aid":["first_aid",58.0],"z_cable_spool":["cable_spool",68.0],"z_tool_tray":["tool_tray",72.0],"z_camera_unit":["camera_unit",48.0],
-    "z_capsule":["capsule",215.0],"z_terminal":["terminal",155.0],
+    "z_capsule":["capsule",215.0],"z_terminal":["terminal",112.0],
     "z_medtable":["scanner_bed",170.0],"z_gurney":["trolley",85.0],
     "z_cabinet":["cabinet",118.0],"z_shelf":["cabinet",160.0],
     "z_server":["server",108.0],"z_reactor":["generator",235.0],
@@ -102,6 +102,7 @@ func _build_bunker() -> void:
 func _ready() -> void:
     loadout7.b=self
     loadout7.ensure()
+    set_meta("bunker_v9",true)
     set_meta("bunker_v6",true)
     set_meta("bunker_v5",true)
     super._ready()
@@ -113,6 +114,10 @@ func _ready() -> void:
     var maintenance:=preload("res://scripts/bunker/maintenance_detail.gd").new()
     maintenance.b=self;maintenance.z_index=1;add_child(maintenance)
     previous_floor.queue_free()
+    var surfaces:=preload("res://scripts/bunker/surface_detail.gd").new()
+    surfaces.b=self;add_child(surfaces)
+    var staircase:=Sprite2D.new();staircase.texture=preload("res://assets/bunker/v9/stairs.svg")
+    staircase.position=Vector2(560,2060);staircase.z_index=-8;add_child(staircase)
     canvas_mod.color = Color(0.25,0.30,0.35)
     camera.limit_left = 0
     camera.limit_top = 0
@@ -139,7 +144,7 @@ func _ready() -> void:
     figure_rig5.heading = PI/2
     figure_rig5.z_index = 8
     unit_layer.add_child(figure_rig5)
-    obj_panel.position.y = 44
+    obj_panel.position=Vector2(24,40)
     if tut != null:
         tut.queue_free()
         tut = null
@@ -181,8 +186,8 @@ func _ready() -> void:
     G.play_sfx("z_relay",-17.0)
     var opening:=lid.create_tween()
     opening.tween_interval(0.35)
-    opening.tween_property(lid,"rotation",-1.08,1.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-    opening.parallel().tween_property(lid,"position:x",346.0,1.15)
+    opening.tween_property(lid,"rotation",-0.06,1.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+    opening.parallel().tween_property(lid,"position:x",292.0,1.15)
     await _exit_phase8(1,1.55)
     await _exit_phase8(2,1.2)
     await get_tree().create_timer(0.28).timeout
@@ -378,21 +383,24 @@ func _experiment_access() -> void:
         _log("Я был мёртв… Они действительно вернули меня.",ZUI.TEXT,"ВОЛКОВ")
 
 func _descend() -> void:
-    if lower_tween != null and lower_tween.is_running(): return
-    records["lower"] = true
-    _open_door("lower")
-    paused = true
-    direct_vec = Vector2.ZERO
-    var spr: Sprite2D = player["spr"]
-    lower_tween = create_tween()
-    lower_tween.tween_property(spr,"position",Vector2(560,1830),0.8)
-    lower_tween.tween_property(spr,"position",Vector2(560,2180),3.4).set_trans(Tween.TRANS_SINE)
+    if lower_tween!=null and lower_tween.is_running(): return
+    paused=true;_release_controls5()
+    await _open_door("lower")
+    var spr: Sprite2D=player.spr
+    var entry: Vector2=spr.position
+    lower_tween=create_tween()
+    lower_tween.tween_method(func(t: float):
+        var target:=entry.lerp(Vector2(560,1905),smoothstep(0,1,t))
+        spr.position=_collide_circle(target,15)
+        player_rig6.pose((Vector2(560,1905)-entry).angle(),t*TAU,Vector2(0,70),false,.016),0.0,1.0,1.0)
+    lower_tween.tween_method(func(t: float):
+        spr.position=_collide_circle(Vector2(560,1905).lerp(Vector2(560,2220),t),15)
+        player_rig6.pose(PI/2,t*PI*12,Vector2(0,90),false,.016)
+        if int(t*12)>int(get_meta("stair_step9",-1)):
+            set_meta("stair_step9",int(t*12));G.play_sfx("z_footstep",-21,0.9),0.0,1.0,3.5)
     lower_tween.tween_callback(func():
-        paused = false
-        _complete_objective("lower")
-        _save_checkpoint()
-        _toast("Нижний уровень. Карантинный сектор."))
-    G.play_sfx("z_footstep",-12.0)
+        records["lower"]=true;smooth_aim5=PI/2;player["aim"]=PI/2;paused=false;_complete_objective("lower")
+        _save_checkpoint();_toast("Нижний уровень. Карантинный сектор."))
 
 func _zpro_tick(delta: float) -> void:
     if starting or ending: return
@@ -438,7 +446,7 @@ func _tick_extraction(_delta: float) -> void:
     pass
 
 func _fire_player() -> void:
-    if not _obj_done("gear") or starting or ending or not _has_weapon7(): return
+    if not _obj_done("gear") or starting or ending or not _has_weapon7() or ammo_check9>0: return
     var wd: Dictionary = G.ZWEAPONS[player["weapon"]]
     if bool(wd.get("melee",false)):
         super._fire_player()
@@ -452,6 +460,7 @@ func _fire_player() -> void:
         player["fire_cd"] = 0.25
         return
     dry_latched4 = false
+    ammo_result9=0.0
     player["mag"] = int(player["mag"])-1
     player["fire_cd"] = maxf(float(wd["rof"]),0.26)
     var move_spread := clampf(player_velocity.length()/150.0,0.0,1.0)*0.065
@@ -560,6 +569,12 @@ func _prop(tex: String, pos: Vector2, radius: float, kind := "", scl := 1.42, so
         pr["spr"].z_index=15
         pr["spr"].rotation=PI/2
         pr["spr"].scale*=0.78
+    if kind=="stairs_transition":
+        pr["solid"]=false;pr["spr"].hide()
+    if kind=="labdesk" and pos.y<1400:
+        var bench:=AtlasTexture.new();bench.atlas=preload("res://assets/bunker/v9/engineering.png")
+        bench.region=Rect2(34,778,790,255)
+        pr.spr.texture=bench;pr.spr.scale=Vector2.ONE*178/790.0
     PropGeometry7.build(pr)
     return pr
 
@@ -782,6 +797,10 @@ class WeaponRig extends Node2D:
     func _draw() -> void:
         if b == null: return
         var kick: float = b.recoil4*4.0
+        if b.ammo_check9>0:
+            var inspection: float=sin((1-b.ammo_check9)*PI)
+            draw_set_transform(Vector2(-inspection*4,inspection*5),inspection*.16)
+            draw_rect(Rect2(17,4+inspection*5,5,9),Color(.26,.32,.35))
         if b.player["weapon"]=="knife":
             draw_line(Vector2(14,0),Vector2(23,0),Color(0.10,0.13,0.14),4)
             draw_colored_polygon(PackedVector2Array([Vector2(23,-2),Vector2(35,0),Vector2(23,2)]),Color(0.62,0.71,0.73))
@@ -798,6 +817,9 @@ class WeaponRig extends Node2D:
             draw_line(Vector2(15-kick,-4),Vector2(28-kick,-4),Color(0.60,0.69,0.71),0.8,true)
 
 func _art_texture4(name: String) -> Texture2D:
+    if name=="cabinet": return preload("res://assets/bunker/v9/storage.svg")
+    if name=="trolley": return preload("res://assets/bunker/v9/diagnostics.svg")
+    if name=="capsule": return preload("res://assets/bunker/v9/capsule.svg")
     if name in ["sink","terminal","security","first_aid"]:
         return load("res://assets/bunker/v8/"+("terminal" if name=="security" else name)+".svg")
     for dir in ["res://assets/bunker/v6/","res://assets/bunker/v5/","res://assets/bunker/v4/","res://assets/bunker/"]:
@@ -815,18 +837,23 @@ func _build_hud() -> void:
     super._build_hud()
     loadout7.ensure()
     for child in quick_panel_ref.get_children(): quick_panel_ref.remove_child(child);child.queue_free()
-    quick_panel_ref.add_theme_constant_override("separation",6)
+    quick_panel_ref.add_theme_constant_override("separation",5)
+    quick_panel_ref.offset_top=-82;quick_panel_ref.offset_bottom=-18
     var ammo:=preload("res://scripts/ui/round_control.gd").new()
-    ammo.symbol="ammo";ammo.caption="ПАТРОНЫ";ammo.custom_minimum_size=Vector2(64,88)
+    ammo.symbol="ammo";ammo.caption="ПАТРОНЫ";ammo.custom_minimum_size=Vector2(56,68)
     ammo.pressed.connect(_start_ammo_check);quick_panel_ref.add_child(ammo)
     for i in range(2):
         var hand:=preload("res://scripts/ui/equipment_cell.gd").new()
-        hand.b=self;hand.place="hand";hand.index=i;hand.custom_minimum_size=Vector2(74,88);quick_panel_ref.add_child(hand)
+        hand.b=self;hand.place="hand";hand.index=i;hand.custom_minimum_size=Vector2(58,58);hand.compact9=true;quick_panel_ref.add_child(hand)
     quick_slots.clear()
     for i in range(6):
         var slot:=preload("res://scripts/ui/equipment_cell.gd").new()
-        slot.b=self;slot.place="quick";slot.index=i;slot.custom_minimum_size=Vector2(68,88)
+        slot.b=self;slot.place="quick";slot.index=i;slot.custom_minimum_size=Vector2(48,58);slot.compact9=true
         quick_panel_ref.add_child(slot);quick_slots.append(slot)
+    mm_ref.custom_minimum_size=Vector2(180,124)
+    mm_ref.offset_left=-194;mm_ref.offset_right=-14;mm_ref.offset_top=12;mm_ref.offset_bottom=136
+    reload_chip_ref.hide()
+    reload_chip_ref.set_process(false);reload_chip_ref.set_script(null)
     # Replace only location one's map and action button.
     for c in ui_layer.get_children():
         if c.get_script() == MiniMap:
@@ -842,12 +869,12 @@ func _build_hud() -> void:
     story_feed6.b=self
     ui_layer.add_child(story_feed6)
     for child in menu_btns_ref.get_children(): menu_btns_ref.remove_child(child);child.queue_free()
-    menu_btns_ref.offset_left=-284;menu_btns_ref.offset_right=-16
-    menu_btns_ref.offset_top=214;menu_btns_ref.offset_bottom=306
+    menu_btns_ref.offset_left=-254;menu_btns_ref.offset_right=-14
+    menu_btns_ref.offset_top=148;menu_btns_ref.offset_bottom=220
     var dock:=HBoxContainer.new();dock.add_theme_constant_override("separation",4);menu_btns_ref.add_child(dock)
     for definition in [["bag","РЮКЗАК"],["pda","КПК"],["flashlight","СВЕТ"],["pause","ПАУЗА"]]:
         var control:=preload("res://scripts/ui/round_control.gd").new()
-        control.symbol=definition[0];control.caption=definition[1];control.custom_minimum_size=Vector2(64,88)
+        control.symbol=definition[0];control.caption=definition[1];control.custom_minimum_size=Vector2(56,68)
         dock.add_child(control)
         match definition[0]:
             "bag": control.pressed.connect(_open_med)
@@ -1182,3 +1209,54 @@ func _exit_phase8(stage: int,duration: float) -> void:
     var phase:=create_tween()
     phase.tween_method(func(v: float): player_rig6.exit_pose8(stage,v),0.0,1.0,duration)
     await phase.finished
+
+
+# Location-one presentation. The inherited combat and medicine state remain canonical.
+var ammo_check9:=-1.0
+var ammo_result9:=0.0
+var ammo_text9:=""
+var ammo_weapon9:=""
+var ammo_reserve9:=-1
+func _start_ammo_check() -> void:
+    if paused or not _has_weapon7() or loadout7.weapon()=="knife" or ammo_check9>0: return
+    if float(player.reload_t)>0: _toast("Завершите перезарядку перед осмотром.");return
+    ammo_check9=1.0;ammo_result9=0;ammo_weapon9=loadout7.weapon();ammo_reserve9=-1
+    G.play_sfx("z_dry",-22,1.1)
+func _tick_ammo_check(delta: float) -> void:
+    # Old HUD timers stay idle, so no legacy panel can draw over this check.
+    _ammo_check_t=-1;_ammo_result_t=0
+    if paused: return
+    if ammo_check9>0:
+        if loadout7.weapon()!=ammo_weapon9 or float(player.reload_t)>0:
+            ammo_check9=-1;ammo_result9=0;return
+        ammo_check9-=delta
+        if ammo_check9<=0:
+            var mag:=int(player.mag)
+            var capacity:=int(G.ZWEAPONS[player.weapon].get("mag",8))
+            var estimate:=clampi(mag+randi_range(-1,1),1,maxi(1,capacity))
+            ammo_text9="Магазин пуст" if mag==0 else "Около %d патронов"%estimate
+            ammo_reserve9=int(G.zsave.ammo.get(ammo_weapon9,0));ammo_result9=3.2
+            G.play_sfx("z_reload",-25,1.3)
+    elif ammo_result9>0:
+        ammo_result9=maxf(0,ammo_result9-delta)
+        if loadout7.weapon()!=ammo_weapon9: ammo_result9=0
+func _stick_base(side: String) -> Vector2:
+    var vp:=get_viewport_rect().size
+    var x:=clampf(vp.x*.115,150,184)
+    return Vector2(x if side=="l" else vp.x-x,vp.y-190)
+func _refresh_obj_labels() -> void:
+    if obj_panel==null: return
+    var vb: VBoxContainer=obj_panel.get_child(0)
+    for child in vb.get_children(): vb.remove_child(child);child.queue_free()
+    obj_labels.clear()
+    obj_panel.add_theme_stylebox_override("panel",preload("res://scripts/ui/visual_theme.gd").panel(Color(.025,.042,.055,.66),Color.TRANSPARENT,10))
+    var header:=HBoxContainer.new();vb.add_child(header)
+    var label:=ZUI.label("ТЕКУЩАЯ ЗАДАЧА",10,Color(.48,.64,.71));label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(label)
+    var eye:=preload("res://scripts/ui/visual_theme.gd").button("−" if not obj_hidden else "+");eye.custom_minimum_size=Vector2(32,30)
+    eye.pressed.connect(func(): obj_hidden=not obj_hidden;_refresh_obj_labels());header.add_child(eye)
+    if obj_hidden: return
+    var frontier:=_obj_frontier()
+    for objective in objectives:
+        if int(objective.get("grp",0))!=frontier or objective.done: continue
+        vb.add_child(ZUI.wrap_label(objective.text,13,Color(.79,.85,.89),286))
+    _obj_frontier_prev=frontier

@@ -1,7 +1,7 @@
 extends "res://scripts/ui/viewport_control.gd"
+const V=preload("res://scripts/ui/visual_theme.gd")
 var b
 var page:="equipment"
-var body_row: HBoxContainer
 var medical: VBoxContainer
 var content: VBoxContainer
 var info: Label
@@ -12,102 +12,119 @@ var bag_cells: Array=[]
 var tabs: Dictionary={}
 var footer: HBoxContainer
 var doll_frame: Control
+var inspector: Label
+var item_picture9: TextureRect
+var body_row: HBoxContainer
+var selected9:=""
+var root9: VBoxContainer
 func _ready() -> void:
-    super._ready()
-    mouse_filter=Control.MOUSE_FILTER_STOP
-    var shade:=ColorRect.new();shade.set_anchors_preset(Control.PRESET_FULL_RECT);shade.color=Color(0.006,0.013,0.020,0.97);add_child(shade)
+    super._ready();mouse_filter=Control.MOUSE_FILTER_STOP
+    var shade:=ColorRect.new();shade.set_anchors_preset(Control.PRESET_FULL_RECT);shade.color=V.INK;add_child(shade)
     var margin:=MarginContainer.new();margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-    for edge in ["left","right"]: margin.add_theme_constant_override("margin_"+edge,40)
-    for edge in ["top","bottom"]: margin.add_theme_constant_override("margin_"+edge,24)
+    for edge in ["left","right"]: margin.add_theme_constant_override("margin_"+edge,28)
+    for edge in ["top","bottom"]: margin.add_theme_constant_override("margin_"+edge,18)
     add_child(margin)
-    var outer:=ScrollContainer.new();outer.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; margin.add_child(outer)
-    var root:=VBoxContainer.new();root.size_flags_horizontal=SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",12);outer.add_child(root)
-    var header:=HBoxContainer.new();header.add_theme_constant_override("separation",18);root.add_child(header)
-    var title:=ZUI.label("ВОЛКОВ / СНАРЯЖЕНИЕ",26,Color(0.78,0.85,0.88));title.size_flags_horizontal=SIZE_EXPAND_FILL;header.add_child(title)
-    var close:=_button("ЗАКРЫТЬ",130);close.pressed.connect(_close);header.add_child(close)
-    var tab_row:=HBoxContainer.new();tab_row.add_theme_constant_override("separation",12);root.add_child(tab_row)
-    for definition in [["equipment","СНАРЯЖЕНИЕ"],["health","ОРГАНИЗМ"],["tasks","ЗАДАЧИ"],["records","ЗАПИСИ"]]:
-        var button:=_button(definition[1],156);var key: String=definition[0]
-        button.pressed.connect(func(): select_page(key));tabs[key]=button;tab_row.add_child(button)
-    var rule:=ColorRect.new();rule.color=Color(0.24,0.39,0.46,0.5);rule.custom_minimum_size.y=1;root.add_child(rule)
-    body_row=HBoxContainer.new();body_row.add_theme_constant_override("separation",30);body_row.size_flags_vertical=SIZE_EXPAND_FILL;root.add_child(body_row)
-    medical=VBoxContainer.new();medical.custom_minimum_size.x=250;medical.add_theme_constant_override("separation",8);body_row.add_child(medical)
-    medical.add_child(ZUI.label("СОСТОЯНИЕ ОРГАНИЗМА",13,Color(0.43,0.61,0.69)))
-    health_status=ZUI.wrap_label("",12,ZUI.MUTED,248);medical.add_child(health_status)
-    var frame:=Control.new();doll_frame=frame;medical.add_child(frame)
-    var doll:=ZMedUI.BodyDoll.new();doll.btl=b
-    var k:=0.55 if get_viewport_rect().size.y<1000 else 0.75
-    doll.custom_minimum_size=Vector2(250,340);doll.size=Vector2(250,340);doll.scale=Vector2.ONE*k
-    frame.custom_minimum_size=Vector2(250,340*k);frame.add_child(doll)
-    b._med_doll=doll
-    info=ZUI.wrap_label("Коснитесь части тела для осмотра. Предмет можно перетащить на повреждённую зону.",13,ZUI.MUTED,248);medical.add_child(info);b._med_info_lbl=info
-    var use:=_button("ПРИМЕНИТЬ ВЫБРАННОЕ",240)
-    use.pressed.connect(func():
+    var outer:=ScrollContainer.new();outer.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;margin.add_child(outer)
+    root9=VBoxContainer.new();root9.size_flags_horizontal=SIZE_EXPAND_FILL;root9.size_flags_vertical=SIZE_EXPAND_FILL;root9.add_theme_constant_override("separation",12);outer.add_child(root9)
+    var header:=HBoxContainer.new();header.add_theme_constant_override("separation",12);root9.add_child(header)
+    var brand:=VBoxContainer.new();brand.size_flags_horizontal=SIZE_EXPAND_FILL;header.add_child(brand)
+    brand.add_child(ZUI.label("V–17   /   ПЕРСОНАЛЬНЫЙ КОНТУР",10,V.MUTED))
+    brand.add_child(ZUI.label("Волков",25,V.TEXT))
+    var close:=V.button("ЗАКРЫТЬ  ×");close.custom_minimum_size.x=120;close.pressed.connect(_close);header.add_child(close)
+    var nav:=HBoxContainer.new();nav.add_theme_constant_override("separation",8);root9.add_child(nav)
+    for definition in [["equipment","Снаряжение"],["health","Организм"],["tasks","Задачи"],["records","Записи"]]:
+        var button:=V.button(definition[1]);button.custom_minimum_size.x=128
+        var key: String=definition[0];button.pressed.connect(func(): select_page(key));tabs[key]=button;nav.add_child(button)
+    body_row=HBoxContainer.new();body_row.add_theme_constant_override("separation",26);body_row.size_flags_vertical=SIZE_EXPAND_FILL;root9.add_child(body_row)
+    medical=VBoxContainer.new();medical.custom_minimum_size.x=280;medical.add_theme_constant_override("separation",8);body_row.add_child(medical)
+    health_status=ZUI.wrap_label("",12,V.MUTED,280);medical.add_child(health_status)
+    doll_frame=Control.new();doll_frame.custom_minimum_size=Vector2(280,230);doll_frame.size_flags_vertical=SIZE_EXPAND_FILL;medical.add_child(doll_frame)
+    var doll:=preload("res://scripts/ui/anatomy_view.gd").new();doll.btl=b;doll.size=Vector2(280,230);doll_frame.add_child(doll);b._med_doll=doll
+    doll_frame.resized.connect(func(): doll.size=doll_frame.size)
+    var hands:=HBoxContainer.new();hands.add_theme_constant_override("separation",8);medical.add_child(hands)
+    for i in range(2): hands.add_child(_cell("hand",i,Vector2(136,82)))
+    info=ZUI.wrap_label("Выберите предмет. Медикамент можно перетащить на повреждённую часть тела.",12,V.MUTED,280);medical.add_child(info);b._med_info_lbl=info
+    var use:=V.button("Применить выбранное");use.pressed.connect(func():
         if b._med_sel_item!="": b._med_tap(b._med_sel_item)
-        else: info.text="Возьмите медицинский предмет и выберите нужную часть тела.")
-    medical.add_child(use)
-    var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_horizontal=SIZE_EXPAND_FILL;scroll.size_flags_vertical=SIZE_EXPAND_FILL;body_row.add_child(scroll)
+        else: info.text="Сначала выберите медицинский предмет.");medical.add_child(use)
+    var right:=VBoxContainer.new();right.size_flags_horizontal=SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",10);body_row.add_child(right)
+    var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=SIZE_EXPAND_FILL;right.add_child(scroll)
     content=VBoxContainer.new();content.size_flags_horizontal=SIZE_EXPAND_FILL;content.add_theme_constant_override("separation",12);scroll.add_child(content)
-    footer=HBoxContainer.new();footer.add_theme_constant_override("separation",24);root.add_child(footer)
-    var hand_box:=VBoxContainer.new();hand_box.add_theme_constant_override("separation",7);footer.add_child(hand_box)
-    hand_box.add_child(ZUI.label("РУКИ / НАЖАТЬ — УБРАТЬ",11,ZUI.MUTED))
-    var hands_row:=HBoxContainer.new();hands_row.add_theme_constant_override("separation",8);hand_box.add_child(hands_row)
-    for i in range(2):
-        var cell:=_cell("hand",i,Vector2(108,90));hands_row.add_child(cell)
-    var access:=VBoxContainer.new();access.size_flags_horizontal=SIZE_EXPAND_FILL;access.add_theme_constant_override("separation",7);footer.add_child(access)
-    access.add_child(ZUI.label("БЫСТРЫЙ ДОСТУП / ЯРЛЫКИ ПРЕДМЕТОВ",11,ZUI.MUTED))
-    var quick_row:=GridContainer.new();quick_row.columns=6 if get_viewport_rect().size.x>=1150 else 3;quick_row.add_theme_constant_override("separation",8);access.add_child(quick_row)
-    for i in range(6): quick_row.add_child(_cell("quick",i,Vector2(88,90)))
-    select_page(page)
-    modulate.a=0;create_tween().tween_property(self,"modulate:a",1.0,0.22)
-func _button(caption: String,width: float) -> Button:
-    var button:=Button.new();button.text=caption;button.custom_minimum_size=Vector2(minf(width,130),40)
-    button.add_theme_font_size_override("font_size",14)
-    button.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.025,0.045,0.06,0.7),Color(0.20,0.34,0.41),10))
-    var hot:=ZUI.panel_style(Color(0.06,0.11,0.14,0.9),Color(0.44,0.64,0.73),10)
-    for state in ["hover","pressed","focus"]: button.add_theme_stylebox_override(state,hot)
-    return button
+    var detail:=PanelContainer.new();detail.custom_minimum_size.x=214
+    detail.add_theme_stylebox_override("panel",V.panel(Color(.04,.06,.075,.6),Color.TRANSPARENT,14));body_row.add_child(detail)
+    var detail_column:=VBoxContainer.new();detail_column.add_theme_constant_override("separation",16);detail.add_child(detail_column)
+    detail_column.add_child(ZUI.label("ПРЕДМЕТ / ОСМОТР",10,V.MUTED))
+    item_picture9=TextureRect.new();item_picture9.custom_minimum_size=Vector2(180,150);item_picture9.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;item_picture9.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;detail_column.add_child(item_picture9)
+    inspector=ZUI.wrap_label("",14,V.TEXT,184);detail_column.add_child(inspector)
+    detail.set_meta("detail9",true)
+    footer=HBoxContainer.new();footer.add_theme_constant_override("separation",8);root9.add_child(footer)
+    var label:=ZUI.label("БЫСТРЫЙ ДОСТУП",10,V.MUTED);label.custom_minimum_size.x=280;label.size_flags_vertical=SIZE_SHRINK_CENTER;footer.add_child(label)
+    for i in range(6): footer.add_child(_cell("quick",i,Vector2(76,62)))
+    select_page(page);modulate.a=0;create_tween().tween_property(self,"modulate:a",1.0,0.22)
 func _cell(place: String,index: int,extent: Vector2) -> Button:
     var cell:=preload("res://scripts/ui/equipment_cell.gd").new();cell.b=b;cell.place=place;cell.index=index;cell.custom_minimum_size=extent
-    cells.append(cell)
-    return cell
+    cell.mouse_entered.connect(func(): show_item9(cell.item))
+    cell.button_down.connect(func(): show_item9(cell.item))
+    cells.append(cell);return cell
 func select_page(key: String) -> void:
     page=key
     for child in content.get_children(): content.remove_child(child);child.queue_free()
-    cells=cells.filter(func(cell): return is_instance_valid(cell) and not cell.is_queued_for_deletion())
-    bag_cells.clear()
-    medical.visible=key in ["equipment","health"]
-    footer.visible=key=="equipment"
-    var scale_factor:=0.86 if key=="health" else (0.55 if get_viewport_rect().size.y<1000 else 0.75)
-    b._med_doll.scale=Vector2.ONE*scale_factor
-    doll_frame.custom_minimum_size.y=340*scale_factor
-    for id in tabs: tabs[id].add_theme_color_override("font_color",Color(0.85,0.93,0.96) if id==key else Color(0.40,0.57,0.65))
+    cells=cells.filter(func(cell): return is_instance_valid(cell) and not cell.is_queued_for_deletion());bag_cells.clear()
+    medical.visible=key in ["equipment","health"];footer.visible=medical.visible;inspector.get_parent().get_parent().visible=medical.visible
+    for id in tabs:
+        tabs[id].add_theme_stylebox_override("normal",V.panel(Color(0.08,0.13,0.16,0.8) if id==key else Color.TRANSPARENT,V.EDGE if id==key else Color.TRANSPARENT,10))
+        tabs[id].add_theme_color_override("font_color",V.TEXT if id==key else V.MUTED)
     if key in ["equipment","health"]:
-        content.add_child(ZUI.label("РЮКЗАК",17,Color(0.66,0.79,0.84)))
-        content.add_child(ZUI.wrap_label("Нажатие — взять в свободную руку: сначала левую, затем правую. Перетащите в слот руки для точного выбора. Оружие с отметкой «2 РУКИ» занимает обе.",13,ZUI.MUTED,0))
-        item_grid=GridContainer.new();item_grid.columns=4 if get_viewport_rect().size.x<1150 else 6;item_grid.add_theme_constant_override("h_separation",7);item_grid.add_theme_constant_override("v_separation",7);content.add_child(item_grid)
-        var grid: Array=b.loadout7.slots()
-        for i in range(grid.size()):
-            var cell:=_cell("bag",i,Vector2(94,92));cell.size_flags_horizontal=SIZE_EXPAND_FILL;bag_cells.append(cell);item_grid.add_child(cell)
+        content.add_child(ZUI.label("МЕДИЦИНСКОЕ СНАРЯЖЕНИЕ" if key=="health" else "НОСИМОЕ СНАРЯЖЕНИЕ",12,V.ICE))
+        content.add_child(ZUI.wrap_label("Коснитесь предмета — взять в свободную руку. Перетащите на руку, быстрый слот или часть тела.",13,V.MUTED,0))
+        item_grid=GridContainer.new();item_grid.columns=3 if get_viewport_rect().size.x<1450 else 4;item_grid.size_flags_horizontal=SIZE_SHRINK_BEGIN;item_grid.add_theme_constant_override("h_separation",10);item_grid.add_theme_constant_override("v_separation",10);content.add_child(item_grid)
+        for i in range(b.loadout7.slots().size()):
+            var cell:=_cell("bag",i,Vector2(138,112));cell.size_flags_horizontal=SIZE_SHRINK_BEGIN;bag_cells.append(cell);item_grid.add_child(cell)
+        show_item9(selected9)
     elif key=="tasks": b._kpk_fill_tasks(content)
     elif key=="records": b._kpk_fill_diary(content)
+    if key in ["tasks","records"]: _restyle9(content)
     refresh()
+func show_item9(id: String) -> void:
+    selected9=id
+    item_picture9.texture=b.loadout7.icon_of(id) if id!="" else null
+    if id=="": inspector.text="РУКИ И ПЕРЕНОСКА\nПервый предмет — левая рука, следующий — правая. Нажмите слот руки, чтобы убрать предмет.";return
+    var details: String=""
+    if G.ZITEMS.has(id): details=str(G.ZITEMS[id].get("desc","Перетащите на нужную часть тела для применения."))
+    elif id=="flashlight": details="Направленный свет. Работает в любой руке; уберите в рюкзак, чтобы освободить руку."
+    elif id.begins_with("weapon:"): details="Занимает обе руки." if b.loadout7.two_handed(id) else "Занимает одну руку. Во второй можно держать фонарь."
+    inspector.text=b.loadout7.name_of(id).to_upper()+"\n"+details
 func refresh() -> void:
-    var state: Dictionary=b.player["st"]
-    var health:=0.0
-    for zone in state["body"]: health+=float(state["body"][zone])
-    health/=maxi(1,state["body"].size())
-    var bleeding:=0
-    for wound in state["wounds"]:
+    var state: Dictionary=b.player["st"];var integrity:=0.0;var bleeding:=0
+    for zone in state.body: integrity+=float(state.body[zone])
+    for wound in state.wounds:
         if not wound.get("tq",false) and not wound.get("clamp",false): bleeding+=int(wound.get("bleed",0))
-    var infection: float=b.player["infect"]
-    health_status.text="Целость %d%% · Кровь: %d\nЗаражение %d%% · %.1f°C\nПереломы: %d"%[roundi(health*100),bleeding,roundi(infection),36.6+infection*0.024,state.get("frac",[]).size()]
-    health_status.add_theme_color_override("font_color",ZUI.ALERT if bleeding>0 else ZUI.MUTED)
+    health_status.text="БИОМЕТРИЯ   /   V–17\nЦелость %d%%  ·  Заражение %d%%\nКровотечений: %d  ·  Переломов: %d"%[roundi(integrity/maxi(1,state.body.size())*100),roundi(b.player.infect),bleeding,state.get("frac",[]).size()]
+    health_status.add_theme_color_override("font_color",V.ALERT if bleeding>0 else V.MUTED)
+    if page in ["equipment","health"] and item_grid!=null:
+        var capacity: int=b.loadout7.slots().size()
+        for i in range(bag_cells.size(),capacity):
+            var cell:=_cell("bag",i,Vector2(138,112));bag_cells.append(cell);item_grid.add_child(cell)
+    var empty:=0
     for cell in cells:
-        if is_instance_valid(cell) and not cell.is_queued_for_deletion(): cell.refresh()
-    if b._med_sel_item!="": info.text=b.loadout7.name_of(b._med_sel_item)+" выбрано. Перетащите на часть тела или нажмите нужную зону."
+        if is_instance_valid(cell) and not cell.is_queued_for_deletion():
+            cell.refresh()
+            if cell.place=="bag":
+                if cell.item=="": empty+=1
+                cell.visible=cell.item!="" or empty<=2
+    if b._med_sel_item!="": info.text=b.loadout7.name_of(b._med_sel_item)+" выбрано. Коснитесь части тела для применения."
 func _close() -> void:
+    mouse_filter=Control.MOUSE_FILTER_STOP
     var tw:=create_tween();tw.tween_property(self,"modulate:a",0.0,0.16);tw.tween_callback(queue_free)
 func _unhandled_key_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
         get_viewport().set_input_as_handled();_close()
+
+func _restyle9(node: Node) -> void:
+    for child in node.get_children():
+        if child is PanelContainer: child.add_theme_stylebox_override("panel",V.panel())
+        if child is Label: child.add_theme_color_override("font_color",V.TEXT)
+        if child is Button:
+            child.add_theme_stylebox_override("normal",V.panel(Color(.04,.06,.075,.5),Color.TRANSPARENT,10))
+            child.add_theme_color_override("font_color",V.TEXT)
+        _restyle9(child)

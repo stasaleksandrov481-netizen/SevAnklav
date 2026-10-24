@@ -11,6 +11,13 @@ var fall_angle:=0.0
 var fall_origin:=Vector2.ZERO
 var fall_target:=Vector2.ZERO
 var phase:=randf()*TAU
+const ATLAS=preload("res://assets/bunker/v9/volkov_parts.png")
+var parts9: Dictionary={}
+func _ready() -> void:
+    var regions: Dictionary=preload("res://scripts/bunker/v6_assets.gd").REGIONS
+    for key in ["torso","head"]:
+        var uv: Array=regions[key];var t:=AtlasTexture.new();t.atlas=ATLAS
+        t.region=Rect2(Vector2(uv[0],uv[1])*ATLAS.get_size(),Vector2(uv[2],uv[3])*ATLAS.get_size());parts9[key]=t
 func update_pose(angle: float, _walk: float, moving: float, delta: float) -> void:
     if fallen: return
     heading=lerp_angle(heading,angle,1.0-exp(-delta*(4.5 if infected else 9.0)))
@@ -52,7 +59,18 @@ func _draw() -> void:
         _oval(foot,Vector2(9,5),Color(0.045,0.06,0.07),f.angle())
     _oval(body-f*2,Vector2(18,13),outfit.darkened(0.3),f.angle()+PI/2)
     _oval(body+f,Vector2(17,11),outfit,f.angle()+PI/2)
-    draw_line(body-f*9,body+f*5,outfit.lightened(0.13),2,true)
+    # Textured shoulders, pockets and a recognisable crown replace plain circles.
+    if parts9.has("torso"):
+        draw_set_transform(body,heading+fall_angle*collapse+PI/2)
+        draw_texture_rect(parts9.torso,Rect2(-18,-12,36,26),false,outfit.lightened(.4))
+        draw_set_transform(Vector2.ZERO)
+    draw_line(body-f*9,body+f*5,outfit.lightened(0.23),1.2,true)
+    for side in [-1,1]:
+        draw_line(body+s*side*11-f*5,body+s*side*11+f*6,outfit.lightened(.2),1,true)
+    if infected:
+        for i in range(4):
+            var p:=body+s*(5+i*1.5)+f*(i*3-8)
+            draw_line(p,p+s*4+f*3,Color(.26,.095,.08,.8),1.4,true)
     for side in [-1.0,1.0]:
         var shoulder: Vector2=body+s*side*15
         var elbow: Vector2=shoulder+f*(5+side*sway*3)+s*side*(3+collapse*8)
@@ -63,4 +81,8 @@ func _draw() -> void:
     _oval(body+f*6,Vector2(9,10),Color(0.36,0.33,0.27),f.angle())
     _oval(body+f*5,Vector2(8,8),Color(0.12,0.13,0.13),f.angle())
     _oval(body+f*12,Vector2(3,5),Color(0.50,0.46,0.38),f.angle())
+    if parts9.has("head"):
+        draw_set_transform(body+f*6,heading+fall_angle*collapse+PI/2)
+        draw_texture_rect(parts9.head,Rect2(-8,-9,16,18),false,Color(.78,.79,.72))
+        draw_set_transform(Vector2.ZERO)
     if infected: draw_line(body+s*9-f*7,body+s*11+f*2,Color(0.25,0.07,0.055),3,true)

@@ -1,4 +1,5 @@
 extends ZTerminal
+const V=preload("res://scripts/ui/visual_theme.gd")
 var instant:=false
 var body_state: Dictionary={}
 var power_ready:=false
@@ -13,7 +14,7 @@ func _fit_viewport() -> void:
     size=get_viewport_rect().size
 func _card8(parent: Node,tint: Color=Color(0.025,0.045,0.055)) -> VBoxContainer:
     var card:=PanelContainer.new()
-    card.add_theme_stylebox_override("panel",ZUI.panel_style(tint,Color(0.18,0.31,0.36),16))
+    card.add_theme_stylebox_override("panel",V.panel(tint,Color(0.18,0.31,0.36),16))
     parent.add_child(card)
     var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);card.add_child(column)
     return column
@@ -22,7 +23,7 @@ func _build() -> void:
     var margin:=MarginContainer.new();margin.set_anchors_preset(Control.PRESET_FULL_RECT)
     for edge in ["left","right"]: margin.add_theme_constant_override("margin_"+edge,38)
     margin.add_theme_constant_override("margin_top",28);margin.add_theme_constant_override("margin_bottom",118);add_child(margin)
-    var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.012,0.024,0.031),Color(0.32,0.48,0.52),20));margin.add_child(frame)
+    var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",V.panel(Color(0.012,0.024,0.031),Color(0.32,0.48,0.52),20));margin.add_child(frame)
     var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);frame.add_child(root)
     var mast:=HBoxContainer.new();root.add_child(mast)
     var brand:=ZUI.label("ЗАРЯ",28,Color(0.83,0.90,0.87));brand.size_flags_horizontal=SIZE_EXPAND_FILL;mast.add_child(brand)
@@ -46,12 +47,12 @@ func _build() -> void:
     document.add_child(ZUI.label("АРХИВ / ВОССТАНОВЛЕННЫЙ ФАЙЛ",11,Color(0.43,0.62,0.66)))
     _title_lbl=ZUI.wrap_label(title,23,Color(0.83,0.90,0.87),0);document.add_child(_title_lbl)
     var sheet:=PanelContainer.new();sheet.size_flags_vertical=SIZE_EXPAND_FILL
-    sheet.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.033,0.052,0.059),Color(0.16,0.29,0.32),20));document.add_child(sheet)
+    sheet.add_theme_stylebox_override("panel",V.panel(Color(0.033,0.052,0.059),Color(0.16,0.29,0.32),20));document.add_child(sheet)
     var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;sheet.add_child(scroll)
     _lines=VBoxContainer.new();_lines.add_theme_constant_override("separation",16);_lines.size_flags_horizontal=SIZE_EXPAND_FILL;scroll.add_child(_lines)
     _cursor_lbl=ZUI.label("_",16,Color(0.52,0.74,0.73));document.add_child(_cursor_lbl)
     diagnostic_panel=PanelContainer.new();diagnostic_panel.custom_minimum_size.x=250
-    diagnostic_panel.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.018,0.035,0.043),Color(0.20,0.34,0.39),14));workspace.add_child(diagnostic_panel)
+    diagnostic_panel.add_theme_stylebox_override("panel",V.panel(Color(0.018,0.035,0.043),Color(0.20,0.34,0.39),14));workspace.add_child(diagnostic_panel)
     var visual:=Diagnostic.new();visual.custom_minimum_size=Vector2(220,350)
     visual.medical=title.contains("V-17") or title.contains("МЕД") or title.contains("ПЕРСОНАЛ")
     visual.body=body_state;visual.powered=power_ready;diagnostic_panel.add_child(visual)
@@ -62,8 +63,8 @@ func _build() -> void:
     footer.add_child(ZUI.label("ОБЪЕКТ 12  •  СЕВЕРНЫЙ ПЕРИМЕТР",10,Color(0.35,0.50,0.53)))
 func _button8(parent: Node,text: String,callback: Callable) -> void:
     var button:=Button.new();button.text=text;button.custom_minimum_size.y=38;button.add_theme_font_size_override("font_size",11)
-    button.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.025,0.05,0.06),Color(0.23,0.38,0.42),9))
-    button.add_theme_stylebox_override("hover",ZUI.panel_style(Color(0.06,0.11,0.13),Color(0.45,0.64,0.66),9));button.pressed.connect(callback);parent.add_child(button)
+    button.add_theme_stylebox_override("normal",V.panel(Color(0.025,0.05,0.06),Color(0.23,0.38,0.42),9))
+    button.add_theme_stylebox_override("hover",V.panel(Color(0.06,0.11,0.13),Color(0.45,0.64,0.66),9));button.pressed.connect(callback);parent.add_child(button)
 func _process(delta: float) -> void:
     _blink_t+=delta
     if _cursor_lbl!=null: _cursor_lbl.visible=not instant and fmod(_blink_t,1.4)<0.7

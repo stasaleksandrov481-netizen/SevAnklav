@@ -1,4 +1,5 @@
 extends "res://scripts/ui/viewport_control.gd"
+const V=preload("res://scripts/ui/visual_theme.gd")
 var b
 var source: Dictionary
 var source_box: VBoxContainer
@@ -15,7 +16,7 @@ func _ready() -> void:
     var root:=VBoxContainer.new();root.add_theme_constant_override("separation",18);margin.add_child(root)
     var head:=HBoxContainer.new();root.add_child(head)
     var name_label:=ZUI.label(title,28,Color(0.77,0.85,0.87));name_label.size_flags_horizontal=SIZE_EXPAND_FILL;head.add_child(name_label)
-    var close:=Button.new();close.text="ЗАКРЫТЬ";close.custom_minimum_size=Vector2(160,52);head.add_child(close);close.pressed.connect(_close)
+    var close:=V.button("ЗАКРЫТЬ");close.custom_minimum_size=Vector2(160,52);head.add_child(close);close.pressed.connect(_close)
     root.add_child(ZUI.wrap_label("Перетащите предмет в рюкзак или коснитесь его, чтобы забрать.",16,ZUI.MUTED,1000))
     var row:=HBoxContainer.new();row.size_flags_vertical=SIZE_EXPAND_FILL;row.add_theme_constant_override("separation",32);root.add_child(row)
     source_box=_column(row,"НАЙДЕННЫЕ ВЕЩИ",false)
@@ -26,7 +27,7 @@ func _column(parent: HBoxContainer, caption: String, target: bool) -> VBoxContai
     var panel:=DropBag.new() if target else PanelContainer.new()
     if target: panel.screen=self
     panel.size_flags_horizontal=SIZE_EXPAND_FILL
-    panel.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.04,0.065,0.08),Color(0.22,0.34,0.39),22))
+    panel.add_theme_stylebox_override("panel",V.panel(Color(0.04,0.065,0.08),Color(0.22,0.34,0.39),22))
     parent.add_child(panel)
     var scroll:=ScrollContainer.new();panel.add_child(scroll)
     var vb:=VBoxContainer.new();vb.size_flags_horizontal=SIZE_EXPAND_FILL;vb.add_theme_constant_override("separation",10);scroll.add_child(vb)
@@ -47,7 +48,7 @@ func refresh() -> void:
         card.add_theme_constant_override("h_separation",20)
         card.alignment=HORIZONTAL_ALIGNMENT_LEFT
         card.add_theme_font_size_override("font_size",18)
-        var style:=ZUI.panel_style(Color(0.055,0.085,0.10),Color(0.20,0.31,0.36),14)
+        var style:=V.panel(Color(0.055,0.085,0.10),Color(0.20,0.31,0.36),14)
         card.add_theme_stylebox_override("normal",style)
         var hot:=style.duplicate();hot.border_color=Color(0.57,0.76,0.81);hot.bg_color=Color(0.07,0.12,0.14)
         for state in ["hover","pressed","focus"]: card.add_theme_stylebox_override(state,hot)
@@ -69,7 +70,7 @@ func transfer(item: String, from: Vector2) -> void:
     if busy or not source.get("loot_items",[]).has(item): return
     busy=true
     var ghost:=PanelContainer.new()
-    ghost.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.08,0.14,0.17,0.95),Color(0.47,0.68,0.74),10))
+    ghost.add_theme_stylebox_override("panel",V.panel(Color(0.08,0.14,0.17,0.95),Color(0.47,0.68,0.74),10))
     var content:=HBoxContainer.new();ghost.add_child(content)
     var image:=TextureRect.new();image.texture=G.tex("z_i_"+item);image.custom_minimum_size=Vector2(44,44)
     image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
