@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://357ft1fu1c1o"]
+
+[ext_resource type="PackedScene" path="res://Location_Example.tscn" id="1_auq3g"]
+
+[node name="LocationExample" unique_id=1719007121 instance=ExtResource("1_auq3g")]
+
+[node name="Ground" parent="." index="0"]
+position = Vector2(0, -1)

@@ -1,0 +1,182 @@
+СЕВЕРНЫЙ АНКЛАВ — ВИЗУАЛЬНЫЙ ПАТЧ «ЗАРЯ 4.0»
+
+ОСНОВА И УСТАНОВКА
+Патч рассчитан на SevernyAnkl_Updated.zip из предыдущего сообщения.
+Это НЕ полный проект. В архиве находятся только новые и изменённые файлы.
+Распакуйте архив рядом с существующей папкой SevernyAnkl и согласитесь с заменой файлов.
+Откройте прежний project.godot. При первом открытии Godot импортирует новые изображения.
+В архиве сохранено исходное дерево каталогов SevernyAnkl/.
+
+ПЛАНИРОВКА
+Вместо шести одинаковых прямоугольных комнат построен асимметричный маршрут:
+— компактный медицинский блок с центральным узлом капсулы;
+— длинный узкий коридор наблюдения, закрытая смотровая и поворот;
+— лабораторный зал с двумя рабочими островами, верхним ответвлением и боковым архивом;
+— технический сектор с генератором, машинной нишей и двумя проходами обслуживания;
+— длинный служебный спуск к карантину;
+— карантинный пост и соединительный коридор к грузовому шлюзу;
+— грузовой зал с отдельной нишей силового оборудования.
+Геометрия стен формируется по объединённым контурам проходов. Двери перекрывают реальные проёмы.
+
+АРХИТЕКТУРА И ПОЛЫ
+Удалена мелкая квадратная сетка пола. Используются разные сплошные промышленные покрытия:
+медицинские герметичные панели, лабораторный пол, шлифованный технический металл,
+сервисные решётки, кабельные каналы и покрытия грузовой зоны.
+Добавлены массивные стеновые секции с углублением, фасками, крепежом и крупными стыками.
+Проработаны обрамления дверей, пороги, предупредительная разметка, технические магистрали,
+секторные обозначения и подключения капсулы к мониторингу.
+
+ОБЪЕКТЫ И СЛЕДЫ АВАРИИ
+Новый согласованный набор оборудования: медицинская капсула, рабочая консоль, инструментальная
+тележка, диагностическая койка, лабораторные столы, серверный блок, вентиляционная установка,
+генератор, контейнеры, шкафы, кресла, пост наблюдения, центрифуга и коммуникационные модули.
+Подготовлены отдельные детали недавней аварии: опрокинутое кресло, инструментальный лоток,
+документы, разбитый экран, открытый технический шкаф с кабелями.
+Мебель сгруппирована вокруг рабочих мест. Декоративные следы аварии не имеют блокирующих коллизий.
+
+СВЕТ И ЭФФЕКТЫ
+Равномерная подсветка и пульсирующий красный фильтр заменены локальными источниками PointLight2D.
+Холодные потолочные светильники формируют отдельные острова света. Между ними остаются тёмные
+участки; красные аварийные лампы имеют разные фазы и плавные циклы, одна лампа работает со сбоем.
+Мониторы дают слабый локальный свет. Стены, двери и крупное оборудование отбрасывают тени.
+Добавлены видимые корпуса светильников, пар из трёх повреждённых магистралей и редкие искры.
+Фонарь после получения снаряжения следует за прицелом и учитывает препятствия.
+Источники света включаются только вблизи камеры. Активно не более четырёх источников с тенями,
+включая фонарь; пар содержит небольшое число частиц и отключается настройкой.
+
+ПЕРСОНАЖ И СТРЕЛЬБА
+Волков использует отдельные анимации четырёх направлений, по четыре кадра на направление.
+Корпус не вращается на 360 градусов вслед за ходьбой. Движение вниз не переворачивает персонажа.
+Оружие показано отдельным узлом и следует за направлением прицела.
+Стрельба получила короткую вспышку локального света, отдачу оружия, выброс гильзы,
+краткий след пули и восстановление точности после выстрела. Разброс учитывает движение
+и состояние правой руки. Пули продолжают проверять препятствия и попадания в противников.
+После последнего патрона автоматическая перезарядка не включается: требуется перезарядить вручную.
+Мобильные стики и двойное касание правого стика для перезарядки сохранены.
+
+МЕНЮ
+Основная картинка, название и композиция исходного меню сохранены.
+Из исходного неба удалён неподвижный вертолёт только в небольшой области изображения.
+Отдельный вертолёт вращает лопасти, летит влево и полностью исчезает после вылета за экран.
+Он не появляется заново, пока главное меню не открыто повторно.
+Добавлены маяк башни, низкий туман, испарения, движение облаков и колыхание одежды; снег сохранён.
+Настройки заменены полноэкранными страницами с боковой навигацией и тонкими разделителями:
+звук, экран и управление. Работают громкость, яркость бункера, частицы, полный экран на ПК
+и мобильный отклик на выстрел. Настройки сохраняются.
+Выбор истории переделан в полноэкранный браузер сюжетов: список слева, иллюстрация и описание
+справа, отдельная закреплённая кнопка начала/продолжения. Иллюстрация «Зари» взята из самой игры.
+
+СОХРАНЁННЫЕ СИСТЕМЫ И ГРАНИЦЫ
+Сюжетные события, два фрагмента журнала, предохранитель, карантин и последовательность шлюза сохранены.
+Система здоровья по частям тела и применение медикаментов сохранены.
+Контрольные точки поддерживают новую геометрию. Сохранение прошлой планировки переносит
+игрока и противников в корректные позиции, сохраняя сюжетные записи и состояние организма.
+Вторая локация Surface, её free_roam и игровые файлы военной кампании не изменены.
+Общий боевой модуль battle_z.gd и медицинские модули не изменялись этим патчем:
+новая стрельба и оформление изолированы в скрипте первой локации.
+
+ПРОВЕРКИ
+Проект импортирован и запущен в Godot 4.5.1.
+Пройдены программные проверки всей цепочки бункера, открытия дверей и шлюза,
+физической проходимости ко всем 13 ключевым объектам, стрельбы, ручной перезарядки,
+бинтования выбранной части тела, восстановления новой контрольной точки и переноса старой.
+Проверены отдельный вертолёт, его исчезновение, анимация движения вниз и закреплённая кнопка
+выбора истории. Интерфейс визуально проверен при 1600×900 и 1280×720.
+APK не собирался, запуск на физическом Android-устройстве не проверялся.
+
+ФАЙЛЫ ПАТЧА
+НОВЫЙ    assets/bunker/v4/access.svg
+НОВЫЙ    assets/bunker/v4/access.svg.import
+НОВЫЙ    assets/bunker/v4/cabinet.png
+НОВЫЙ    assets/bunker/v4/cabinet.png.import
+НОВЫЙ    assets/bunker/v4/capsule.png
+НОВЫЙ    assets/bunker/v4/capsule.png.import
+НОВЫЙ    assets/bunker/v4/centrifuge.png
+НОВЫЙ    assets/bunker/v4/centrifuge.png.import
+НОВЫЙ    assets/bunker/v4/chair.png
+НОВЫЙ    assets/bunker/v4/chair.png.import
+НОВЫЙ    assets/bunker/v4/conduit.png
+НОВЫЙ    assets/bunker/v4/conduit.png.import
+НОВЫЙ    assets/bunker/v4/crate.png
+НОВЫЙ    assets/bunker/v4/crate.png.import
+НОВЫЙ    assets/bunker/v4/fallen_chair.png
+НОВЫЙ    assets/bunker/v4/fallen_chair.png.import
+НОВЫЙ    assets/bunker/v4/flashlight.svg
+НОВЫЙ    assets/bunker/v4/flashlight.svg.import
+НОВЫЙ    assets/bunker/v4/generator.png
+НОВЫЙ    assets/bunker/v4/generator.png.import
+НОВЫЙ    assets/bunker/v4/labdesk.png
+НОВЫЙ    assets/bunker/v4/labdesk.png.import
+НОВЫЙ    assets/bunker/v4/scanner_bed.png
+НОВЫЙ    assets/bunker/v4/scanner_bed.png.import
+НОВЫЙ    assets/bunker/v4/security.png
+НОВЫЙ    assets/bunker/v4/security.png.import
+НОВЫЙ    assets/bunker/v4/server.png
+НОВЫЙ    assets/bunker/v4/server.png.import
+НОВЫЙ    assets/bunker/v4/stairs.svg
+НОВЫЙ    assets/bunker/v4/stairs.svg.import
+НОВЫЙ    assets/bunker/v4/surface_cargo.svg
+НОВЫЙ    assets/bunker/v4/surface_cargo.svg.import
+НОВЫЙ    assets/bunker/v4/surface_laboratory.svg
+НОВЫЙ    assets/bunker/v4/surface_laboratory.svg.import
+НОВЫЙ    assets/bunker/v4/surface_medical.svg
+НОВЫЙ    assets/bunker/v4/surface_medical.svg.import
+НОВЫЙ    assets/bunker/v4/surface_technical.svg
+НОВЫЙ    assets/bunker/v4/surface_technical.svg.import
+НОВЫЙ    assets/bunker/v4/terminal.png
+НОВЫЙ    assets/bunker/v4/terminal.png.import
+НОВЫЙ    assets/bunker/v4/tools.png
+НОВЫЙ    assets/bunker/v4/tools.png.import
+НОВЫЙ    assets/bunker/v4/trolley.png
+НОВЫЙ    assets/bunker/v4/trolley.png.import
+НОВЫЙ    assets/bunker/v4/ventplant.png
+НОВЫЙ    assets/bunker/v4/ventplant.png.import
+НОВЫЙ    assets/bunker/v4/volkov_0_0.png
+НОВЫЙ    assets/bunker/v4/volkov_0_0.png.import
+НОВЫЙ    assets/bunker/v4/volkov_0_1.png
+НОВЫЙ    assets/bunker/v4/volkov_0_1.png.import
+НОВЫЙ    assets/bunker/v4/volkov_0_2.png
+НОВЫЙ    assets/bunker/v4/volkov_0_2.png.import
+НОВЫЙ    assets/bunker/v4/volkov_0_3.png
+НОВЫЙ    assets/bunker/v4/volkov_0_3.png.import
+НОВЫЙ    assets/bunker/v4/volkov_1_0.png
+НОВЫЙ    assets/bunker/v4/volkov_1_0.png.import
+НОВЫЙ    assets/bunker/v4/volkov_1_1.png
+НОВЫЙ    assets/bunker/v4/volkov_1_1.png.import
+НОВЫЙ    assets/bunker/v4/volkov_1_2.png
+НОВЫЙ    assets/bunker/v4/volkov_1_2.png.import
+НОВЫЙ    assets/bunker/v4/volkov_1_3.png
+НОВЫЙ    assets/bunker/v4/volkov_1_3.png.import
+НОВЫЙ    assets/bunker/v4/volkov_2_0.png
+НОВЫЙ    assets/bunker/v4/volkov_2_0.png.import
+НОВЫЙ    assets/bunker/v4/volkov_2_1.png
+НОВЫЙ    assets/bunker/v4/volkov_2_1.png.import
+НОВЫЙ    assets/bunker/v4/volkov_2_2.png
+НОВЫЙ    assets/bunker/v4/volkov_2_2.png.import
+НОВЫЙ    assets/bunker/v4/volkov_2_3.png
+НОВЫЙ    assets/bunker/v4/volkov_2_3.png.import
+НОВЫЙ    assets/bunker/v4/volkov_3_0.png
+НОВЫЙ    assets/bunker/v4/volkov_3_0.png.import
+НОВЫЙ    assets/bunker/v4/volkov_3_1.png
+НОВЫЙ    assets/bunker/v4/volkov_3_1.png.import
+НОВЫЙ    assets/bunker/v4/volkov_3_2.png
+НОВЫЙ    assets/bunker/v4/volkov_3_2.png.import
+НОВЫЙ    assets/bunker/v4/volkov_3_3.png
+НОВЫЙ    assets/bunker/v4/volkov_3_3.png.import
+ИЗМЕНЁН  assets/menu/north.gdshader
+НОВЫЙ    assets/menu/v4/sky_clean.png
+НОВЫЙ    assets/menu/v4/sky_clean.png.import
+НОВЫЙ    assets/menu/v4/story_zarya.png
+НОВЫЙ    assets/menu/v4/story_zarya.png.import
+НОВЫЙ    scenes/locations/Bunker_Architecture.tscn
+НОВЫЙ    scripts/bunker/bunker_environment.gd
+НОВЫЙ    scripts/bunker/bunker_environment.gd.uid
+НОВЫЙ    scripts/bunker/bunker_layout.gd
+НОВЫЙ    scripts/bunker/bunker_layout.gd.uid
+ИЗМЕНЁН  scripts/bunker_story.gd
+ИЗМЕНЁН  scripts/main.gd
+НОВЫЙ    scripts/ui/cinematic_pages.gd
+НОВЫЙ    scripts/ui/cinematic_pages.gd.uid
+ИЗМЕНЁН  scripts/ui/main_menu.gd
+НОВЫЙ    scripts/ui/menu_atmosphere.gd
+НОВЫЙ    scripts/ui/menu_atmosphere.gd.uid

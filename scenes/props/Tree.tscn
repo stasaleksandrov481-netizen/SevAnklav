@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/tree.gd" id="1_tree"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prop_tree_dec0.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="shape_trunk"]
+radius = 13.0
+
+[node name="Tree" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_tree")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(0, -52)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_tex")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("shape_trunk")

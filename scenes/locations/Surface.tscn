@@ -1,0 +1,83 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/locations/free_roam.gd" id="1_fr"]
+[ext_resource type="PackedScene" path="res://scenes/props/Player.tscn" id="2_pl"]
+[ext_resource type="PackedScene" path="res://scenes/props/ExitDoor.tscn" id="3_ed"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tile_dry.png" id="4_gr"]
+
+[sub_resource type="RectangleShape2D" id="wall_h"]
+size = Vector2(2640, 40)
+
+[sub_resource type="RectangleShape2D" id="wall_v"]
+size = Vector2(40, 1640)
+
+[node name="Surface" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_fr")
+location_title = "ПОВЕРХНОСТЬ · СЕВЕР"
+
+[node name="Ground" type="Sprite2D" parent="."]
+z_index = -2
+texture_repeat = 2
+centered = false
+texture = ExtResource("4_gr")
+region_enabled = true
+region_rect = Rect2(0, 0, 2560, 1536)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="N" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1280, -20)
+shape = SubResource("wall_h")
+
+[node name="S" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1280, 1556)
+shape = SubResource("wall_h")
+
+[node name="W" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-20, 768)
+shape = SubResource("wall_v")
+
+[node name="E" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2580, 768)
+shape = SubResource("wall_v")
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="FromBunker" type="Marker2D" parent="Spawns"]
+position = Vector2(1280, 1400)
+
+[node name="Main" type="Marker2D" parent="Spawns"]
+position = Vector2(1280, 900)
+
+[node name="Player" parent="." instance=ExtResource("2_pl")]
+position = Vector2(1280, 900)
+
+[node name="Exits" type="Node2D" parent="."]
+
+[node name="ToNorth" parent="Exits" instance=ExtResource("3_ed")]
+position = Vector2(1280, 46)
+door_label = "ДАЛЬШЕ НА СЕВЕР"
+ends_chapter = true
+
+[node name="ToBunker" parent="Exits" instance=ExtResource("3_ed")]
+position = Vector2(2200, 1480)
+door_label = "БУНКЕР «ЗАРЯ»"
+locked_text = "Лестница позади обрушилась — назад пути нет."
+
+[node name="Hint" type="Label" parent="."]
+offset_left = 30.0
+offset_top = 20.0
+offset_right = 900.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 0.85)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 15
+text = "ЗАГОТОВКА ЛОКАЦИИ «ПОВЕРХНОСТЬ»
+Это твоя вторая локация после бункера — собери её сам из префабов:
+перетащи Bush / Tree / Fence / PropTemplate из scenes/props, двигай мышью.
+Точки входа — узел Spawns, двери-переходы — Exits (параметры в инспекторе)."

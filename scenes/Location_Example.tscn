@@ -1,0 +1,105 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/props/Bush.tscn" id="2_bush"]
+[ext_resource type="PackedScene" path="res://scenes/props/Tree.tscn" id="3_tree"]
+[ext_resource type="PackedScene" path="res://scenes/props/Fence.tscn" id="4_fence"]
+[ext_resource type="PackedScene" path="res://scenes/props/Trench.tscn" id="5_trench"]
+[ext_resource type="PackedScene" path="res://scenes/props/Bullet.tscn" id="6_bullet"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tile_grass_v0.png" id="7_grass"]
+
+[sub_resource type="RectangleShape2D" id="wall_h"]
+size = Vector2(2640, 40)
+
+[sub_resource type="RectangleShape2D" id="wall_v"]
+size = Vector2(40, 1640)
+
+[node name="LocationExample" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Ground" type="Sprite2D" parent="."]
+texture_repeat = 2
+centered = false
+texture = ExtResource("7_grass")
+region_enabled = true
+region_rect = Rect2(0, 0, 2560, 1536)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="N" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1280, -20)
+shape = SubResource("wall_h")
+
+[node name="S" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1280, 1556)
+shape = SubResource("wall_h")
+
+[node name="W" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-20, 768)
+shape = SubResource("wall_v")
+
+[node name="E" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2580, 768)
+shape = SubResource("wall_v")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(1280, 780)
+bullet_scene = ExtResource("6_bullet")
+
+[node name="Bush1" parent="." instance=ExtResource("2_bush")]
+position = Vector2(700, 500)
+
+[node name="Bush2" parent="." instance=ExtResource("2_bush")]
+position = Vector2(790, 560)
+
+[node name="Bush3" parent="." instance=ExtResource("2_bush")]
+position = Vector2(1800, 900)
+
+[node name="Tree1" parent="." instance=ExtResource("3_tree")]
+position = Vector2(500, 700)
+
+[node name="Tree2" parent="." instance=ExtResource("3_tree")]
+position = Vector2(1000, 350)
+
+[node name="Tree3" parent="." instance=ExtResource("3_tree")]
+position = Vector2(1600, 1100)
+
+[node name="Tree4" parent="." instance=ExtResource("3_tree")]
+position = Vector2(2100, 450)
+
+[node name="Fence1" parent="." instance=ExtResource("4_fence")]
+position = Vector2(400, 1000)
+
+[node name="Fence2" parent="." instance=ExtResource("4_fence")]
+position = Vector2(660, 1000)
+
+[node name="Fence3" parent="." instance=ExtResource("4_fence")]
+position = Vector2(920, 1000)
+
+[node name="Fence4" parent="." instance=ExtResource("4_fence")]
+position = Vector2(1150, 1250)
+rotation = 1.5708
+
+[node name="Trench1" parent="." instance=ExtResource("5_trench")]
+position = Vector2(1900, 1250)
+
+[node name="Trench2" parent="." instance=ExtResource("5_trench")]
+position = Vector2(2092, 1250)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Hint" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 1100.0
+offset_bottom = 150.0
+theme_override_colors/font_color = Color(0.92, 0.95, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "ДЕМО-ЛОКАЦИЯ (шаблон для ручной расстановки)
+WASD/стрелки — ходьба.  Двойной тап по направлению или Shift — БЕГ (отпустил — снова шаг).
+ЛКМ/Пробел — стрельба (проверь урон по забору — он разрушаемый).
+Зайди в куст — is_hidden включится (боты с той же переменной перестанут тебя видеть).
+Окоп замедляет. Новые объекты: дублируй scenes/props/PropTemplate.tscn — инструкция в скрипте."

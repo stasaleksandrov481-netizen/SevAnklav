@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/bush.gd" id="1_bsh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prop_bush0.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="shape_bush"]
+radius = 40.0
+
+[node name="Bush" type="Area2D"]
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_bsh")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_tex")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("shape_bush")

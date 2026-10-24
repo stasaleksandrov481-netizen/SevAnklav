@@ -1,0 +1,1766 @@
+[gd_scene load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/locations/level_def.gd" id="1_ldef"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_capsule.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_medtable.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_cabinet.png" id="t3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_shelf.png" id="t4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_crate_z.png" id="t5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_vent.png" id="t6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_reactor.png" id="t7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_scanner.png" id="t8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_airlock.png" id="t9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_stairs.png" id="t10"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_sign.png" id="t11"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_i_meds.png" id="t12"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_i_band.png" id="t13"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_i_tq.png" id="t14"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_corpse_guard.png" id="t15"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_corpse_sci.png" id="t16"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_zombie_sci_w0.png" id="t17"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_zombie_walk_w0.png" id="t18"]
+[ext_resource type="Texture2D" path="res://assets/sprites/z_zombie_run_w0.png" id="t19"]
+
+[node name="BunkerZarya" type="Node2D"]
+
+[node name="Zone1" type="Node2D" parent="."]
+position = Vector2(118, 142)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "metal"
+
+[node name="Zone2" type="Node2D" parent="."]
+position = Vector2(1012, 142)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "metal"
+
+[node name="Zone3" type="Node2D" parent="."]
+position = Vector2(1906, 142)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "metal"
+
+[node name="Zone4" type="Node2D" parent="."]
+position = Vector2(118, 744)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 1722, 536)
+def_kind = "tile_lab"
+
+[node name="Zone5" type="Node2D" parent="."]
+position = Vector2(1906, 744)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "tile_lab"
+
+[node name="Zone6" type="Node2D" parent="."]
+position = Vector2(118, 1346)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "tile_med"
+
+[node name="Zone7" type="Node2D" parent="."]
+position = Vector2(1012, 1346)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "tile_lab"
+
+[node name="Zone8" type="Node2D" parent="."]
+position = Vector2(1906, 1346)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 828, 536)
+def_kind = "conc"
+
+[node name="Wall1" type="Node2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 2880, 24)
+
+[node name="Wall2" type="Node2D" parent="."]
+position = Vector2(0, 2088)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 2880, 24)
+
+[node name="Wall3" type="Node2D" parent="."]
+position = Vector2(0, 0)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 24, 2112)
+
+[node name="Wall4" type="Node2D" parent="."]
+position = Vector2(2856, 0)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 24, 2112)
+
+[node name="Wall5" type="Node2D" parent="."]
+position = Vector2(24, 24)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 2832, 96)
+
+[node name="Wall6" type="Node2D" parent="."]
+position = Vector2(24, 1926)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 2832, 162)
+
+[node name="Wall7" type="Node2D" parent="."]
+position = Vector2(24, 24)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 72, 2064)
+
+[node name="Wall8" type="Node2D" parent="."]
+position = Vector2(2778, 24)
+script = ExtResource("1_ldef")
+def_type = "wall"
+rect = Rect2(0, 0, 78, 2064)
+
+[node name="Room1" type="Node2D" parent="."]
+position = Vector2(96, 120)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"s": [[0.38, 0.62]]}
+
+[node name="Room2" type="Node2D" parent="."]
+position = Vector2(990, 120)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"s": [[0.38, 0.62]]}
+
+[node name="Room3" type="Node2D" parent="."]
+position = Vector2(1884, 120)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"s": [[0.38, 0.62]]}
+
+[node name="Room4" type="Node2D" parent="."]
+position = Vector2(96, 722)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 1766, 580)
+room_thickness = 22
+doors = {"n": [[0.187, 0.306], [0.694, 0.812]], "s": [[0.1325, 0.2288], [0.5685, 0.6648]], "e": [[0.307, 0.566]]}
+
+[node name="Room5" type="Node2D" parent="."]
+position = Vector2(1884, 722)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"w": [[0.307, 0.566]], "n": [[0.38, 0.62]], "s": [[0.38, 0.62]]}
+
+[node name="Room6" type="Node2D" parent="."]
+position = Vector2(96, 1324)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"n": [[0.268, 0.463]], "e": [[0.355, 0.631]], "s": [[0.268, 0.463]]}
+
+[node name="Room7" type="Node2D" parent="."]
+position = Vector2(990, 1324)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"n": [[0.126, 0.321]], "w": [[0.355, 0.631]], "e": [[0.355, 0.631]]}
+
+[node name="Room8" type="Node2D" parent="."]
+position = Vector2(1884, 1324)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+room_thickness = 22
+doors = {"n": [[0.38, 0.62]], "w": [[0.355, 0.631]], "s": [[0.38, 0.62]]}
+
+[node name="Door_gp" type="Node2D" parent="."]
+position = Vector2(532, 733)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "gp"
+gap_w = 210
+vertical = false
+
+[node name="Door_ar" type="Node2D" parent="."]
+position = Vector2(1426, 733)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "ar"
+gap_w = 210
+vertical = false
+
+[node name="Door_air" type="Node2D" parent="."]
+position = Vector2(2320, 733)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "air"
+gap_w = 210
+vertical = false
+
+[node name="Door_lab_e" type="Node2D" parent="."]
+position = Vector2(1873, 975)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "lab_e"
+gap_w = 150
+vertical = true
+
+[node name="Door_med_n" type="Node2D" parent="."]
+position = Vector2(415, 1313)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "med_n"
+gap_w = 170
+vertical = false
+
+[node name="Door_qr_n" type="Node2D" parent="."]
+position = Vector2(1185, 1313)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "qr_n"
+gap_w = 170
+vertical = false
+
+[node name="Door_med_e" type="Node2D" parent="."]
+position = Vector2(979, 1610)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "med_e"
+gap_w = 160
+vertical = true
+
+[node name="Door_qr_e" type="Node2D" parent="."]
+position = Vector2(1873, 1610)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "qr_e"
+gap_w = 160
+vertical = true
+
+[node name="Door_cryo_s" type="Node2D" parent="."]
+position = Vector2(2320, 1313)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "cryo_s"
+gap_w = 210
+vertical = false
+
+[node name="Prop1" type="Node2D" parent="."]
+position = Vector2(350, 1720)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_kind = "capsule"
+def_radius = 44
+def_scale = 1.15
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop1"]
+z_index = 3
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("t1")
+
+[node name="Prop2" type="Node2D" parent="."]
+position = Vector2(650, 1440)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_medtable"
+def_kind = "gear_table"
+def_radius = 34
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop2"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t2")
+
+[node name="Prop3" type="Node2D" parent="."]
+position = Vector2(238, 1420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop3"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t3")
+
+[node name="Prop4" type="Node2D" parent="."]
+position = Vector2(872, 1440)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop4"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop5" type="Node2D" parent="."]
+position = Vector2(1768, 1434)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop5"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop6" type="Node2D" parent="."]
+position = Vector2(1650, 1811)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop6"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop7" type="Node2D" parent="."]
+position = Vector2(304, 924)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_radius = 40
+def_scale = 1.05
+def_z = 3
+solid = true
+rot_deg = -90
+
+[node name="Spr" type="Sprite2D" parent="Prop7"]
+z_index = 3
+scale = Vector2(1.05, 1.05)
+rotation = -1.570796
+texture = ExtResource("t1")
+
+[node name="Prop8" type="Node2D" parent="."]
+position = Vector2(800, 1171)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_radius = 40
+def_scale = 1.05
+def_z = 3
+solid = true
+rot_deg = 180
+
+[node name="Spr" type="Sprite2D" parent="Prop8"]
+z_index = 3
+scale = Vector2(1.05, 1.05)
+rotation = 3.141593
+texture = ExtResource("t1")
+
+[node name="Prop9" type="Node2D" parent="."]
+position = Vector2(1767, 1190)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop9"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop10" type="Node2D" parent="."]
+position = Vector2(1660, 842)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop10"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop11" type="Node2D" parent="."]
+position = Vector2(200, 1243)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+def_radius = 24
+def_scale = 1.3
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop11"]
+z_index = 3
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("t5")
+
+[node name="Prop12" type="Node2D" parent="."]
+position = Vector2(210, 1291)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_vent"
+def_kind = "vent"
+def_radius = 0
+def_scale = 1.1
+def_z = 6
+solid = false
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop12"]
+z_index = 6
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("t6")
+
+[node name="Prop13" type="Node2D" parent="."]
+position = Vector2(873, 240)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop13"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop14" type="Node2D" parent="."]
+position = Vector2(300, 641)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+def_radius = 24
+def_scale = 1.35
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop14"]
+z_index = 3
+scale = Vector2(1.35, 1.35)
+texture = ExtResource("t5")
+
+[node name="Prop15" type="Node2D" parent="."]
+position = Vector2(875, 545)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop15"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+rotation = 1.570796
+texture = ExtResource("t4")
+
+[node name="Prop16" type="Node2D" parent="."]
+position = Vector2(1150, 214)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop16"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop17" type="Node2D" parent="."]
+position = Vector2(1420, 214)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop17"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop18" type="Node2D" parent="."]
+position = Vector2(1690, 214)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop18"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop19" type="Node2D" parent="."]
+position = Vector2(1180, 641)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+def_radius = 24
+def_scale = 1.3
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop19"]
+z_index = 3
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("t5")
+
+[node name="Prop20" type="Node2D" parent="."]
+position = Vector2(1767, 480)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop20"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop21" type="Node2D" parent="."]
+position = Vector2(2092, 926)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_radius = 40
+def_scale = 1.05
+def_z = 3
+solid = true
+rot_deg = -90
+
+[node name="Spr" type="Sprite2D" parent="Prop21"]
+z_index = 3
+scale = Vector2(1.05, 1.05)
+rotation = -1.570796
+texture = ExtResource("t1")
+
+[node name="Prop22" type="Node2D" parent="."]
+position = Vector2(2400, 844)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_radius = 40
+def_scale = 1.05
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop22"]
+z_index = 3
+scale = Vector2(1.05, 1.05)
+texture = ExtResource("t1")
+
+[node name="Prop23" type="Node2D" parent="."]
+position = Vector2(2548, 1098)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_radius = 40
+def_scale = 1.05
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop23"]
+z_index = 3
+scale = Vector2(1.05, 1.05)
+rotation = 1.570796
+texture = ExtResource("t1")
+
+[node name="Prop24" type="Node2D" parent="."]
+position = Vector2(2300, 1210)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+def_radius = 30
+def_scale = 1.25
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop24"]
+z_index = 3
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("t4")
+
+[node name="Prop25" type="Node2D" parent="."]
+position = Vector2(1955, 1243)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+def_radius = 24
+def_scale = 1.3
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop25"]
+z_index = 3
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("t5")
+
+[node name="Prop26" type="Node2D" parent="."]
+position = Vector2(2520, 1430)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_reactor"
+def_radius = 30
+def_scale = 1.5
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop26"]
+z_index = 3
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("t7")
+
+[node name="Prop27" type="Node2D" parent="."]
+position = Vector2(2612, 1430)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_reactor"
+def_radius = 30
+def_scale = 1.5
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop27"]
+z_index = 3
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("t7")
+
+[node name="Prop28" type="Node2D" parent="."]
+position = Vector2(2687, 1520)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+def_radius = 24
+def_scale = 1.3
+def_z = 3
+solid = true
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop28"]
+z_index = 3
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("t5")
+
+[node name="Prop29" type="Node2D" parent="."]
+position = Vector2(2000, 420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_scanner"
+def_kind = "scanner"
+def_radius = 16
+def_scale = 1
+def_z = 7
+solid = false
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop29"]
+z_index = 7
+scale = Vector2(1, 1)
+texture = ExtResource("t8")
+
+[node name="Prop30" type="Node2D" parent="."]
+position = Vector2(2320, 320)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_airlock"
+def_kind = "airlock"
+def_radius = 0
+def_scale = 1.1
+def_z = 7
+solid = false
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop30"]
+z_index = 7
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("t9")
+
+[node name="Prop31" type="Node2D" parent="."]
+position = Vector2(2661, 260)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "cabinet"
+def_radius = 26
+def_scale = 1.2
+def_z = 3
+solid = true
+rot_deg = 90
+
+[node name="Spr" type="Sprite2D" parent="Prop31"]
+z_index = 3
+scale = Vector2(1.2, 1.2)
+rotation = 1.570796
+texture = ExtResource("t3")
+
+[node name="Prop32" type="Node2D" parent="."]
+position = Vector2(2320, 180)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_stairs"
+def_kind = "stairs"
+def_radius = 0
+def_scale = 1.7
+def_z = 8
+solid = false
+rot_deg = 0
+
+[node name="Spr" type="Sprite2D" parent="Prop32"]
+z_index = 8
+scale = Vector2(1.7, 1.7)
+texture = ExtResource("t10")
+
+[node name="Deco1" type="Node2D" parent="."]
+position = Vector2(640, 1372)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.92
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco1"]
+z_index = 9
+scale = Vector2(0.92, 0.92)
+texture = ExtResource("t11")
+
+[node name="Deco2" type="Node2D" parent="."]
+position = Vector2(580, 1428)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_i_meds"
+def_scale = 0.6
+def_z = 6
+
+[node name="Spr" type="Sprite2D" parent="Deco2"]
+z_index = 6
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("t12")
+
+[node name="Deco3" type="Node2D" parent="."]
+position = Vector2(612, 1432)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_i_band"
+def_scale = 0.6
+def_z = 6
+
+[node name="Spr" type="Sprite2D" parent="Deco3"]
+z_index = 6
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("t13")
+
+[node name="Deco4" type="Node2D" parent="."]
+position = Vector2(596, 1452)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_i_tq"
+def_scale = 0.6
+def_z = 6
+
+[node name="Spr" type="Sprite2D" parent="Deco4"]
+z_index = 6
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("t14")
+
+[node name="Deco5" type="Node2D" parent="."]
+position = Vector2(1560, 1372)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.92
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco5"]
+z_index = 9
+scale = Vector2(0.92, 0.92)
+texture = ExtResource("t11")
+
+[node name="Deco6" type="Node2D" parent="."]
+position = Vector2(1230, 772)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.95
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco6"]
+z_index = 9
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("t11")
+
+[node name="Deco7" type="Node2D" parent="."]
+position = Vector2(560, 166)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.92
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco7"]
+z_index = 9
+scale = Vector2(0.92, 0.92)
+texture = ExtResource("t11")
+
+[node name="Deco8" type="Node2D" parent="."]
+position = Vector2(1426, 656)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.95
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco8"]
+z_index = 9
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("t11")
+
+[node name="Deco9" type="Node2D" parent="."]
+position = Vector2(1920, 1180)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.95
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco9"]
+z_index = 9
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("t11")
+
+[node name="Deco10" type="Node2D" parent="."]
+position = Vector2(2520, 640)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+def_scale = 0.95
+def_z = 9
+
+[node name="Spr" type="Sprite2D" parent="Deco10"]
+z_index = 9
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("t11")
+
+[node name="LabLight1" type="Node2D" parent="."]
+position = Vector2(350, 1560)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight2" type="Node2D" parent="."]
+position = Vector2(640, 1660)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="LabLight3" type="Node2D" parent="."]
+position = Vector2(1600, 1560)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="LabLight4" type="Node2D" parent="."]
+position = Vector2(700, 900)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight5" type="Node2D" parent="."]
+position = Vector2(1400, 900)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight6" type="Node2D" parent="."]
+position = Vector2(700, 1180)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="LabLight7" type="Node2D" parent="."]
+position = Vector2(1400, 1180)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="LabLight8" type="Node2D" parent="."]
+position = Vector2(532, 400)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight9" type="Node2D" parent="."]
+position = Vector2(1426, 400)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight10" type="Node2D" parent="."]
+position = Vector2(2320, 1000)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight11" type="Node2D" parent="."]
+position = Vector2(2300, 1600)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="LabLight12" type="Node2D" parent="."]
+position = Vector2(2320, 500)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = false
+
+[node name="RedLamp1" type="Node2D" parent="."]
+position = Vector2(1046, 1420)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="RedLamp2" type="Node2D" parent="."]
+position = Vector2(1550, 1012)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="RedLamp3" type="Node2D" parent="."]
+position = Vector2(2400, 1700)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Blood1" type="Node2D" parent="."]
+position = Vector2(310, 1665)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = false
+
+[node name="Blood2" type="Node2D" parent="."]
+position = Vector2(430, 1560)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = true
+
+[node name="Corpse1" type="Node2D" parent="."]
+position = Vector2(2250, 560)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "guard"
+
+[node name="Spr" type="Sprite2D" parent="Corpse1"]
+z_index = 2
+texture = ExtResource("t15")
+
+[node name="Corpse2" type="Node2D" parent="."]
+position = Vector2(1400, 1240)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Corpse2"]
+z_index = 2
+texture = ExtResource("t16")
+
+[node name="Corpse3" type="Node2D" parent="."]
+position = Vector2(800, 800)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Corpse3"]
+z_index = 2
+texture = ExtResource("t16")
+
+[node name="Corpse4" type="Node2D" parent="."]
+position = Vector2(2400, 1100)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Corpse4"]
+z_index = 2
+texture = ExtResource("t16")
+
+[node name="Zombie1" type="Node2D" parent="."]
+position = Vector2(1150, 1500)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Zombie1"]
+z_index = 8
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("t17")
+
+[node name="Zombie2" type="Node2D" parent="."]
+position = Vector2(1300, 1680)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Zombie2"]
+z_index = 8
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("t17")
+
+[node name="Zombie3" type="Node2D" parent="."]
+position = Vector2(1450, 1520)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "sci"
+
+[node name="Spr" type="Sprite2D" parent="Zombie3"]
+z_index = 8
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("t17")
+
+[node name="Zombie4" type="Node2D" parent="."]
+position = Vector2(700, 1000)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "walk"
+
+[node name="Spr" type="Sprite2D" parent="Zombie4"]
+z_index = 8
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("t18")
+
+[node name="Zombie5" type="Node2D" parent="."]
+position = Vector2(2400, 1650)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "run"
+
+[node name="Spr" type="Sprite2D" parent="Zombie5"]
+z_index = 8
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("t19")
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(350, 1750)
+script = ExtResource("1_ldef")
+def_type = "spawn"
+
+[node name="Zone9" type="Node2D" parent="."]
+position = Vector2(96, 1926)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "conc"
+
+[node name="Zone10" type="Node2D" parent="."]
+position = Vector2(990, 1926)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "tile_lab"
+
+[node name="Zone11" type="Node2D" parent="."]
+position = Vector2(1884, 1926)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "tile_med"
+
+[node name="Room9" type="Node2D" parent="."]
+position = Vector2(96, 1926)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.268, 0.463]], "e": [[0.355, 0.631]], "s": [[0.132, 0.321]]}
+
+[node name="Room10" type="Node2D" parent="."]
+position = Vector2(990, 1926)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.126, 0.321]], "w": [[0.355, 0.631]], "e": [[0.355, 0.631]]}
+
+[node name="Room11" type="Node2D" parent="."]
+position = Vector2(1884, 1926)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.38, 0.62]], "w": [[0.355, 0.631]], "s": [[0.355, 0.631]]}
+
+[node name="Zone12" type="Node2D" parent="."]
+position = Vector2(96, 2528)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "metal"
+
+[node name="Zone13" type="Node2D" parent="."]
+position = Vector2(990, 2528)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "tile_lab"
+
+[node name="Zone14" type="Node2D" parent="."]
+position = Vector2(1884, 2528)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "tile_med"
+
+[node name="Room12" type="Node2D" parent="."]
+position = Vector2(96, 2528)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.132, 0.321]], "e": [[0.355, 0.631]]}
+
+[node name="Room13" type="Node2D" parent="."]
+position = Vector2(990, 2528)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.126, 0.321]], "w": [[0.355, 0.631]], "e": [[0.355, 0.631]], "s": [[0.126, 0.321]]}
+
+[node name="Room14" type="Node2D" parent="."]
+position = Vector2(1884, 2528)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.355, 0.631]], "w": [[0.355, 0.631]]}
+
+[node name="Zone15" type="Node2D" parent="."]
+position = Vector2(990, 3130)
+script = ExtResource("1_ldef")
+def_type = "zone"
+rect = Rect2(0, 0, 872, 580)
+def_kind = "metal"
+
+[node name="Room15" type="Node2D" parent="."]
+position = Vector2(990, 3130)
+script = ExtResource("1_ldef")
+def_type = "room"
+rect = Rect2(0, 0, 872, 580)
+doors = {"n": [[0.126, 0.321]]}
+
+[node name="Door_tech_n" type="Node2D" parent="."]
+position = Vector2(415, 1937)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "tech_n"
+
+[node name="Door_cryo_s2" type="Node2D" parent="."]
+position = Vector2(2320, 1937)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "cryo_s2"
+
+[node name="Door_tech_e" type="Node2D" parent="."]
+position = Vector2(979, 2212)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "tech_e"
+vertical = true
+
+[node name="Door_wrk_e" type="Node2D" parent="."]
+position = Vector2(1873, 2212)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "wrk_e"
+vertical = true
+
+[node name="Door_gen_s" type="Node2D" parent="."]
+position = Vector2(415, 2539)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "gen_s"
+
+[node name="Door_qr2_n" type="Node2D" parent="."]
+position = Vector2(1185, 2539)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "qr2_n"
+
+[node name="Door_obs_n" type="Node2D" parent="."]
+position = Vector2(2320, 2539)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "obs_n"
+
+[node name="Door_arm_e" type="Node2D" parent="."]
+position = Vector2(979, 2814)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "arm_e"
+vertical = true
+
+[node name="Door_qr2_e" type="Node2D" parent="."]
+position = Vector2(1873, 2814)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "qr2_e"
+vertical = true
+
+[node name="Door_sas_n" type="Node2D" parent="."]
+position = Vector2(1185, 3141)
+script = ExtResource("1_ldef")
+def_type = "door"
+def_id = "sas_n"
+
+[node name="Prop33" type="Node2D" parent="."]
+position = Vector2(300, 2100)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_reactor"
+def_kind = "generator"
+
+[node name="Prop34" type="Node2D" parent="."]
+position = Vector2(700, 2000)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "gen_panel"
+
+[node name="Prop35" type="Node2D" parent="."]
+position = Vector2(170, 2320)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_vent"
+def_kind = "coolant"
+
+[node name="Prop36" type="Node2D" parent="."]
+position = Vector2(850, 2420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop37" type="Node2D" parent="."]
+position = Vector2(760, 2320)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Corpse5" type="Node2D" parent="."]
+position = Vector2(600, 2300)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "sci"
+
+[node name="Zombie6" type="Node2D" parent="."]
+position = Vector2(500, 2180)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "walk"
+
+[node name="LabLight13" type="Node2D" parent="."]
+position = Vector2(350, 2100)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight14" type="Node2D" parent="."]
+position = Vector2(700, 2350)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+
+[node name="RedLamp4" type="Node2D" parent="."]
+position = Vector2(530, 1980)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Prop38" type="Node2D" parent="."]
+position = Vector2(1300, 2100)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_player"
+def_kind = "serov"
+def_radius = 18.0
+def_color = Color(0.72, 0.8, 0.9, 1)
+
+[node name="Prop39" type="Node2D" parent="."]
+position = Vector2(1180, 2210)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_medtable"
+def_kind = "serov_table"
+
+[node name="Prop40" type="Node2D" parent="."]
+position = Vector2(1700, 2000)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Prop41" type="Node2D" parent="."]
+position = Vector2(1080, 2360)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop42" type="Node2D" parent="."]
+position = Vector2(1520, 2420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_reactor"
+def_kind = "tape_deck"
+
+[node name="Deco11" type="Node2D" parent="."]
+position = Vector2(1100, 1980)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+
+[node name="LabLight15" type="Node2D" parent="."]
+position = Vector2(1300, 2150)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight16" type="Node2D" parent="."]
+position = Vector2(1550, 2400)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+
+[node name="Zombie7" type="Node2D" parent="."]
+position = Vector2(1750, 2380)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "run"
+
+[node name="Prop43" type="Node2D" parent="."]
+position = Vector2(2300, 2120)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_kind = "exp12_capsule"
+
+[node name="Prop44" type="Node2D" parent="."]
+position = Vector2(2620, 2050)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_scanner"
+def_kind = "exp12_video"
+
+[node name="Prop45" type="Node2D" parent="."]
+position = Vector2(2380, 2420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Deco12" type="Node2D" parent="."]
+position = Vector2(2200, 1980)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+
+[node name="LabLight17" type="Node2D" parent="."]
+position = Vector2(2300, 2180)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+
+[node name="RedLamp5" type="Node2D" parent="."]
+position = Vector2(2500, 2320)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Blood3" type="Node2D" parent="."]
+position = Vector2(2260, 2200)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = false
+
+[node name="Prop46" type="Node2D" parent="."]
+position = Vector2(300, 2720)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_cabinet"
+def_kind = "weapon_locker"
+
+[node name="Prop47" type="Node2D" parent="."]
+position = Vector2(700, 2600)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop48" type="Node2D" parent="."]
+position = Vector2(820, 2950)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop49" type="Node2D" parent="."]
+position = Vector2(560, 2960)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Deco13" type="Node2D" parent="."]
+position = Vector2(415, 2580)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+
+[node name="LabLight18" type="Node2D" parent="."]
+position = Vector2(450, 2700)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="Prop50" type="Node2D" parent="."]
+position = Vector2(1150, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_kind = "cell"
+
+[node name="Prop51" type="Node2D" parent="."]
+position = Vector2(1450, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_kind = "cell"
+
+[node name="Prop52" type="Node2D" parent="."]
+position = Vector2(1750, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_capsule"
+def_kind = "cell"
+
+[node name="Prop53" type="Node2D" parent="."]
+position = Vector2(1400, 2560)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_vent"
+def_kind = "vent_bypass"
+solid = false
+
+[node name="Prop54" type="Node2D" parent="."]
+position = Vector2(1080, 2920)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_scanner"
+def_kind = "iso_panel"
+
+[node name="Prop55" type="Node2D" parent="."]
+position = Vector2(1300, 3060)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_airlock"
+def_kind = "sas_gate"
+
+[node name="Prop56" type="Node2D" parent="."]
+position = Vector2(1600, 2900)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Silhouette1" type="Node2D" parent="."]
+position = Vector2(1180, 2660)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_zombie_walk"
+solid = false
+def_z = 2
+def_scale = 0.8
+def_color = Color(0.45, 0.5, 0.5, 0.55)
+
+[node name="Silhouette2" type="Node2D" parent="."]
+position = Vector2(1480, 2660)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_zombie_sci"
+solid = false
+def_z = 2
+def_scale = 0.8
+def_color = Color(0.45, 0.5, 0.5, 0.55)
+
+[node name="Silhouette3" type="Node2D" parent="."]
+position = Vector2(1720, 2660)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_zombie_walk"
+solid = false
+def_z = 2
+def_scale = 0.8
+def_color = Color(0.4, 0.46, 0.46, 0.5)
+
+[node name="Corpse6" type="Node2D" parent="."]
+position = Vector2(1300, 2980)
+script = ExtResource("1_ldef")
+def_type = "corpse"
+def_kind = "guard"
+
+[node name="Zombie8" type="Node2D" parent="."]
+position = Vector2(1250, 2760)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "sci"
+
+[node name="Zombie9" type="Node2D" parent="."]
+position = Vector2(1550, 2960)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "sci"
+
+[node name="LabLight19" type="Node2D" parent="."]
+position = Vector2(1250, 2700)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="LabLight20" type="Node2D" parent="."]
+position = Vector2(1600, 2950)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+
+[node name="RedLamp6" type="Node2D" parent="."]
+position = Vector2(1426, 2580)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="RedLamp7" type="Node2D" parent="."]
+position = Vector2(1185, 3040)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Blood4" type="Node2D" parent="."]
+position = Vector2(1420, 2800)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = true
+
+[node name="Blood5" type="Node2D" parent="."]
+position = Vector2(1150, 3000)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = false
+
+[node name="Prop57" type="Node2D" parent="."]
+position = Vector2(2320, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_scanner"
+def_kind = "obs_terminal"
+
+[node name="Prop58" type="Node2D" parent="."]
+position = Vector2(2500, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Prop59" type="Node2D" parent="."]
+position = Vector2(2100, 2620)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Silhouette4" type="Node2D" parent="."]
+position = Vector2(2620, 2860)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_zombie_sci"
+solid = false
+def_z = 2
+def_scale = 0.8
+def_color = Color(0.45, 0.5, 0.5, 0.5)
+
+[node name="Deco14" type="Node2D" parent="."]
+position = Vector2(2320, 2580)
+script = ExtResource("1_ldef")
+def_type = "spr"
+tex = "z_sign"
+
+[node name="LabLight21" type="Node2D" parent="."]
+position = Vector2(2320, 2750)
+script = ExtResource("1_ldef")
+def_type = "light_lab"
+wide = true
+
+[node name="RedLamp8" type="Node2D" parent="."]
+position = Vector2(2500, 2900)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Blood6" type="Node2D" parent="."]
+position = Vector2(2260, 2860)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = false
+
+[node name="Prop60" type="Node2D" parent="."]
+position = Vector2(1300, 3420)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_reactor"
+def_kind = "hydro"
+
+[node name="Prop61" type="Node2D" parent="."]
+position = Vector2(1620, 3340)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_vent"
+def_kind = "hydro_lever"
+
+[node name="Prop62" type="Node2D" parent="."]
+position = Vector2(1080, 3340)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_scanner"
+def_kind = "power_hold"
+
+[node name="Prop63" type="Node2D" parent="."]
+position = Vector2(1426, 3240)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_sign"
+def_kind = "speaker"
+solid = false
+
+[node name="Prop64" type="Node2D" parent="."]
+position = Vector2(1000, 3600)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop65" type="Node2D" parent="."]
+position = Vector2(1800, 3560)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_crate_z"
+def_kind = "loot_crate"
+
+[node name="Prop66" type="Node2D" parent="."]
+position = Vector2(700, 3300)
+script = ExtResource("1_ldef")
+def_type = "prop"
+tex = "z_shelf"
+def_kind = "cabinet"
+
+[node name="Zombie10" type="Node2D" parent="."]
+position = Vector2(1050, 3260)
+script = ExtResource("1_ldef")
+def_type = "zombie"
+def_kind = "run"
+
+[node name="RedLamp9" type="Node2D" parent="."]
+position = Vector2(1185, 3220)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="RedLamp10" type="Node2D" parent="."]
+position = Vector2(1650, 3560)
+script = ExtResource("1_ldef")
+def_type = "light_red"
+
+[node name="Blood7" type="Node2D" parent="."]
+position = Vector2(1350, 3480)
+script = ExtResource("1_ldef")
+def_type = "blood"
+big = true

@@ -1,0 +1,168 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mm"]
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="2_mb"]
+
+[node name="MainMenu" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_mm")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleBlock" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -620.0
+offset_top = 60.0
+offset_right = 620.0
+grow_horizontal = 2
+grow_vertical = 1
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="OverLabel" type="Label" parent="Root/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "— СЕВЕРНЫЙ РЕГИОН · 2029 · ПОСЛЕ ЭМИ-УДАРА —"
+horizontal_alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Root/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "СЕВЕРНЫЙ АНКЛАВ"
+horizontal_alignment = 1
+
+[node name="SubLabel" type="Label" parent="Root/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "сюжетная кампания · вид сверху · тактика выживания"
+horizontal_alignment = 1
+
+[node name="TitleDivider" type="ColorRect" parent="Root/TitleBlock"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(280, 2)
+size_flags_horizontal = 4
+color = Color(0.85, 0.65, 0.28, 1)
+
+[node name="Buttons" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -315.0
+offset_top = -30.0
+offset_right = 315.0
+grow_horizontal = 2
+grow_vertical = 1
+theme_override_constants/separation = 12
+
+[node name="PlayBtn" type="Button" parent="Root/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 78)
+layout_mode = 2
+text = "ИГРАТЬ"
+script = ExtResource("2_mb")
+icon_name = "map"
+accent = true
+font_size = 23
+
+[node name="MilBtn" type="Button" parent="Root/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 58)
+layout_mode = 2
+text = "ВОЕННЫЙ КОНФЛИКТ САК–ФОА — ЗАПЕЧАТАНО"
+script = ExtResource("2_mb")
+icon_name = "shield"
+font_size = 15
+
+[node name="SetBtn" type="Button" parent="Root/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 58)
+layout_mode = 2
+text = "НАСТРОЙКИ"
+script = ExtResource("2_mb")
+icon_name = "gear"
+font_size = 16
+
+[node name="HelpBtn" type="Button" parent="Root/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 58)
+layout_mode = 2
+text = "КАК ИГРАТЬ"
+script = ExtResource("2_mb")
+icon_name = "question"
+font_size = 16
+
+[node name="QuitBtn" type="Button" parent="Root/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 54)
+layout_mode = 2
+text = "ВЫХОД"
+script = ExtResource("2_mb")
+icon_name = "door"
+font_size = 15
+
+[node name="LorePanel" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = -146.0
+offset_right = 484.0
+offset_bottom = -14.0
+grow_horizontal = 1
+grow_vertical = 0
+
+[node name="LoreLabel" type="Label" parent="Root/LorePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(440, 0)
+text = "ЭМИ-удар погрузил регион во тьму. Лаборатория «Заря» выпустила штамм, превращающий людей в мёртвых. Вы — единственный носитель нулевого штамма. Выберитесь из бункера и узнайте, что стало с поверхностью."
+autowrap_mode = 3
+vertical_alignment = 1
+
+[node name="ChipPanel" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -380.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 72.0
+grow_horizontal = 0
+
+[node name="ChipLabel" type="Label" parent="Root/ChipPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ВЫЖИВШИЙ"
+
+[node name="VersionLabel" type="Label" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -640.0
+offset_top = -26.0
+offset_right = -12.0
+offset_bottom = -6.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "сборка 2.1 «Сцены» · все экраны и локации — сцены · сохранение в user://anklav_rts.cfg"
+horizontal_alignment = 2

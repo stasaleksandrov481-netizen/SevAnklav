@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/props/fence.gd" id="1_fen"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prop_fence.png" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="shape_fence"]
+size = Vector2(215, 46)
+
+[node name="Fence" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_fen")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(0, -10)
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("2_tex")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -6)
+shape = SubResource("shape_fence")
