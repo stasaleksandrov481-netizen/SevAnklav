@@ -52,7 +52,14 @@ godot --headless --path . --audio-driver Dummy --max-fps 60 tests/v9_visual.tscn
 
 ## GitHub и применение
 
-Доступ на запись через подключение GitHub вернул `403 Resource not accessible by integration`; обычный Git push также не имеет учётных данных. Поэтому удалённая ветка и PR не созданы. Локальный коммит и bundle сохраняют результат, основанный именно на актуальном репозитории.
+Изменения опубликованы в ветке `visual/bunker-unified-v9` репозитория `stasaleksandrov481-netizen/SevAnklav`. Для проверки актуальной версии:
+
+```sh
+git fetch origin
+git switch visual/bunker-unified-v9
+```
+
+Откройте проект в редакторе Godot и дождитесь импорта новых ресурсов. После проверки ветку можно объединить с `main` через pull request.
 
 Для импорта bundle в существующий клон:
 
