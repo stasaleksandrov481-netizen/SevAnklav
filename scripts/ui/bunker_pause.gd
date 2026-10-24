@@ -1,4 +1,5 @@
 extends "res://scripts/ui/viewport_control.gd"
+const V=preload("res://scripts/ui/visual_theme.gd")
 var b
 func _ready() -> void:
     super._ready()
@@ -13,7 +14,7 @@ func _ready() -> void:
     root.add_child(ZUI.label("ПАУЗА",40,ZUI.TEXT))
     root.add_child(ZUI.label("Контрольная точка сохранена",14,ZUI.MUTED))
     _button(root,"ПРОДОЛЖИТЬ",func(): queue_free())
-    var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.024,0.043,0.055),Color(0.18,0.32,0.39),18));root.add_child(card)
+    var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",V.panel(Color(0.024,0.043,0.055),Color(0.18,0.32,0.39),18));root.add_child(card)
     var options:=VBoxContainer.new();options.add_theme_constant_override("separation",12);card.add_child(options)
     options.add_child(ZUI.label("ЗВУК И ИЗОБРАЖЕНИЕ",16,ZUI.ICE))
     _slider(options,"Музыка",G.music_vol,0,1,func(v): G.set_music_vol(v))
@@ -22,7 +23,7 @@ func _ready() -> void:
     _slider(options,"Яркость",float(prefs.get("brightness",1.0)),0.75,1.3,func(v):
         var visual: Dictionary=G.zsave.get("bunker_visual",{});visual["brightness"]=v;G.zsave["bunker_visual"]=visual)
     var full:=CheckButton.new();full.text="Полный экран";full.button_pressed=G.fullscreen;full.toggled.connect(func(on): G.set_fullscreen(on));options.add_child(full)
-    var controls:=PanelContainer.new();controls.add_theme_stylebox_override("panel",ZUI.panel_style(Color(0.018,0.032,0.041),Color(0.14,0.25,0.30),18));root.add_child(controls)
+    var controls:=PanelContainer.new();controls.add_theme_stylebox_override("panel",V.panel(Color(0.018,0.032,0.041),Color(0.14,0.25,0.30),18));root.add_child(controls)
     var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",32);grid.add_theme_constant_override("v_separation",9);controls.add_child(grid)
     for entry in [["WASD / ЛЕВЫЙ СТИК","Движение"],["МЫШЬ / ПРАВЫЙ СТИК","Прицеливание"],["E / ДЕЙСТВИЕ","Взаимодействие"],["R","Перезарядка"],["F","Фонарь"],["ESC","Продолжить"]]:
         grid.add_child(ZUI.label(entry[0],12,ZUI.ICE));grid.add_child(ZUI.label(entry[1],14,ZUI.TEXT))
@@ -30,8 +31,8 @@ func _ready() -> void:
     modulate.a=0;create_tween().tween_property(self,"modulate:a",1.0,0.18)
 func _button(root: VBoxContainer,text: String,callback: Callable) -> void:
     var button:=Button.new();button.text=text;button.custom_minimum_size.y=54
-    button.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.04,0.08,0.10),Color(0.28,0.47,0.52),14))
-    button.add_theme_stylebox_override("hover",ZUI.panel_style(Color(0.08,0.15,0.18),Color(0.52,0.72,0.73),14));button.pressed.connect(callback);root.add_child(button)
+    button.add_theme_stylebox_override("normal",V.panel(Color(0.04,0.08,0.10),Color(0.28,0.47,0.52),14))
+    button.add_theme_stylebox_override("hover",V.panel(Color(0.08,0.15,0.18),Color(0.52,0.72,0.73),14));button.pressed.connect(callback);root.add_child(button)
 func _slider(root: VBoxContainer,title: String,value: float,lo: float,hi: float,callback: Callable) -> void:
     var label:=ZUI.label(title+"  %d%%"%roundi(value*100),14,ZUI.MUTED);root.add_child(label)
     var slider:=HSlider.new();slider.min_value=lo;slider.max_value=hi;slider.step=0.01;slider.value=value;slider.custom_minimum_size.y=26;root.add_child(slider)

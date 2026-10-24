@@ -1,5 +1,7 @@
 extends Button
+const V=preload("res://scripts/ui/visual_theme.gd")
 var b
+var compact9:=false
 var place:="bag"
 var index:=0
 var item:=""
@@ -9,7 +11,7 @@ var seen_revision:=-1
 var was_dragged:=false
 func _ready() -> void:
     focus_mode=Control.FOCUS_NONE
-    var normal:=ZUI.panel_style(Color(0.025,0.042,0.052,0.82),Color(0.17,0.28,0.33,0.65),8)
+    var normal:=V.panel(Color(0.045,0.065,0.080,0.68),Color(0.25,0.38,0.45,0.18),5)
     normal.set_corner_radius_all(3)
     add_theme_stylebox_override("normal",normal)
     var hot:=normal.duplicate();hot.border_color=Color(0.45,0.66,0.73);hot.bg_color=Color(0.045,0.08,0.10,0.9)
@@ -35,22 +37,27 @@ func _activate() -> void:
     if was_dragged or item=="": return
     if place=="hand": b.loadout7.put_away(index)
     elif place=="quick": b._quick_use_item(item)
-    else: b.loadout7.equip(item)
+    else:
+        if G.ZITEMS.has(item):
+            b._med_sel_item=item
+            if b.loadout7.hands().has(""): b.loadout7.equip(item)
+            else: b._inventory_changed7()
+        else: b.loadout7.equip(item)
 func _draw() -> void:
     if selected: draw_rect(Rect2(Vector2(2,2),size-Vector2(4,4)),Color(0.48,0.70,0.78,0.7),false,1)
-    var heading: String=("ЛЕВАЯ" if index==0 else "ПРАВАЯ") if place=="hand" else (str(index+1) if place=="quick" else "")
+    var heading: String=(("Л" if compact9 else "ЛЕВАЯ РУКА") if index==0 else ("П" if compact9 else "ПРАВАЯ РУКА")) if place=="hand" else (str(index+1) if place=="quick" else "")
     draw_string(ThemeDB.fallback_font,Vector2(7,15),heading,HORIZONTAL_ALIGNMENT_LEFT,size.x-14,10,Color(0.40,0.57,0.64))
     if item!="":
         var tex: Texture2D=b.loadout7.icon_of(item)
         if tex!=null:
-            var extent:=minf(size.x-22,size.y-40)
+            var extent:=minf(size.x-18,size.y-(28 if compact9 else 39))
             var picture:=tex.get_size()*minf(extent/tex.get_width(),extent/tex.get_height())
-            draw_texture_rect(tex,Rect2(Vector2((size.x-picture.x)*0.5,20+(extent-picture.y)*0.5),picture),false,Color(0.88,0.94,0.95))
+            draw_texture_rect(tex,Rect2(Vector2((size.x-picture.x)*0.5,(14 if compact9 else 22)+(extent-picture.y)*0.5),picture),false,Color(0.88,0.94,0.95))
         var label: String=b.loadout7.name_of(item)
-        if size.x<90:
+        if size.x<110:
             if item.begins_with("weapon:"): label={"pistol":"ПМ","rifle":"АК-74М","smg":"ПП","shotgun":"САЙГА","knife":"НОЖ"}.get(item.trim_prefix("weapon:"),label)
             elif label.length()>10: label=label.left(9)+"…"
-        draw_string(ThemeDB.fallback_font,Vector2(4,size.y-7),label,HORIZONTAL_ALIGNMENT_CENTER,size.x-8,10,Color(0.64,0.75,0.80))
+        draw_string(ThemeDB.fallback_font,Vector2(4,size.y-5),label if not compact9 else "",HORIZONTAL_ALIGNMENT_CENTER,size.x-8,12 if not compact9 else 10,Color(0.64,0.75,0.80))
         if count>1: draw_string(ThemeDB.fallback_font,Vector2(size.x-31,17),"×"+str(count),HORIZONTAL_ALIGNMENT_RIGHT,25,11,Color(0.74,0.86,0.88))
         if b.loadout7.two_handed(item): draw_string(ThemeDB.fallback_font,Vector2(7,29),"2 РУКИ",HORIZONTAL_ALIGNMENT_LEFT,size.x-14,9,Color(0.59,0.71,0.77))
     else:

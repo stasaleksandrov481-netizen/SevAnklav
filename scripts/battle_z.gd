@@ -4587,7 +4587,7 @@ class HudDraw extends Control:
                                                                                                                                                                                                 draw_string(ThemeDB.fallback_font, Vector2((vp.x - w) * 0.5 + 10, ty + 19), t["text"], HORIZONTAL_ALIGNMENT_CENTER, w, 19, col2)
                                                                                                                                                                                                 ty += 38.0
                                                                                                                                 # ---------- FIX6: проверка магазина — панель над полосой слотов ----------
-                                                                                                                                if float(btl._ammo_check_t) > 0.0 or float(btl._ammo_result_t) > 0.0:
+                                                                                                                                if not btl.get_meta("bunker_v9",false) and (float(btl._ammo_check_t) > 0.0 or float(btl._ammo_result_t) > 0.0):
                                                                                                                                                                                                 var pw := 320.0
                                                                                                                                                                                                 var px := vp.x * 0.5 - pw * 0.5
                                                                                                                                                                                                 var py := vp.y - 272.0
@@ -4725,13 +4725,14 @@ class HudDraw extends Control:
                                                                                                                                         return
                                                                                                                                 var edge := c + dir * k
                                                                                                                                 var pulse := 0.78 + 0.22 * sin(Time.get_ticks_msec() * 0.0045)
-                                                                                                                                var col := Color(0.52, 0.9, 0.7, 0.9 * pulse)
+                                                                                                                                var col := Color(0.60,0.76,0.82,0.75) if btl.get_meta("bunker_v9",false) else Color(0.52, 0.9, 0.7, 0.9 * pulse)
                                                                                                                                 var pts := PackedVector2Array([Vector2(15, 0), Vector2(-9, 9), Vector2(-4, 0), Vector2(-9, -9)])
                                                                                                                                 var xf := Transform2D(dir.angle(), edge)
                                                                                                                                 var tri := PackedVector2Array()
                                                                                                                                 for p in pts:
                                                                                                                                         tri.append(xf * p)
                                                                                                                                 draw_colored_polygon(tri, col)
+                                                                                                                                if btl.get_meta("bunker_v9",false): return
                                                                                                                                 draw_arc(edge, 21.0, 0.0, TAU, 26, Color(col.r, col.g, col.b, 0.30), 1.4)
                                                                                                                                 draw_arc(edge, 26.0, dir.angle() - 0.5, dir.angle() + 0.5, 12, Color(col.r, col.g, col.b, 0.55), 2.0)
 

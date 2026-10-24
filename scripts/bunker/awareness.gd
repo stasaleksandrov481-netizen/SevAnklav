@@ -3,7 +3,7 @@ const Layout = preload("res://scripts/bunker/bunker_layout.gd")
 var b
 var timer := 0.0
 var explored: Array[Vector2] = []
-var dim: Array[float] = [0.0,0.5,0.5,0.5,0.5,0.5]
+var dim: Array[float] = [0.0,0.30,0.30,0.30,0.30,0.30]
 var reachable := {0:true}
 var veil: Polygon2D
 func _ready() -> void:
@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
     var pos: Vector2 = b.player["spr"].position
     veil.material.set_shader_parameter("observer",pos)
     veil.material.set_shader_parameter("facing",Vector2.from_angle(b.player["aim"]))
-    for i in range(dim.size()): dim[i]=move_toward(dim[i],0.0 if reachable.has(i) else 0.48,delta*0.8)
+    for i in range(dim.size()): dim[i]=move_toward(dim[i],0.0 if reachable.has(i) else 0.30,delta*0.8)
     timer-=delta
     if timer<=0:
         timer=0.10

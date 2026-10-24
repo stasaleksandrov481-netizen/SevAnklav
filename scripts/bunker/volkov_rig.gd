@@ -1,6 +1,6 @@
 extends Node2D
 # Jointed photographic atlas; no direction bins or rotation of a whole character image.
-const ATLAS=preload("res://assets/bunker/v6/volkov_parts.png")
+const ATLAS=preload("res://assets/bunker/v9/volkov_parts.png")
 var b=null
 var heading:=PI/2
 var torso_heading:=PI/2
@@ -13,6 +13,7 @@ var recovery8:=1.0
 var emergence8:=false
 var joints8: Dictionary={}
 var cutscene_clock8:=0.0
+var boots9: Dictionary={}
 func _ready() -> void:
     var regions: Dictionary=preload("res://scripts/bunker/v6_assets.gd").REGIONS
     for key in ["leg_l","leg_r","arm_l","arm_r","torso","head"]:
@@ -31,11 +32,18 @@ func _ready() -> void:
             var rect:=full.region
             var half: float=rect.size.y*0.5
             tex.region=Rect2(rect.position+Vector2(0,half if segment=="upper" else 0),Vector2(rect.size.x,half))
+            if limb.begins_with("leg") and segment=="lower":
+                # Calf fabric and boot are separate. A bent knee must never turn a toe backwards.
+                tex.region=Rect2(rect.position+Vector2(0,rect.size.y*.22),Vector2(rect.size.x,rect.size.y*.35))
             var sprite:=Sprite2D.new();sprite.texture=tex;sprite.z_index=1;sprite.hide();add_child(sprite)
             var length: float=(14.0 if segment=="upper" else 15.0) if limb.begins_with("arm") else (14.0 if segment=="upper" else 16.0)
             var width: float=9.0 if limb.begins_with("arm") else 11.0
             sprite.scale=Vector2(width/tex.get_width(),length/tex.get_height())
             joints8[limb+"_"+segment]=sprite
+        if limb.begins_with("leg"):
+            var boot_tex:=AtlasTexture.new();boot_tex.atlas=ATLAS
+            boot_tex.region=Rect2(full.region.position,Vector2(full.region.size.x,full.region.size.y*.24))
+            var boot:=Sprite2D.new();boot.texture=boot_tex;boot.scale=Vector2(10,10)/boot_tex.get_size();boot.z_index=1;add_child(boot);boots9[limb]=boot
     modulate=Color.WHITE
     initialized=true
     pose(PI/2,0,Vector2.ZERO,false,0.1)
@@ -48,13 +56,17 @@ func pose(look: float, walk: float, velocity: Vector2, holding: bool, delta: flo
     var f:=Vector2.from_angle(torso_heading)
     var side:=f.rotated(PI/2)
     var step:=sin(gait)*speed
+    # The same fixed-length articulated limbs are used in the capsule and gameplay.
+    # Switching to locomotion never swaps a long cutscene sprite for a different body.
+    for key in ["arm_l","arm_r","leg_l","leg_r"]: parts[key].hide()
     for sign in [-1,1]:
-        var leg: Sprite2D=parts["leg_l" if sign<0 else "leg_r"]
-        leg.position=-f*9+side*sign*9+f*(step*sign*4)
-        leg.rotation=torso_heading-PI/2+sign*sin(gait)*speed*0.10
-        var arm: Sprite2D=parts["arm_l" if sign<0 else "arm_r"]
-        arm.position=side*sign*(11 if armed else 17)+f*(8 if armed else 1)+f*step*sign*(0.4 if armed else 2.0)
-        arm.rotation=torso_heading+PI/2-sign*(0.55 if armed else 0.10+step*0.08)
+        var suffix: String="_l" if sign<0 else "_r"
+        var hip: Vector2=-f*5+side*sign*7
+        var foot: Vector2=-f*(23-step*sign*5)+side*sign*8
+        _limb8("leg"+suffix,hip,foot,hip+side*sign*6-f*11,14,16)
+        var shoulder: Vector2=side*sign*15
+        var hand: Vector2=side*sign*(11 if armed else 17)+f*(26 if armed else 16+step*sign*3)
+        _limb8("arm"+suffix,shoulder,hand,shoulder+side*sign*6+f*9,14,15)
     var torso: Sprite2D=parts.torso
     torso.rotation=torso_heading+PI/2
     torso.position=f*sin(gait*2)*speed*0.8+side*sin(gait)*speed*0.6
@@ -114,7 +126,8 @@ func exit_pose8(stage: int,progress: float) -> void:
 func finish_exit8() -> void:
     emergence8=false;recovery8=1.0
     for joint in joints8.values(): joint.hide()
-    for part in parts.values(): part.show()
+    parts.torso.show();parts.head.show()
+    heading=PI/2;torso_heading=PI/2
     pose(PI/2,0,Vector2.ZERO,false,0.2)
 
 func _limb8(key: String,origin: Vector2,target: Vector2,bend_hint: Vector2,upper: float,lower: float) -> void:
@@ -128,3 +141,6 @@ func _limb8(key: String,origin: Vector2,target: Vector2,bend_hint: Vector2,upper
     var joint:=origin+direction*along+direction.orthogonal()*height*sign
     _segment8(key+"_upper",origin,joint,9)
     _segment8(key+"_lower",joint,reach,9)
+    if key.begins_with("leg") and boots9.has(key):
+        boots9[key].position=reach
+        boots9[key].rotation=parts.torso.rotation if emergence8 else torso_heading+PI/2

@@ -22,7 +22,7 @@ var current_screen: Node = null
 var battle_node = null
 var loading_layer: CanvasLayer = null
 
-const GAME_VER := "СЕВЕРНЫЙ АНКЛАВ · ЗАРЯ 8.0"   # метка сборки — видна в главном меню (правый нижний угол)
+const GAME_VER := "СЕВЕРНЫЙ АНКЛАВ · ЗАРЯ 9.0"   # метка сборки — видна в главном меню (правый нижний угол)
 
 func _loading_text(kind: String = "") -> String:
 		var lines := [
