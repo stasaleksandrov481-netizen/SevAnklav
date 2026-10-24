@@ -29,8 +29,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
     elapsed+=delta
     if phrase==null or phrases.is_empty(): return
-    phrase.text=phrases[int(elapsed/1.05)%phrases.size()]
-    phrase.modulate.a=0.6+0.4*smoothstep(0,0.2,fposmod(elapsed,1.05))
+    phrase.text=phrases[int(elapsed/7.0)%phrases.size()]
+    phrase.modulate.a=0.6+0.4*smoothstep(0,0.2,fposmod(elapsed,7.0))
     queue_redraw()
 func _draw() -> void:
     if strip==null: return

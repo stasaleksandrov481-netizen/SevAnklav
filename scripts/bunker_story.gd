@@ -75,9 +75,9 @@ func _room_rect_at(p: Vector2) -> Rect2:
 
 func _build_bunker() -> void:
     Layout4.build(self)
-    for decoration in [["z_oxygen_rack",Vector2(165,530)],["z_sink",Vector2(605,210)],["z_first_aid",Vector2(830,300)],["z_camera_unit",Vector2(840,690)],["z_sample_rack",Vector2(1575,1190)],["z_sample_rack",Vector2(1550,1650)],["z_sink",Vector2(2225,1170)],["z_oxygen_rack",Vector2(1390,1640)],["z_camera_unit",Vector2(2265,1350)],["z_tool_tray",Vector2(700,1770)],["z_cable_spool",Vector2(180,1510)],["z_cable_spool",Vector2(940,1640)],["z_first_aid",Vector2(1040,1340)],["z_camera_unit",Vector2(1190,2500)],["z_oxygen_rack",Vector2(175,2430)],["z_cable_spool",Vector2(2610,2680)]]:
+    for decoration in [["z_oxygen_rack",Vector2(165,530)],["z_sink",Vector2(605,210)],["z_first_aid",Vector2(845,300)],["z_camera_unit",Vector2(840,690)],["z_sample_rack",Vector2(1575,1190)],["z_sample_rack",Vector2(1550,1650)],["z_oxygen_rack",Vector2(1390,1640)],["z_camera_unit",Vector2(2265,1350)],["z_tool_tray",Vector2(700,1770)],["z_cable_spool",Vector2(180,1510)],["z_cable_spool",Vector2(940,1640)],["z_first_aid",Vector2(1048,1340)],["z_camera_unit",Vector2(1190,2500)],["z_oxygen_rack",Vector2(175,2430)],["z_cable_spool",Vector2(2610,2680)]]:
         _prop(decoration[0],decoration[1],14.0,"equipment_detail",1.42,false)
-    for detail in [["z_cabinet",Vector2(820,210),23.0,"wall_storage"],["z_server",Vector2(1410,930),24.0,"wall_server"],["z_sink",Vector2(1910,1690),15.0,"equipment_detail"],["z_tool_tray",Vector2(620,1760),12.0,"equipment_detail"],["z_camera_unit",Vector2(1180,430),10.0,"equipment_detail"],["z_first_aid",Vector2(1854,2400),12.0,"equipment_detail"],["z_oxygen_rack",Vector2(290,2300),17.0,"equipment_detail"]]:
+    for detail in [["z_cabinet",Vector2(820,210),23.0,"wall_storage"],["z_server",Vector2(1410,930),24.0,"wall_server"],["z_sink",Vector2(1910,1690),15.0,"equipment_detail"],["z_tool_tray",Vector2(620,1760),12.0,"equipment_detail"],["z_camera_unit",Vector2(1180,430),10.0,"equipment_detail"],["z_first_aid",Vector2(1820,2400),12.0,"equipment_detail"],["z_oxygen_rack",Vector2(290,2300),17.0,"equipment_detail"]]:
         _prop(detail[0],detail[1],detail[2],detail[3],1.0,false)
     zp = {"hypo":0.0,"seen":{},"gas_fixed":true,"gen_on":false,"iso_active":false,"iso_off":false,"escape_on":false}
     zp["flash_off"]=bool(G.zsave.get("flash_off7",false))
@@ -110,6 +110,8 @@ func _ready() -> void:
     add_child(floor_node)
     floor_node.configure(self)
     environment4 = floor_node
+    var maintenance:=preload("res://scripts/bunker/maintenance_detail.gd").new()
+    maintenance.b=self;maintenance.z_index=1;add_child(maintenance)
     previous_floor.queue_free()
     canvas_mod.color = Color(0.25,0.30,0.35)
     camera.limit_left = 0
@@ -117,15 +119,16 @@ func _ready() -> void:
     camera.limit_right = int(map_size.x)
     camera.limit_bottom = int(map_size.y)
     q_lock = OS.get_cmdline_user_args().has("--quality-lock")
-    player["light"].texture = preload("res://assets/bunker/v4/flashlight.svg")
-    player["light"].texture_scale = 1.30
+    player["light"].texture = preload("res://assets/bunker/v8/flashlight.svg")
+    player["light"].texture_scale = 0.92
     player["light"].energy = 0.70
-    player["light"].color = Color(0.65,0.76,0.79)
+    player["light"].color = Color(1.0,0.93,0.80)
     player["light"].enabled = false
     player["halo"].modulate.a=0.0
-    player["light"].offset = Vector2(256*1.30,0)
+    player["light"].offset = Vector2(110,0)
     player["light"].shadow_enabled = true
-    player["light"].shadow_filter = Light2D.SHADOW_FILTER_NONE
+    player["light"].shadow_filter = Light2D.SHADOW_FILTER_PCF13
+    player["light"].shadow_filter_smooth = 4.0
     player["light"].range_z_min = -20
     player["light"].range_z_max = 30
     awareness5 = preload("res://scripts/bunker/awareness.gd").new()
@@ -169,12 +172,43 @@ func _ready() -> void:
     tw.tween_property(shutter,"color:a",0.0,2.8)
     await tw.finished
     G.play_sfx("z_hiss",-13.0)
-    player["spr"].visible = true
-    player["spr"].modulate.a = 0.0
-    var emerge := create_tween().set_parallel(true)
-    emerge.tween_property(player["spr"],"position",_collide_circle(Vector2(460,490),15),1.9).set_trans(Tween.TRANS_SINE)
-    emerge.tween_property(player["spr"],"modulate:a",1.0,1.3)
-    await emerge.finished
+    var lid:=preload("res://scripts/bunker/capsule_lid.gd").new()
+    lid.position=Vector2(395,345);lid.z_index=14;prop_layer.add_child(lid)
+    player["spr"].position=Vector2(395,425)
+    player["spr"].visible=true;player["spr"].modulate.a=1.0
+    player_rig6.visible=true;player_rig6.exit_pose8(0,0)
+    await _exit_phase8(0,0.85)
+    G.play_sfx("z_relay",-17.0)
+    var opening:=lid.create_tween()
+    opening.tween_interval(0.35)
+    opening.tween_property(lid,"rotation",-1.08,1.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+    opening.parallel().tween_property(lid,"position:x",346.0,1.15)
+    await _exit_phase8(1,1.55)
+    await _exit_phase8(2,1.2)
+    await get_tree().create_timer(0.28).timeout
+    await _exit_phase8(3,0.95)
+    G.play_sfx("z_footstep",-18.0)
+    await _exit_phase8(4,0.95)
+    G.play_sfx("z_footstep",-17.0)
+    var stand_origin: Vector2=player["spr"].position
+    var stand:=create_tween()
+    stand.tween_method(func(v: float):
+        player["spr"].position=stand_origin+Vector2(40,42)*smoothstep(0,1,v)
+        player_rig6.exit_pose8(5,v),0.0,1.0,1.15)
+    await stand.finished
+    player_rig6.finish_exit8()
+    # Two discrete weight-bearing steps, with a planted-foot pause between them.
+    for step in range(2):
+        var step_start: Vector2=player["spr"].position
+        var walking:=create_tween()
+        walking.tween_method(func(v: float):
+            var lift: float=sin(v*PI)
+            player["spr"].position=step_start+Vector2(15,19)*smoothstep(0.05,0.88,v)
+            player_rig6.pose(PI/2,float(step)*PI+v*PI,Vector2(35,42),false,0.1)
+            player_rig6.parts.torso.position.y-=lift*1.8,0.0,1.0,0.55)
+        await walking.finished
+        G.play_sfx("z_footstep",-18.0)
+        await get_tree().create_timer(0.14).timeout
     in_capsule = false
     starting = false
     paused = false
@@ -243,6 +277,7 @@ func _do_interact(info: Dictionary) -> void:
     super._do_interact(info)
 
 func _record(id: String, title: String, body: String) -> void:
+    if records.has(id): records["terminal_seen:"+title]=true
     if not records.has(id):
         records[id] = true
         notes.append({"title":title,"body":body})
@@ -250,11 +285,14 @@ func _record(id: String, title: String, body: String) -> void:
     _save_checkpoint()
 
 func _story_action(action: String) -> void:
+    var legacy_key: String={"cryo_terminal":"terminal","iso_panel":"isolation_note"}.get(action,"interaction:"+action)
+    var first_visit: bool=not records.has("interaction:"+action) and not records.has(legacy_key)
+    records["interaction:"+action]=true
     match action:
         "cryo_terminal":
             _record("terminal","V-17 / ПЕРСОНАЛЬНОЕ ДОСЬЕ","Пациент: А. Волков.\nЭксперимент №12.\nВосстановление сознания: подтверждено.\nПоследующая стабилизация: прервана.\n\nАварийный доступ: служебная дверь медицинского блока.")
             _complete_objective("terminal")
-            _log("Волков… Это я? Что со мной сделали?",ZUI.TEXT,"ВОЛКОВ")
+            if first_visit: _log("Волков… Это я? Что со мной сделали?",ZUI.TEXT,"ВОЛКОВ")
             if not records.has("symptom"):
                 records["symptom"] = true
                 _hit_vignette(0.12)
@@ -303,7 +341,7 @@ func _story_action(action: String) -> void:
             zp["iso_off"] = true
             _complete_objective("iso")
             _record("isolation_note","КАРАНТИН / ЛОКАЛЬНЫЙ ДОСТУП","Карантинный протокол активен. Подтверждение безопасности отсутствует.\nБлокировка введена автоматически после потери контроля над частью комплекса.\nАварийное снятие блокировки перехода: выполнено.")
-            _log("Если всё было под контролем… почему они заперли здесь своих?",ZUI.TEXT,"ВОЛКОВ")
+            if first_visit: _log("Если всё было под контролем… почему они заперли здесь своих?",ZUI.TEXT,"ВОЛКОВ")
         "obs_terminal":
             _record("archive","АРХИВ НАБЛЮДЕНИЯ","Датчики зафиксировали нарушение изоляции. Сотрудники пытались закрыть переходы вручную.\n\nПротокол «Север»: распоряжение руководства в момент аварии. Назначение: [повреждено].\n\nЛичный фрагмент: «Алексей, ты обещал вернуться». Автор не определён.\n\nМаршрут аварийного выхода: грузовой шлюз.")
             _complete_objective("frost")
@@ -501,7 +539,7 @@ func _prop(tex: String, pos: Vector2, radius: float, kind := "", scl := 1.42, so
     var replacement: String=""
     var width:=150.0
     if kind=="gear_table": replacement="security_rack";width=140.0
-    elif kind=="cryo_terminal": replacement="medical_station";width=164.0
+    elif kind=="cryo_terminal": replacement=""
     elif kind=="labdesk": replacement="lab_bench";width=178.0
     elif kind=="medtable" and pos.y>2200:
         replacement="medical_station";width=138.0
@@ -518,6 +556,10 @@ func _prop(tex: String, pos: Vector2, radius: float, kind := "", scl := 1.42, so
         for c in spr.get_children(): c.queue_free()
         _add_shadow(spr,0.93,0.60,0.24)
     if tex in ["z_oxygen_rack","z_cable_spool"] or kind=="seat": pr["solid"]=true
+    if tex=="z_first_aid":
+        pr["spr"].z_index=15
+        pr["spr"].rotation=PI/2
+        pr["spr"].scale*=0.78
     PropGeometry7.build(pr)
     return pr
 
@@ -591,7 +633,7 @@ func _spawn_zombie(kind: String, pos: Vector2) -> void:
     z["spr"].scale = Vector2(0.27,0.27)
     z["base_scale"] = Vector2(0.27,0.27)
     var rig:=preload("res://scripts/bunker/actor_rig.gd").new()
-    rig.position=pos;rig.z_index=8
+    rig.position=pos;rig.z_index=8;rig.b=self
     rig.outfit=Color(0.65,0.69,0.66) if kind=="sci" else (Color(0.16,0.23,0.28) if kind=="cop" else Color(0.34,0.36,0.29))
     unit_layer.add_child(rig)
     z["rig5"]=rig
@@ -642,6 +684,10 @@ func _restore_checkpoint() -> bool:
         z["hp"] = float(e["hp"])
         z["alive"] = bool(e["alive"])
         z["spr"].visible = z["alive"]
+        if not z["alive"] and z.has("rig5"):
+            var dead_rig=z["rig5"]
+            dead_rig.position=pos;dead_rig.fall(Vector2.ZERO);dead_rig.fall_time=1.4;dead_rig.z_index=2
+            corpses.append({"spr":z["spr"],"kind":"zmb","searched":false,"pos":pos,"loot":z["loot"]})
     for i in range(mini(corpses.size(),data.get("searched",[]).size())):
         corpses[i]["searched"] = bool(data["searched"][i])
     for i in range(mini(props.size(),data.get("used",[]).size())):
@@ -677,11 +723,13 @@ func _restore_checkpoint() -> bool:
     return true
 
 func _open_pause() -> void:
-    _release_controls5()
-    _save_checkpoint()
-    super._open_pause()
+    if is_instance_valid(pause_win): return
+    _release_controls5();_save_checkpoint();paused=true
+    var panel:=preload("res://scripts/ui/bunker_pause.gd").new();panel.b=self
+    pause_win=panel;panel.tree_exiting.connect(_pause_closed);ui_layer.add_child(panel)
 
 func _notification(what: int) -> void:
+    if has_meta("qa8"): return
     if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
         _save_checkpoint()
     super._notification(what)
@@ -717,6 +765,7 @@ func _tick_player(delta: float) -> void:
     player_rig6.modulate.a=player["spr"].modulate.a
     player_rig6.pose(smooth_aim5,player_walk_t,player_velocity,_has_weapon7() or loadout7.hands().has("flashlight"),delta)
     # Texture starts at its left edge; its apex is now exactly the lamp origin.
+    player["halo"].hide()
     player["light"].position = _flash_origin7()
     player["light"].enabled = _obj_done("gear") and player["alive"] and loadout7.hands().has("flashlight") and not bool(zp.get("flash_off",false))
     player["light"].rotation = smooth_aim5
@@ -728,6 +777,7 @@ func _tick_player(delta: float) -> void:
     aim_rig4.queue_redraw()
 
 class WeaponRig extends Node2D:
+    const PM=preload("res://assets/bunker/v8/pm_top.svg")
     var b = null
     func _draw() -> void:
         if b == null: return
@@ -742,11 +792,14 @@ class WeaponRig extends Node2D:
             draw_rect(Rect2(17-kick,3,6,7),Color(0.055,0.08,0.09))
             return
         draw_circle(Vector2(13-kick,3),3.5,Color(0.55,0.43,0.35))
-        draw_rect(Rect2(12-kick,-2,17,5),Color(0.08,0.10,0.12))
-        draw_line(Vector2(14-kick,-2),Vector2(27-kick,-2),Color(0.52,0.57,0.59),1)
-        draw_rect(Rect2(15-kick,2,5,7),Color(0.035,0.04,0.045))
+        draw_texture_rect(PM,Rect2(8-kick,-5,25,11),false)
+        # Ejection port and rearward slide movement remain readable at game scale.
+        if kick>0.2:
+            draw_line(Vector2(15-kick,-4),Vector2(28-kick,-4),Color(0.60,0.69,0.71),0.8,true)
 
 func _art_texture4(name: String) -> Texture2D:
+    if name in ["sink","terminal","security","first_aid"]:
+        return load("res://assets/bunker/v8/"+("terminal" if name=="security" else name)+".svg")
     for dir in ["res://assets/bunker/v6/","res://assets/bunker/v5/","res://assets/bunker/v4/","res://assets/bunker/"]:
         for ext in [".png",".svg"]:
             if ResourceLoader.exists(dir+name+ext): return load(dir+name+ext)
@@ -822,7 +875,7 @@ func _tick_zombies(delta: float) -> void:
         var z: Dictionary=zombies[i]
         if not z.has("rig5"): continue
         var rig: Node2D=z["rig5"]
-        if not z["alive"]: rig.visible=false;continue
+        if not z["alive"]: continue
         var velocity: Vector2=(z["spr"].position-positions[i])/maxf(delta,0.001)
         var heading: float=velocity.angle() if velocity.length()>1 else rig.heading
         rig.position=z["spr"].position
@@ -834,44 +887,42 @@ func _cull_offscreen() -> void:
     super._cull_offscreen()
     # Never resurrect a door leaf already moved into its wall pocket.
     for id in doors:
-        if doors[id]["opened"]: doors[id]["pr"]["spr"].visible=false
+        if doors[id]["opened"] or doors[id].get("opening",false): doors[id]["pr"]["spr"].visible=false
     for z in zombies:
-        if z["alive"] and z.has("rig5"): z["spr"].visible=false
+        if z.has("rig5"): z["spr"].visible=false
 
 func _open_door(id: String) -> void:
     var door: Dictionary=doors.get(id,{})
     if door.is_empty() or door["opened"] or door.get("opening",false): return
-    if restoring5:
-        door["opened"]=true
-        walls.erase(door["wall"])
-        door["pr"]["spr"].hide()
-        if environment4!=null: environment4.redraw_all()
-        return
-    door["opening"]=true
-    G.play_sfx("z_door",-12.0)
     var original: Sprite2D=door["pr"]["spr"]
-    original.visible=false
-    var leaves: Array=[]
-    for side in [-1,1]:
-        var leaf:=Sprite2D.new()
-        leaf.texture=original.texture
-        leaf.region_enabled=true
-        var h:=original.texture.get_height()*0.5
-        leaf.region_rect=Rect2(0,0 if side<0 else h,original.texture.get_width(),h)
-        leaf.rotation=original.rotation;leaf.scale=original.scale
-        var axis:=Vector2.DOWN.rotated(original.rotation)
-        leaf.position=door["pr"]["pos"]+axis*side*h*original.scale.y*0.5
-        leaf.z_index=5
-        prop_layer.add_child(leaf);leaves.append(leaf)
-        var tw:=leaf.create_tween()
-        tw.tween_interval(0.16)
-        tw.tween_property(leaf,"position",leaf.position+axis*side*h*original.scale.y,0.95).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-    await get_tree().create_timer(1.12).timeout
+    original.hide()
+    if not restoring5:
+        door["opening"]=true
+        G.play_sfx("z_door",-12.0)
+        var extent: Vector2=original.texture.get_size()*original.scale
+        var frame:=Polygon2D.new()
+        frame.polygon=PackedVector2Array([Vector2(-extent.x/2,-extent.y/2),Vector2(extent.x/2,-extent.y/2),extent/2,Vector2(-extent.x/2,extent.y/2)])
+        frame.clip_children=CanvasItem.CLIP_CHILDREN_ONLY
+        frame.position=door["pr"]["pos"];frame.rotation=original.rotation;frame.z_index=5
+        prop_layer.add_child(frame)
+        for side in [-1,1]:
+            var leaf:=Sprite2D.new();leaf.texture=original.texture;leaf.region_enabled=true
+            var half: float=original.texture.get_height()*0.5
+            leaf.region_rect=Rect2(0,0 if side<0 else half,original.texture.get_width(),half)
+            leaf.scale=original.scale;leaf.position=Vector2(0,side*extent.y*0.25);frame.add_child(leaf)
+            var tw:=leaf.create_tween();tw.tween_interval(0.18)
+            tw.tween_property(leaf,"position:y",side*extent.y*0.80,1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+        await get_tree().create_timer(1.24).timeout
+        frame.queue_free()
+    original.hide()
     door["opened"]=true;door["opening"]=false
     walls.erase(door["wall"])
-    for leaf in leaves: leaf.queue_free()
+    if wall_occluders.has(door["wall"]):
+        var occ=wall_occluders[door["wall"]]
+        if is_instance_valid(occ): occ.queue_free()
+        wall_occluders.erase(door["wall"])
     if environment4!=null: environment4.redraw_all()
-    _save_checkpoint()
+    if not restoring5: _save_checkpoint()
 
 func _open_loot_window(title: String, source: Dictionary) -> void:
     if is_instance_valid(loot_win): return
@@ -890,15 +941,22 @@ func zp_terminal_screen(title: String, accent: Color, lines: Array, on_done: Cal
     _release_controls5()
     var layer:=CanvasLayer.new();layer.layer=41;add_child(layer)
     zp_overlay_layer=layer
+    var replay: bool=records.has("terminal_seen:"+title)
+    records["terminal_seen:"+title]=true
     var terminal:=preload("res://scripts/bunker/terminal_view.gd").new(title,accent)
+    terminal.instant=replay
+    terminal.body_state=player["st"].get("body",{}).duplicate()
+    terminal.power_ready=records.has("power")
     layer.add_child(terminal)
-    terminal.modulate.a=0
-    terminal.create_tween().tween_property(terminal,"modulate:a",1.0,0.32)
+    terminal.modulate.a=1.0 if replay else 0.0
+    if not replay: terminal.create_tween().tween_property(terminal,"modulate:a",1.0,0.32)
     if status!="": terminal.set_status(status)
     var close:=Button.new();close.text="ЗАКРЫТЬ ТЕРМИНАЛ";close.custom_minimum_size=Vector2(280,56)
     close.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
     close.offset_left=-350;close.offset_right=-70;close.offset_top=-100;close.offset_bottom=-44
-    close.disabled=true;terminal.add_child(close)
+    close.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.04,0.085,0.10),Color(0.31,0.50,0.54),14))
+    close.add_theme_stylebox_override("hover",ZUI.panel_style(Color(0.08,0.15,0.18),Color(0.55,0.72,0.72),14))
+    close.disabled=false;terminal.add_child(close)
     var finish:=func():
         if close.disabled: return
         close.disabled=true
@@ -1033,7 +1091,7 @@ func _weapon_hand7() -> int:
 func _weapon_origin7() -> Vector2:
     var face:=Vector2.from_angle(player["aim"])
     var two: bool=loadout7.two_handed("weapon:"+loadout7.weapon())
-    return player["spr"].position+face*(43 if two else 26)+face.rotated(PI/2)*(0 if two else (7 if _weapon_hand7()==1 else -7))
+    return player["spr"].position+face*(43 if two else 33)+face.rotated(PI/2)*(0 if two else (7 if _weapon_hand7()==1 else -7))
 func _flash_origin7() -> Vector2:
     var face:=Vector2.from_angle(player["aim"])
     return player["spr"].position+face*29+face.rotated(PI/2)*(-11 if loadout7.hand_of("flashlight")==0 else 11)
@@ -1108,3 +1166,19 @@ func _cycle_weapon() -> void:
 func _receive_item(item: String,count: int) -> void:
     super._receive_item(item,count)
     loadout7.ensure();_inventory_changed7()
+
+func _damage_zombie(z: Dictionary, damage: float, direction: Vector2) -> void:
+    z["impact8"]=direction
+    super._damage_zombie(z,damage,direction)
+func _kill_zombie(z: Dictionary) -> void:
+    if not z["alive"]: return
+    super._kill_zombie(z)
+    z["spr"].hide()
+    if z.has("rig5"):
+        z["rig5"].z_index=2
+        z["rig5"].fall(z.get("impact8",Vector2.from_angle(z["rig5"].heading)))
+
+func _exit_phase8(stage: int,duration: float) -> void:
+    var phase:=create_tween()
+    phase.tween_method(func(v: float): player_rig6.exit_pose8(stage,v),0.0,1.0,duration)
+    await phase.finished

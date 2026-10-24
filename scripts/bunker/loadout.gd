@@ -3,6 +3,19 @@ var b
 func gear_owned() -> bool:
     return b._obj_done("gear") or G.zsave.get("bunker3",{}).get("done",[]).has("gear")
 func ensure() -> void:
+    var owned: Array=[]
+    var aliases: Dictionary={"pm":"pistol","makarov":"pistol","weapon:pistol":"pistol"}
+    for entry in G.zsave.get("weapons",[]):
+        var id: String=str(aliases.get(str(entry),str(entry)))
+        if G.ZWEAPONS.has(id) and not owned.has(id): owned.append(id)
+    var bag: Dictionary=G.zsave.get("inv",{})
+    for key in bag.keys():
+        var id: String=str(aliases.get(str(key),str(key).trim_prefix("weapon:")))
+        if G.ZWEAPONS.has(id):
+            if int(bag[key])>0 and not owned.has(id): owned.append(id)
+            bag.erase(key)
+    G.zsave["weapons"]=owned
+    G.zsave["inv"]=bag
     if not (G.zsave.get("hands7") is Array) or G.zsave["hands7"].size()!=2:
         G.zsave["hands7"]=["",""]
         if gear_owned(): defaults()
@@ -80,7 +93,7 @@ func all_items() -> Array:
     if in_bag("flashlight")>0: items.append("flashlight")
     for weapon_id in G.zsave.get("weapons",[]):
         var id: String="weapon:"+str(weapon_id)
-        if in_bag(id)>0: items.append(id)
+        if in_bag(id)>0 and not items.has(id): items.append(id)
     return items
 func slots() -> Array:
     ensure()

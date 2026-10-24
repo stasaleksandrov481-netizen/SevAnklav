@@ -22,7 +22,7 @@ var current_screen: Node = null
 var battle_node = null
 var loading_layer: CanvasLayer = null
 
-const GAME_VER := "СЕВЕРНЫЙ АНКЛАВ · ЗАРЯ 7.0"   # метка сборки — видна в главном меню (правый нижний угол)
+const GAME_VER := "СЕВЕРНЫЙ АНКЛАВ · ЗАРЯ 8.0"   # метка сборки — видна в главном меню (правый нижний угол)
 
 func _loading_text(kind: String = "") -> String:
 		var lines := [
@@ -48,7 +48,7 @@ func show_loading(message: String = "", min_time: float = 0.5) -> void:
 	var layer:=CanvasLayer.new();layer.layer=100;add_child(layer);loading_layer=layer
 	var screen:=preload("res://scripts/ui/loading_screen.gd").new()
 	screen.message=message;screen.entering=entering;layer.add_child(screen)
-	await get_tree().create_timer(maxf(3.0,min_time)).timeout
+	await get_tree().create_timer(maxf(7.0,min_time)).timeout
 	if not is_instance_valid(screen): return
 	await screen.fade_out()
 	layer.queue_free()

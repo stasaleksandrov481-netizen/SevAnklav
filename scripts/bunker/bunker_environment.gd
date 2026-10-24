@@ -23,7 +23,7 @@ func configure(battle) -> void:
     light_texture.fill_from = Vector2(0.5,0.5); light_texture.fill_to = Vector2(1.0,0.5)
     var g := Gradient.new()
     g.set_color(0,Color(1,1,1,1)); g.set_color(1,Color(1,1,1,0))
-    g.add_point(0.18,Color(1,1,1,0.85));g.add_point(0.65,Color(1,1,1,0.18))
+    g.add_point(0.12,Color(1,1,1,0.80));g.add_point(0.40,Color(1,1,1,0.32));g.add_point(0.72,Color(1,1,1,0.06))
     light_texture.gradient = g
     # Shadow walls follow door removal; static large furniture casts short silhouettes.
     for w in b.walls:
@@ -68,9 +68,9 @@ func _light(pos: Vector2, color: Color, radius: float, energy: float, kind: Stri
     if kind in ["red","cold"]: pos = _fixture_position(pos)
     p.position = pos; p.color = color; p.energy = energy
     p.range_z_min = -20; p.range_z_max = 30
-    p.shadow_filter = Light2D.SHADOW_FILTER_PCF5
+    p.shadow_filter = Light2D.SHADOW_FILTER_PCF13
     p.shadow_color = Color(0.015,0.018,0.025,0.84)
-    p.shadow_filter_smooth = 1.5
+    p.shadow_filter_smooth = 4.0
     p.enabled = false
     add_child(p)
     var entry: Dictionary={"node":p,"energy":energy,"kind":kind,"radius":radius,"fixture":null,"lens":null}
@@ -158,28 +158,21 @@ func _process(delta: float) -> void:
         # Camera distance bounds light work. Two lamp shadow maps plus the player cone.
         var visible: Array = []
         var view: Vector2 = b.get_viewport_rect().size/b.camera.zoom
-        var bounds := Rect2(b.camera.get_screen_center_position()-view*0.5,view).grow(240)
+        var bounds := Rect2(b.camera.get_screen_center_position()-view*0.5,view).grow(520)
         for l in lights:
             var node: PointLight2D = l["node"]
             node.enabled = bounds.has_point(node.position)
             node.shadow_enabled = false
             if node.enabled: visible.append(l)
-        visible.sort_custom(func(a,c): return a["node"].position.distance_squared_to(b.player["spr"].position)<c["node"].position.distance_squared_to(b.player["spr"].position))
+        # Lamp intensity never changes in response to actor proximity.
         # Reserve a slot for the alarm. Sorting all sources together used to erase its light.
-        var chosen: Array=[]
-        for kind in ["red","cold"]:
-            for entry in visible:
-                if entry["kind"]==kind:
-                    chosen.append(entry)
-                    break
-        if b.q_level>0:
-            for entry in visible:
-                if entry["kind"]=="screen": chosen.append(entry);break
+        var chosen: Array=visible.duplicate()
         for entry in visible:
             var lamp: PointLight2D=entry["node"]
             lamp.enabled=chosen.has(entry)
             lamp.shadow_enabled=lamp.enabled and entry["kind"]!="screen"
-            lamp.shadow_filter=Light2D.SHADOW_FILTER_PCF5 if b.q_level>0 else Light2D.SHADOW_FILTER_NONE
+            lamp.shadow_filter_smooth=4.0
+            lamp.shadow_filter=Light2D.SHADOW_FILTER_PCF13 if b.q_level>0 else Light2D.SHADOW_FILTER_PCF5
 
     for i in range(lights.size()):
         var l: Dictionary = lights[i]

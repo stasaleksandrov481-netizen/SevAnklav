@@ -20,9 +20,10 @@ func _ready() -> void:
     for edge in ["left","right"]: margin.add_theme_constant_override("margin_"+edge,40)
     for edge in ["top","bottom"]: margin.add_theme_constant_override("margin_"+edge,24)
     add_child(margin)
-    var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);margin.add_child(root)
+    var outer:=ScrollContainer.new();outer.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; margin.add_child(outer)
+    var root:=VBoxContainer.new();root.size_flags_horizontal=SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",12);outer.add_child(root)
     var header:=HBoxContainer.new();header.add_theme_constant_override("separation",18);root.add_child(header)
-    var title:=ZUI.label("ВОЛКОВ / ПОЛЕВОЕ СНАРЯЖЕНИЕ",26,Color(0.78,0.85,0.88));title.size_flags_horizontal=SIZE_EXPAND_FILL;header.add_child(title)
+    var title:=ZUI.label("ВОЛКОВ / СНАРЯЖЕНИЕ",26,Color(0.78,0.85,0.88));title.size_flags_horizontal=SIZE_EXPAND_FILL;header.add_child(title)
     var close:=_button("ЗАКРЫТЬ",130);close.pressed.connect(_close);header.add_child(close)
     var tab_row:=HBoxContainer.new();tab_row.add_theme_constant_override("separation",12);root.add_child(tab_row)
     for definition in [["equipment","СНАРЯЖЕНИЕ"],["health","ОРГАНИЗМ"],["tasks","ЗАДАЧИ"],["records","ЗАПИСИ"]]:
@@ -35,7 +36,7 @@ func _ready() -> void:
     health_status=ZUI.wrap_label("",12,ZUI.MUTED,248);medical.add_child(health_status)
     var frame:=Control.new();doll_frame=frame;medical.add_child(frame)
     var doll:=ZMedUI.BodyDoll.new();doll.btl=b
-    var k:=0.61 if get_viewport_rect().size.y<800 else 0.82
+    var k:=0.55 if get_viewport_rect().size.y<1000 else 0.75
     doll.custom_minimum_size=Vector2(250,340);doll.size=Vector2(250,340);doll.scale=Vector2.ONE*k
     frame.custom_minimum_size=Vector2(250,340*k);frame.add_child(doll)
     b._med_doll=doll
@@ -55,12 +56,12 @@ func _ready() -> void:
         var cell:=_cell("hand",i,Vector2(108,90));hands_row.add_child(cell)
     var access:=VBoxContainer.new();access.size_flags_horizontal=SIZE_EXPAND_FILL;access.add_theme_constant_override("separation",7);footer.add_child(access)
     access.add_child(ZUI.label("БЫСТРЫЙ ДОСТУП / ЯРЛЫКИ ПРЕДМЕТОВ",11,ZUI.MUTED))
-    var quick_row:=HBoxContainer.new();quick_row.add_theme_constant_override("separation",8);access.add_child(quick_row)
+    var quick_row:=GridContainer.new();quick_row.columns=6 if get_viewport_rect().size.x>=1150 else 3;quick_row.add_theme_constant_override("separation",8);access.add_child(quick_row)
     for i in range(6): quick_row.add_child(_cell("quick",i,Vector2(88,90)))
     select_page(page)
     modulate.a=0;create_tween().tween_property(self,"modulate:a",1.0,0.22)
 func _button(caption: String,width: float) -> Button:
-    var button:=Button.new();button.text=caption;button.custom_minimum_size=Vector2(width,40)
+    var button:=Button.new();button.text=caption;button.custom_minimum_size=Vector2(minf(width,130),40)
     button.add_theme_font_size_override("font_size",14)
     button.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.025,0.045,0.06,0.7),Color(0.20,0.34,0.41),10))
     var hot:=ZUI.panel_style(Color(0.06,0.11,0.14,0.9),Color(0.44,0.64,0.73),10)
@@ -77,14 +78,14 @@ func select_page(key: String) -> void:
     bag_cells.clear()
     medical.visible=key in ["equipment","health"]
     footer.visible=key=="equipment"
-    var scale_factor:=0.86 if key=="health" else (0.61 if get_viewport_rect().size.y<800 else 0.82)
+    var scale_factor:=0.86 if key=="health" else (0.55 if get_viewport_rect().size.y<1000 else 0.75)
     b._med_doll.scale=Vector2.ONE*scale_factor
     doll_frame.custom_minimum_size.y=340*scale_factor
     for id in tabs: tabs[id].add_theme_color_override("font_color",Color(0.85,0.93,0.96) if id==key else Color(0.40,0.57,0.65))
     if key in ["equipment","health"]:
         content.add_child(ZUI.label("РЮКЗАК",17,Color(0.66,0.79,0.84)))
-        content.add_child(ZUI.wrap_label("Нажатие — взять в свободную руку: сначала левую, затем правую. Перетащите в слот руки для точного выбора. Оружие с отметкой «2 РУКИ» занимает обе.",13,ZUI.MUTED,800))
-        item_grid=GridContainer.new();item_grid.columns=6;item_grid.add_theme_constant_override("h_separation",7);item_grid.add_theme_constant_override("v_separation",7);content.add_child(item_grid)
+        content.add_child(ZUI.wrap_label("Нажатие — взять в свободную руку: сначала левую, затем правую. Перетащите в слот руки для точного выбора. Оружие с отметкой «2 РУКИ» занимает обе.",13,ZUI.MUTED,0))
+        item_grid=GridContainer.new();item_grid.columns=4 if get_viewport_rect().size.x<1150 else 6;item_grid.add_theme_constant_override("h_separation",7);item_grid.add_theme_constant_override("v_separation",7);content.add_child(item_grid)
         var grid: Array=b.loadout7.slots()
         for i in range(grid.size()):
             var cell:=_cell("bag",i,Vector2(94,92));cell.size_flags_horizontal=SIZE_EXPAND_FILL;bag_cells.append(cell);item_grid.add_child(cell)

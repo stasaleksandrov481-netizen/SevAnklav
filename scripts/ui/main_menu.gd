@@ -14,6 +14,7 @@ func _ready() -> void:
     for c in get_children():
         if c is CanvasItem: c.hide()
         c.queue_free()
+    add_child(preload("res://scripts/ui/menu_music.gd").new())
     menu_root=Control.new()
     menu_root.set_anchors_preset(Control.PRESET_TOP_LEFT)
     add_child(menu_root)

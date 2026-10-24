@@ -428,6 +428,7 @@ func default_ui_scale() -> float:
         return 1.0
 
 func write_save() -> void:
+        if has_meta("qa8"): return
         var cfg := ConfigFile.new()
         cfg.set_value("camp", "commander", save["commander"])
         cfg.set_value("camp", "difficulty", save["difficulty"])
@@ -557,39 +558,9 @@ func set_music_track(_track: String) -> void:
         _play_music_track(_track)
 
 func _play_music_track(_track: String) -> void:
-        # Музыка физически удалена. Слот для СВОЕЙ музыки игрока:
-        #   assets/sfx/music_user.ogg   (предпочтительно)
-        #   assets/sfx/music_user.wav
-        # Нет файла — нет музыки (тишина), игра работает как обычно.
-        if music_player != null and is_instance_valid(music_player):
-                return
-        var p := ""
-        for cand in ["res://assets/sfx/music_user.ogg", "res://assets/sfx/music_user.wav"]:
-                if ResourceLoader.exists(cand):
-                        p = cand
-                        break
-        if p == "":
-                return
-        var st: AudioStream = load(p)
-        if st == null:
-                return
-        if st is AudioStreamWAV:
-                st.loop_mode = AudioStreamWAV.LOOP_FORWARD
-                st.loop_begin = 0
-                st.loop_end = st.data.size() >> 1
-        elif st is AudioStreamOggVorbis:
-                st.loop = true
-        if music_player != null and is_instance_valid(music_player):
-                music_player.queue_free()
-                music_player = null
-        music_player = AudioStreamPlayer.new()
-        music_player.stream = st
-        music_player.bus = "Music"
-        music_player.volume_db = linear_to_db(maxf(0.001, music_vol))
-        music_player.process_mode = Node.PROCESS_MODE_ALWAYS
-        music_player.finished.connect(music_player.play)
-        get_tree().root.add_child.call_deferred(music_player)
-        music_player.play.call_deferred()
+        # Music belongs to MainMenuScreen; never leak it into a battle.
+        if is_instance_valid(music_player):
+                music_player.stop()
 
 func zdiff_mult() -> float:
         # множитель сложности зомби-кампании (по допуску)
