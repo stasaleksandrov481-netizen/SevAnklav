@@ -30,7 +30,7 @@ func _setup_environment() -> void:
 	environment.background_color = Color("#303c40") if lighting_profile == 1 else Color("#10191c")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("#91a2a6") if lighting_profile == 1 else Color("#8fa8b2")
-	environment.ambient_light_energy = 0.50 if lighting_profile == 1 else 0.23
+	environment.ambient_light_energy = 0.50 if lighting_profile == 1 else 0.0
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
 	world_environment.environment = environment
 	add_child(world_environment)
@@ -41,7 +41,10 @@ func _process(_delta: float) -> void:
 	for room in get_tree().get_nodes_in_group("iso_rooms"):
 		if room.get_script() == RoomScript:
 			room.set_roof_visible(lighting_profile != 0 and not room.contains_world_point(player.global_position))
-			room.set_front_transparency(0.82 if world_layer == 1 or room.contains_world_point(player.global_position) else 0.0)
+			if world_layer == 1:
+				room.update_occlusion(player.global_position, $Camera, _delta)
+			else:
+				room.set_front_transparency(0.82 if room.contains_world_point(player.global_position) else 0.0)
 	for building in get_tree().get_nodes_in_group("iso_buildings"):
 		if building.get_script() == BuildingScript:
 			building.set_occluders_visible(not building.contains_world_point(player.global_position))

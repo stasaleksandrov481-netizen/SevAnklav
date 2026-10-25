@@ -47,16 +47,6 @@ script = ExtResource("7")
 script = ExtResource("5")
 target_path = NodePath("../Volkov")
 current = true
-
-[node name="Ambient" type="DirectionalLight3D" parent="."]
-rotation = Vector3(-0.75, -0.6, 0)
-light_energy = 0.22
-shadow_enabled = true
-
-[node name="EmergencyLight" type="OmniLight3D" parent="."]
-position = Vector3(3533, 2.4, 2908)
-light_color = Color(1, 0.14, 0.08, 1)
-light_energy = 0.58
-omni_range = 6.0
+initial_size = 21.0
 
 [node name="TouchControls" parent="." instance=ExtResource("6")]
