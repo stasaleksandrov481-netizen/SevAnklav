@@ -1,6 +1,8 @@
 extends RefCounted
+# V11: detailed top-down industrial / medical furniture atlas, original prop shapes
+# and positioning retained for save compatibility and mobile collision tests.
 static var textures: Dictionary={}
-const ATLAS=preload("res://assets/bunker/v10/furniture_atlas.svg")
+const ATLAS=preload("res://assets/bunker/v11/furniture_atlas.svg")
 const KINDS=["medical","research","security","archive","power","access","emergency","personal","server","locker","bench","gurney","sofa","coffee","paper","carrier"]
 static func texture(kind: String) -> Texture2D:
     if not textures.has(kind):
@@ -57,3 +59,8 @@ static func build(b) -> void:
     for prop in b.props:
         if prop.kind=="incident" and prop.pos==Vector2(600,560):
             prop.pos=Vector2(650,570);prop.spr.position=prop.pos;b.PropGeometry7.update(prop)
+    # Detail pass is purely decorative, drawn below existing furniture and units.
+    # No extra room solids, no mission changes, no dynamic particles.
+    var dressing:=preload("res://scripts/bunker/v11/visual_dressing.gd").new()
+    dressing.b=b
+    b.add_child(dressing)
