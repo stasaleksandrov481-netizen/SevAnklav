@@ -2,7 +2,7 @@ extends Node2D
 const Layout = preload("res://scripts/bunker/bunker_layout.gd")
 var b = null
 var textures := {}
-var baked_floor: Texture2D = preload("res://assets/bunker/v5/architecture.png")
+var baked_floor: Texture2D = preload("res://assets/bunker/v10/architecture.png")
 
 var lights: Array = []
 var phase := 0.0
@@ -31,9 +31,9 @@ func configure(battle) -> void:
         wall_snapshot.append({"rect":w,"node":occ})
     # Furniture occluders are children of their sprites and share the physical silhouette.
     # Cold ceiling islands leave deliberate dark intervals.
-    for p in [Vector2(440,300),Vector2(1560,450),Vector2(1950,445),Vector2(1120,470),Vector2(2210,690),Vector2(1620,1240),Vector2(2520,1500),Vector2(340,1340),Vector2(890,1530),Vector2(560,2030),Vector2(320,2400),Vector2(2070,2200),Vector2(2810,1840)]:
+    for p in [Vector2(440,300),Vector2(1560,450),Vector2(1950,445),Vector2(1120,470),Vector2(2210,690),Vector2(1620,1240),Vector2(2520,1500),Vector2(340,1340),Vector2(890,1530),Vector2(560,2030),Vector2(320,2400),Vector2(2070,2200),Vector2(2810,1840),Vector2(2550,690),Vector2(2680,1000),Vector2(935,950),Vector2(680,650)]:
         _light(p,Color(0.63,0.78,0.85),490 if p.x<880 else 430,0.82,"cold")
-    for p in [Vector2(810,510),Vector2(1700,515),Vector2(2185,1030),Vector2(2200,1650),Vector2(950,1230),Vector2(520,2100),Vector2(1110,2580),Vector2(1720,2510),Vector2(2870,2300)]:
+    for p in [Vector2(810,510),Vector2(1700,515),Vector2(2185,1030),Vector2(2200,1650),Vector2(950,1230),Vector2(520,2100),Vector2(1110,2580),Vector2(1720,2510),Vector2(2870,2300),Vector2(2410,950)]:
         _light(p,Color(1.0,0.055,0.018),320,0.95,"red")
     # Low intensity local monitor spill, never a room fill.
     for p in b.props:
@@ -145,8 +145,8 @@ func _process(delta: float) -> void:
     if b == null: return
     phase += delta
     var prefs: Dictionary = G.zsave.get("bunker_visual",{})
-    var brightness: float = clampf(float(prefs.get("brightness",1.0)),0.75,1.3)
-    b.canvas_mod.color = Color(0.34,0.39,0.44)*brightness
+    var brightness: float = clampf(float(prefs.get("brightness",1.0)),0.85,1.45)
+    b.canvas_mod.color = Color(0.37,0.42,0.47)*brightness
     for particle in b.steam_particles:
         if is_instance_valid(particle): particle.emitting = bool(prefs.get("particles",true)) and b.q_level>0 and particle.position.distance_to(b.player["spr"].position)<700
     if muzzle_time > 0:
@@ -168,7 +168,7 @@ func _process(delta: float) -> void:
         # No unshadowed spill through walls; remaining distant sources are disabled.
         var camera_center: Vector2=b.camera.get_screen_center_position()
         visible.sort_custom(func(a,c): return a.node.position.distance_squared_to(camera_center)<c.node.position.distance_squared_to(camera_center))
-        var budget:=5 if b.q_level>1 else (4 if b.q_level>0 else 2)
+        var budget:=4 if b.q_level>1 else (3 if b.q_level>0 else 2)
         var chosen: Array=[]
         for kind in ["cold","red"]:
             for entry in visible:
@@ -193,6 +193,10 @@ func _process(delta: float) -> void:
             k=0.06+0.94*smoothstep(0.0,0.14,cycle)*(1.0-smoothstep(1.65,2.15,cycle))
         elif l["kind"] == "screen": k = 0.94+0.06*sin(phase*1.4+i)
         else: k = 0.98+0.02*sin(phase*1.7+i)
+        var elapsed: float=b.investigation10.state.get("flicker",4.0)
+        if l.kind=="cold" and elapsed<2.4 and node.position.distance_to(Vector2(2230,900))<550:
+            var envelope:=pow(sin(clampf(elapsed/2.4,0,1)*PI),2)
+            k*=1.0-.45*envelope*(.5+.5*sin(elapsed*9))
         node.energy = float(l["energy"])*k
         if is_instance_valid(l["fixture"]): l["fixture"].modulate=Color(1,1,1,0.10+0.90*k)
         if is_instance_valid(l["lens"]): l["lens"].modulate.a=(0.60 if l["kind"]=="red" else 0.14)*k

@@ -11,7 +11,7 @@ var seen_revision:=-1
 var was_dragged:=false
 func _ready() -> void:
     focus_mode=Control.FOCUS_NONE
-    var normal:=V.panel(Color(0.045,0.065,0.080,0.68),Color(0.25,0.38,0.45,0.18),5)
+    var normal:=V.panel(Color(0.085,0.115,0.14,0.95),Color(0.35,0.49,0.56,0.38),5)
     normal.set_corner_radius_all(3)
     add_theme_stylebox_override("normal",normal)
     var hot:=normal.duplicate();hot.border_color=Color(0.45,0.66,0.73);hot.bg_color=Color(0.045,0.08,0.10,0.9)
