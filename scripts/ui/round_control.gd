@@ -5,6 +5,7 @@ var symbol:="hand"
 var caption:=""
 var large:=false
 var warmth:=0.0
+var visual_scale10:=1.0
 func _ready() -> void:
     focus_mode=Control.FOCUS_NONE;text=""
     for state in ["normal","hover","pressed","disabled","focus"]: add_theme_stylebox_override(state,StyleBoxEmpty.new())
@@ -13,8 +14,8 @@ func _process(delta: float) -> void:
     var target:=0.0 if disabled else (1.0 if is_pressed() or is_hovered() else 0.25)
     var previous:=warmth;warmth=move_toward(warmth,target,delta*5)
     if previous!=warmth: queue_redraw()
-func _control_center7() -> Vector2: return Vector2(size.x*0.5,37 if large else 25)
-func _control_radius7() -> float: return 31.0 if large else 23.0
+func _control_center7() -> Vector2: return Vector2(size.x*0.5,(37 if large else 25)*visual_scale10)
+func _control_radius7() -> float: return (31.0 if large else 23.0)*visual_scale10
 func _draw() -> void:
     var c:=_control_center7();var r:=_control_radius7()
     var alpha:=0.24 if disabled else 0.82

@@ -54,6 +54,11 @@ var inventory_revision7:=0
 var loadout7=preload("res://scripts/bunker/loadout.gd").new()
 var hand_visual7: Node2D
 var atlas_regions6: Dictionary={}
+var investigation10=preload("res://scripts/bunker/v10/investigation.gd").new()
+var prop_index10=preload("res://scripts/bunker/v10/prop_index.gd").new()
+var indexed10:=false
+var ui_owners10: Array=[]
+var checkpoint_loading10:=false
 
 
 func map_size_for() -> Vector2:
@@ -69,6 +74,8 @@ func _mk_spr(tex: String, pos: Vector2, scl := 1.42, z := 5, mod := Color(1,1,1)
     return s
 
 func _room_rect_at(p: Vector2) -> Rect2:
+    for extra in [Rect2(650,850,360,300),Rect2(2380,640,380,420)]:
+        if extra.has_point(p): return extra
     for r in story_rooms:
         if r.grow(20).has_point(p): return r
     return Rect2(Vector2.ZERO,map_size)
@@ -79,6 +86,8 @@ func _build_bunker() -> void:
         _prop(decoration[0],decoration[1],14.0,"equipment_detail",1.42,false)
     for detail in [["z_cabinet",Vector2(820,210),23.0,"wall_storage"],["z_server",Vector2(1410,930),24.0,"wall_server"],["z_sink",Vector2(1910,1690),15.0,"equipment_detail"],["z_tool_tray",Vector2(620,1760),12.0,"equipment_detail"],["z_camera_unit",Vector2(1180,430),10.0,"equipment_detail"],["z_first_aid",Vector2(1820,2400),12.0,"equipment_detail"],["z_oxygen_rack",Vector2(290,2300),17.0,"equipment_detail"]]:
         _prop(detail[0],detail[1],detail[2],detail[3],1.0,false)
+    investigation10.b=self;investigation10.build()
+    prop_index10.build(props);indexed10=true
     zp = {"hypo":0.0,"seen":{},"gas_fixed":true,"gen_on":false,"iso_active":false,"iso_off":false,"escape_on":false}
     zp["flash_off"]=bool(G.zsave.get("flash_off7",false))
     zp_amb = ZAmbience.new()
@@ -100,6 +109,7 @@ func _build_bunker() -> void:
     _occluder_for_walls()
 
 func _ready() -> void:
+    investigation10.b=self;investigation10.ensure()
     loadout7.b=self
     loadout7.ensure()
     set_meta("bunker_v9",true)
@@ -114,9 +124,8 @@ func _ready() -> void:
     var maintenance:=preload("res://scripts/bunker/maintenance_detail.gd").new()
     maintenance.b=self;maintenance.z_index=1;add_child(maintenance)
     previous_floor.queue_free()
-    var surfaces:=preload("res://scripts/bunker/surface_detail.gd").new()
-    surfaces.b=self;add_child(surfaces)
-    var staircase:=Sprite2D.new();staircase.texture=preload("res://assets/bunker/v9/stairs.svg")
+    var devices10:=preload("res://scripts/bunker/v10/equipment_status.gd").new();devices10.b=self;add_child(devices10)
+    var staircase:=Sprite2D.new();staircase.texture=preload("res://assets/bunker/v10/stairs.svg")
     staircase.position=Vector2(560,2060);staircase.z_index=-8;add_child(staircase)
     canvas_mod.color = Color(0.25,0.30,0.35)
     camera.limit_left = 0
@@ -124,6 +133,8 @@ func _ready() -> void:
     camera.limit_right = int(map_size.x)
     camera.limit_bottom = int(map_size.y)
     q_lock = OS.get_cmdline_user_args().has("--quality-lock")
+    var quality10: int=G.zsave.get("bunker_visual",{}).get("quality10",0)
+    if quality10>0: q_lock=true;q_level=clampi(quality10-1,0,2)
     player["light"].texture = preload("res://assets/bunker/v8/flashlight.svg")
     player["light"].texture_scale = 0.92
     player["light"].energy = 0.70
@@ -190,7 +201,7 @@ func _ready() -> void:
     opening.parallel().tween_property(lid,"position:x",292.0,1.15)
     await _exit_phase8(1,1.55)
     await _exit_phase8(2,1.2)
-    await get_tree().create_timer(0.28).timeout
+    await get_tree().create_timer(0.28,false).timeout
     await _exit_phase8(3,0.95)
     G.play_sfx("z_footstep",-18.0)
     await _exit_phase8(4,0.95)
@@ -213,7 +224,7 @@ func _ready() -> void:
             player_rig6.parts.torso.position.y-=lift*1.8,0.0,1.0,0.55)
         await walking.finished
         G.play_sfx("z_footstep",-18.0)
-        await get_tree().create_timer(0.14).timeout
+        await get_tree().create_timer(0.14,false).timeout
     in_capsule = false
     starting = false
     paused = false
@@ -226,6 +237,8 @@ func _ready() -> void:
 
 func _find_interact() -> Dictionary:
     if starting or ending: return {}
+    var evidence: Dictionary=investigation10.nearest(player.spr.position)
+    if not evidence.is_empty(): return evidence
     var pp: Vector2 = player["spr"].position
     for pr in props:
         var k: String = pr["kind"]
@@ -245,6 +258,8 @@ func _find_interact() -> Dictionary:
     return result
 
 func _door_allowed(id: String) -> bool:
+    if id=="staff10": return true
+    if id=="office10": return bool(records.get("office_unlocked10",false))
     match id:
         "medical": return records.has("terminal")
         "science": return _obj_done("gear")
@@ -254,6 +269,13 @@ func _door_allowed(id: String) -> bool:
     return true
 
 func _do_interact(info: Dictionary) -> void:
+    if info.is_empty() or paused: return
+    if info.kind=="evidence10": investigation10.act(info.action);return
+    if info.kind=="story_door" and info.get("door_id","")=="office10":
+        if records.get("office_unlocked10",false): _open_door("office10")
+        else: _open_keypad10("КАБИНЕТ ИССЛЕДОВАТЕЛЯ",func():
+            records["office_unlocked10"]=true;_open_door("office10"))
+        return
     if info["kind"] == "story_door":
         var id: String = info["door_id"]
         if _door_allowed(id):
@@ -404,6 +426,7 @@ func _descend() -> void:
 
 func _zpro_tick(delta: float) -> void:
     if starting or ending: return
+    investigation10.tick(delta)
     checkpoint_timer += delta
     if checkpoint_timer > 15.0:
         checkpoint_timer = 0.0
@@ -421,6 +444,9 @@ func _zpro_tick(delta: float) -> void:
             if i == 2 and not records.has("science_seen"):
                 records["science_seen"] = true
                 _toast("Ищите два фрагмента журнала №12. При необходимости можно отступить к двери.")
+    if Rect2(650,850,360,300).has_point(p): level_label.text="М–02 / КОМНАТА ОТДЫХА"
+    elif Rect2(2380,640,380,420).has_point(p): level_label.text="Н–12 / КАБИНЕТ ИССЛЕДОВАТЕЛЯ"
+    elif current_room>=0: level_label.text=ROOM_NAMES[current_room]
     if safe_figure != null:
         safe_figure.rotation = 0
         if is_instance_valid(figure_rig5): figure_rig5.update_pose(PI/2,sin(time_alive*0.7),0.1,delta)
@@ -569,6 +595,13 @@ func _prop(tex: String, pos: Vector2, radius: float, kind := "", scl := 1.42, so
         pr["spr"].z_index=15
         pr["spr"].rotation=PI/2
         pr["spr"].scale*=0.78
+    var style10: String=preload("res://scripts/bunker/v10/furnishing.gd").terminal_style(kind)
+    if style10!="":
+        var terminal_sprite: Sprite2D=pr.spr
+        terminal_sprite.texture=preload("res://scripts/bunker/v10/furnishing.gd").texture(style10)
+        var width10: float=122.0 if kind not in ["gen_panel","iso_panel","hydro","hydro_lever","power_hold"] else 55.0
+        terminal_sprite.scale=Vector2.ONE*width10/terminal_sprite.texture.get_width()
+        pr["half"]=terminal_sprite.texture.get_size()*terminal_sprite.scale*.5;pr["style10"]=style10
     if kind=="stairs_transition":
         pr["solid"]=false;pr["spr"].hide()
     if kind=="labdesk" and pos.y<1400:
@@ -678,16 +711,30 @@ func _save_checkpoint() -> void:
     for pr in props: used.append({"used":bool(pr.get("used",false)),"loot":pr.get("loot_items",[])})
     var p: Vector2 = player["spr"].position
     G.zsave["bunker3"] = {"version":3,"layout":4,"records":records,"notes":notes,"doors":ds,"done":done,"enemies":enemies,"searched":searched,"used":used,"pos":[p.x,p.y],"st":player["st"],"infect":player["infect"],"mag":player["mag"],"gate":zp_gate_state,"gate_progress":gate_progress}
+    var snapshot: Dictionary=G.zsave["bunker3"]
+    snapshot["investigation10"]=investigation10.snapshot()
+    snapshot["inventory10"]={}
+    for key in ["inv","ammo","weapons","hands7","quick","slots7","weapon_mags7","cur_weapon","flash_off7","equipment_ready7"]:
+        if not G.zsave.has(key) or G.zsave[key]==null: continue
+        var value=G.zsave[key]
+        snapshot.inventory10[key]=value.duplicate(true) if value is Dictionary or value is Array else value
+    snapshot["props10"]={}
+    for prop in props:
+        var key: String=_prop_key10(prop)
+        snapshot.props10[key]={"used":prop.get("used",false),"loot":prop.get("loot_items",[]).duplicate()}
+    G.zsave["bunker3"]=snapshot.duplicate(true)
     G.write_save()
 
 func _restore_checkpoint() -> bool:
     var data: Dictionary = G.zsave.get("bunker3",{})
     if int(data.get("version",0)) != 3: return false
-    records = data.get("records",{})
-    notes = data.get("notes",[])
+    records = data.get("records",{}).duplicate(true)
+    notes = data.get("notes",[]).duplicate(true)
+    if data.has("investigation10"):
+        G.zsave["investigation10"]=data.investigation10.duplicate(true);investigation10.ensure()
     restoring5 = true
     for id in data.get("doors",{}):
-        if data["doors"][id]: _open_door(id)
+        if data["doors"][id] and doors.has(id): _open_door(id)
     restoring5 = false
     for o in objectives: o["done"] = data.get("done",[]).has(o["id"])
     for i in range(data.get("enemies",[]).size()):
@@ -708,6 +755,10 @@ func _restore_checkpoint() -> bool:
     for i in range(mini(props.size(),data.get("used",[]).size())):
         props[i]["used"] = bool(data["used"][i]["used"])
         if props[i]["used"] and int(data.get("layout",3)) >= 4: props[i]["loot_items"] = data["used"][i]["loot"]
+    for prop in props:
+        var key: String=_prop_key10(prop)
+        if data.get("props10",{}).has(key):
+            prop["used"]=bool(data.props10[key].used);prop["loot_items"]=data.props10[key].loot.duplicate()
     var p: Array = data.get("pos",[460,490])
     player["spr"].position = Vector2(float(p[0]),float(p[1]))
     player["st"] = data.get("st",Med.mk_state())
@@ -739,13 +790,14 @@ func _restore_checkpoint() -> bool:
 
 func _open_pause() -> void:
     if is_instance_valid(pause_win): return
-    _release_controls5();_save_checkpoint();paused=true
+    if starting or checkpoint_loading10: return
+    _release_controls5();paused=true
     var panel:=preload("res://scripts/ui/bunker_pause.gd").new();panel.b=self
-    pause_win=panel;panel.tree_exiting.connect(_pause_closed);ui_layer.add_child(panel)
+    pause_win=panel;panel.tree_exiting.connect(_pause_closed);ui_layer.add_child(panel);_freeze_ui10(panel)
 
 func _notification(what: int) -> void:
     if has_meta("qa8"): return
-    if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+    if what == NOTIFICATION_APPLICATION_FOCUS_OUT and not paused:
         _save_checkpoint()
     super._notification(what)
 
@@ -765,7 +817,7 @@ func _tick_player(delta: float) -> void:
     recoil4 = maxf(0,recoil4-delta*6.5)
     shot_heat4 = maxf(0,shot_heat4-delta*0.65)
     var target: float = manual_ang if manual_aim else (player_velocity.angle() if player_velocity.length()>4 else smooth_aim5)
-    smooth_aim5 = lerp_angle(smooth_aim5,target,1.0-exp(-delta*12.0))
+    smooth_aim5 = lerp_angle(smooth_aim5,target,1.0-exp(-delta*12.0*float(G.zsave.get("bunker_visual",{}).get("turn10",1))))
     var input_angle := manual_ang
     manual_ang = smooth_aim5
     if not _has_weapon7(): manual_fire=false
@@ -835,6 +887,7 @@ func _bubble_caption(kind: String, holding: bool) -> String:
 
 func _build_hud() -> void:
     super._build_hud()
+    ui_layer.process_mode=Node.PROCESS_MODE_ALWAYS
     loadout7.ensure()
     for child in quick_panel_ref.get_children(): quick_panel_ref.remove_child(child);child.queue_free()
     quick_panel_ref.add_theme_constant_override("separation",5)
@@ -850,8 +903,8 @@ func _build_hud() -> void:
         var slot:=preload("res://scripts/ui/equipment_cell.gd").new()
         slot.b=self;slot.place="quick";slot.index=i;slot.custom_minimum_size=Vector2(48,58);slot.compact9=true
         quick_panel_ref.add_child(slot);quick_slots.append(slot)
-    mm_ref.custom_minimum_size=Vector2(180,124)
-    mm_ref.offset_left=-194;mm_ref.offset_right=-14;mm_ref.offset_top=12;mm_ref.offset_bottom=136
+    mm_ref.custom_minimum_size=Vector2(220,132)
+    mm_ref.offset_left=-234;mm_ref.offset_right=-14;mm_ref.offset_top=12;mm_ref.offset_bottom=144
     reload_chip_ref.hide()
     reload_chip_ref.set_process(false);reload_chip_ref.set_script(null)
     # Replace only location one's map and action button.
@@ -939,7 +992,7 @@ func _open_door(id: String) -> void:
             leaf.scale=original.scale;leaf.position=Vector2(0,side*extent.y*0.25);frame.add_child(leaf)
             var tw:=leaf.create_tween();tw.tween_interval(0.18)
             tw.tween_property(leaf,"position:y",side*extent.y*0.80,1.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-        await get_tree().create_timer(1.24).timeout
+        await get_tree().create_timer(1.24,false).timeout
         frame.queue_free()
     original.hide()
     door["opened"]=true;door["opening"]=false
@@ -960,7 +1013,7 @@ func _open_loot_window(title: String, source: Dictionary) -> void:
     screen.b=self;screen.source=source;screen.title=title
     loot_win=screen
     screen.tree_exiting.connect(_loot_closed)
-    ui_layer.add_child(screen)
+    ui_layer.add_child(screen);_freeze_ui10(screen)
 
 func zp_terminal_screen(title: String, accent: Color, lines: Array, on_done: Callable=Callable(), status: String="") -> void:
     if is_instance_valid(zp_overlay_layer): return
@@ -975,15 +1028,15 @@ func zp_terminal_screen(title: String, accent: Color, lines: Array, on_done: Cal
     terminal.body_state=player["st"].get("body",{}).duplicate()
     terminal.power_ready=records.has("power")
     layer.add_child(terminal)
+    _freeze_ui10(layer)
     terminal.modulate.a=1.0 if replay else 0.0
     if not replay: terminal.create_tween().tween_property(terminal,"modulate:a",1.0,0.32)
     if status!="": terminal.set_status(status)
-    var close:=Button.new();close.text="ЗАКРЫТЬ ТЕРМИНАЛ";close.custom_minimum_size=Vector2(280,56)
-    close.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-    close.offset_left=-350;close.offset_right=-70;close.offset_top=-100;close.offset_bottom=-44
-    close.add_theme_stylebox_override("normal",ZUI.panel_style(Color(0.04,0.085,0.10),Color(0.31,0.50,0.54),14))
-    close.add_theme_stylebox_override("hover",ZUI.panel_style(Color(0.08,0.15,0.18),Color(0.55,0.72,0.72),14))
-    close.disabled=false;terminal.add_child(close)
+    var close:=preload("res://scripts/ui/visual_theme.gd").button("ЗАКРЫТЬ ×");close.custom_minimum_size=Vector2(132,44)
+    var align_close:=func():
+        var r: Rect2=terminal.panel_rect10();close.position=r.position+Vector2(r.size.x-156,16)
+    terminal.add_child(close);align_close.call();terminal.resized.connect(align_close)
+    close.disabled=false
     var finish:=func():
         if close.disabled: return
         close.disabled=true
@@ -1089,7 +1142,7 @@ func _collide_circle(pos: Vector2, radius: float) -> Vector2:
                 result=closest
             elif delta.length_squared()<radius*radius:
                 result=closest+delta.normalized()*(radius+0.08)
-        for prop in props:
+        for prop in (prop_index10.near(result,radius) if indexed10 else props):
             if prop["solid"]: result=PropGeometry7.push_out(prop,result,radius)
         if result.distance_squared_to(before)<0.00001: break
     return result.clamp(Vector2(60,60),map_size-Vector2(60,60))
@@ -1130,7 +1183,7 @@ func _open_inventory7(tab: String) -> void:
     if tab=="equipment": med_win=screen
     else: kpk_win=screen
     screen.tree_exiting.connect(_inventory_closed7)
-    ui_layer.add_child(screen)
+    ui_layer.add_child(screen);_freeze_ui10(screen)
 func _inventory_closed7() -> void:
     inventory7=null;med_win=null;kpk_win=null
     _med_doll=null;_med_info_lbl=null
@@ -1260,3 +1313,59 @@ func _refresh_obj_labels() -> void:
         if int(objective.get("grp",0))!=frontier or objective.done: continue
         vb.add_child(ZUI.wrap_label(objective.text,13,Color(.79,.85,.89),286))
     _obj_frontier_prev=frontier
+
+
+func _prop_key10(prop: Dictionary) -> String:
+    if prop.has("id10"): return "evidence:"+str(prop.id10)
+    var p: Vector2=prop.pos
+    return str(prop.kind)+"@%d,%d"%[roundi(p.x),roundi(p.y)]
+func _freeze_ui10(owner: Node) -> void:
+    owner.process_mode=Node.PROCESS_MODE_ALWAYS
+    ui_owners10.append(weakref(owner));paused=true;_release_controls5()
+    owner.tree_exiting.connect(func():
+        ui_owners10=ui_owners10.filter(func(reference):
+            var other=reference.get_ref()
+            return is_instance_valid(other) and other!=owner and not other.is_queued_for_deletion())
+        var tree=get_tree()
+        if tree!=null:
+            tree.paused=not ui_owners10.is_empty();paused=tree.paused)
+    get_tree().paused=true
+func _show_document10(entry: Dictionary) -> void:
+    var reader:=preload("res://scripts/ui/v10/document_reader.gd").new();reader.entry=entry;ui_layer.add_child(reader);_freeze_ui10(reader)
+func _open_keypad10(title10: String,on_success: Callable) -> void:
+    var keypad:=preload("res://scripts/ui/v10/keypad.gd").new();keypad.b=self;keypad.caption=title10;keypad.on_success=on_success;ui_layer.add_child(keypad);_freeze_ui10(keypad)
+func _reload_checkpoint10() -> void:
+    if checkpoint_loading10: return
+    var data: Dictionary=G.zsave.get("bunker3",{}).duplicate(true)
+    if int(data.get("version",0))!=3:
+        _toast("Контрольная точка ещё не создана.");return
+    checkpoint_loading10=true
+    if data.has("inventory10"):
+        for key in ["inv","ammo","weapons","hands7","quick","slots7","weapon_mags7","cur_weapon","flash_off7","equipment_ready7"]:
+            if not data.inventory10.has(key): G.zsave.erase(key)
+    for key in data.get("inventory10",{}):
+        var value=data.inventory10[key]
+        G.zsave[key]=value.duplicate(true) if value is Dictionary or value is Array else value
+    if data.has("investigation10"): G.zsave["investigation10"]=data.investigation10.duplicate(true)
+    G.zsave["pstate"]=data.get("st",Med.mk_state()).duplicate(true);G.zsave["infect"]=data.get("infect",0)
+    G.write_save();get_tree().paused=false
+    main_ref.start_zbattle()
+func _exit_tree() -> void:
+    var tree=get_tree()
+    if tree!=null and not ui_owners10.is_empty(): tree.paused=false
+func _take_loot_item(item: String) -> void:
+    super._take_loot_item(item)
+    _save_checkpoint()
+func _move_stick_vec(at: Vector2) -> void:
+    var scale10: float=G.zsave.get("bunker_visual",{}).get("control_scale10",1)
+    direct_vec=((at-_stick_base("l"))/(STICK_KNOB*scale10)).limit_length(1)
+func _aim_stick_vec(at: Vector2) -> void:
+    var delta:=at-_stick_base("r");var magnitude:=delta.length()
+    var scale10: float=G.zsave.get("bunker_visual",{}).get("control_scale10",1)
+    var fraction: float=magnitude/(STICK_KNOB*scale10)
+    if magnitude>14*scale10:
+        manual_aim=true;manual_ang=delta.angle()
+        if fraction<STICK_FIRE_OFF:
+            _r_was_center=true
+            if _r_fire_latch: _r_fire_latch=false;manual_fire=false
+        elif _r_was_center and fraction>=STICK_FIRE_K: _r_fire_latch=true;manual_fire=true

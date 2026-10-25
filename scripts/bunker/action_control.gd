@@ -21,7 +21,10 @@ func _ready() -> void:
 func _signature(info: Dictionary) -> String:
     return str(info.get("kind",""))+str(info.get("action",""))+str(info.get("door_id",""))+str(info.get("pos",Vector2.INF))
 func _process(delta: float) -> void:
-    position=btl._stick_base("r")+Vector2(-220,-40)
+    visual_scale10=float(G.zsave.get("bunker_visual",{}).get("control_scale10",1))
+    custom_minimum_size=Vector2(112,112)*visual_scale10
+    size=custom_minimum_size
+    position=btl._stick_base("r")+Vector2(-220,-40)*visual_scale10
     var info: Dictionary=btl.cur_interact
     disabled=info.is_empty() or btl.paused
     caption=_caption(info)
@@ -38,6 +41,8 @@ func _process(delta: float) -> void:
 func _caption(info: Dictionary) -> String:
     if info.is_empty(): return "ДЕЙСТВИЕ"
     var kind:=str(info.get("kind",""))
+    if kind=="evidence10":
+        return {"cache10":"КОДОВЫЙ\nЗАМОК","restore10":"ВОССТАНОВИТЬ\nДАННЫЕ","camera10":"АРХИВ\nКАМЕР","monitor10":"ОСМОТРЕТЬ\nСЛЕДЫ","tray10":"ОСМОТРЕТЬ\nСЛЕДЫ","override10":"ОСМОТРЕТЬ\nСЛЕДЫ"}.get(str(info.get("action","")),"ПРОЧИТАТЬ\nЗАПИСЬ")
     if kind=="corpse": return "ОБЫСКАТЬ\nТЕЛО"
     if kind=="cabinet": return "ОБЫСКАТЬ\nШКАФ"
     if kind=="loot_crate": return "ОБЫСКАТЬ\nКОНТЕЙНЕР"

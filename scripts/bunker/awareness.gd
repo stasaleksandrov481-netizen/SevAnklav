@@ -30,6 +30,7 @@ func sees(p: Vector2) -> bool:
     var d := p-a
     return d.length()<850 and (d.length()<65 or d.normalized().dot(Vector2.from_angle(b.player["aim"]))>0.08) and clear_view(a,p)
 func _process(delta: float) -> void:
+    if b!=null and b.paused: return
     if b==null or b.player.is_empty(): return
     var pos: Vector2 = b.player["spr"].position
     veil.material.set_shader_parameter("observer",pos)
@@ -62,3 +63,7 @@ func _draw() -> void:
     for f in Layout.FLOOR:
         var alpha := dim[int(f[2])]
         if alpha>0.001: draw_rect(f[0],Color(0.005,0.012,0.02,alpha))
+
+    for pair in [["staff10",Rect2(650,850,360,300)],["office10",Rect2(2380,640,380,420)]]:
+        if b.doors.has(pair[0]) and not b.doors[pair[0]].opened:
+            draw_rect(pair[1],Color(.005,.012,.02,.30))
