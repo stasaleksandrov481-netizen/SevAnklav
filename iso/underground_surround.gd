@@ -19,7 +19,7 @@ func _rebuild() -> void:
 	var floor_mesh := MeshInstance3D.new()
 	floor_mesh.name = "Strata floor"
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(80, 80)
+	plane.size = Vector2(140, 140)
 	floor_mesh.mesh = plane
 	floor_mesh.position = Vector3(20, -0.32, 18)
 	var material := ShaderMaterial.new()
@@ -37,7 +37,7 @@ func _rebuild() -> void:
 	seed.seed = 193821
 	for i in 58:
 		var angle := TAU * float(i) / 58.0 + seed.randf_range(-0.08, 0.08)
-		var radius := seed.randf_range(25.5, 34.0)
+		var radius := seed.randf_range(65.5, 69.0)
 		var rock := MeshInstance3D.new()
 		rock.name = "Bedrock %02d" % i
 		var mesh := SphereMesh.new()

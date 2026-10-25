@@ -58,7 +58,7 @@ west_door = true
 south_door = false
 roof_enabled = false
 
-[node name="Generator" type="Node3D" parent="."]
+[node name="EngineeringWorkshop" type="Node3D" parent="."]
 position = Vector3(8, 0, 8)
 script = ExtResource("2")
 width = 12
@@ -222,7 +222,7 @@ script = ExtResource("3")
 collision_size = Vector3(1.6, 0.8, 0.8)
 
 [node name="GeneratorConsole" type="Node3D" parent="."]
-position = Vector3(10, 0, 8)
+position = Vector3(34, 0, 25)
 script = ExtResource("3")
 kind = 3
 collision_size = Vector3(0.9, 1.7, 0.6)
@@ -238,12 +238,13 @@ display_name = "Пост наблюдения"
 
 [node name="ServiceDoor" type="Node3D" parent="."]
 position = Vector3(2, 0, -8)
+rotation_degrees = Vector3(0, 90, 0)
 script = ExtResource("5")
 story_id = "door"
 display_name = "Служебная дверь"
 
 [node name="ExitAirlock" type="Node3D" parent="."]
-position = Vector3(8, 0, 12)
+position = Vector3(20, 0, 31.8)
 script = ExtResource("5")
 story_id = "exit"
 display_name = "Выходной шлюз"
@@ -251,3 +252,129 @@ display_name = "Выходной шлюз"
 [node name="Details" type="Node3D" parent="."]
 script = ExtResource("4")
 
+
+[node name="TransferGallery" type="Node3D" parent="."]
+position = Vector3(8, 0, 19)
+script = ExtResource("2")
+width = 6
+depth = 14
+floor_finish = 2
+north_door = true
+south_door = false
+east_door = true
+west_door = false
+roof_enabled = false
+
+[node name="ServiceElbow" type="Node3D" parent="."]
+position = Vector3(20, 0, 19)
+script = ExtResource("2")
+width = 18
+depth = 4
+floor_finish = 2
+north_door = false
+south_door = true
+east_door = true
+west_door = true
+roof_enabled = false
+
+[node name="PowerHall" type="Node3D" parent="."]
+position = Vector3(35, 0, 19)
+script = ExtResource("2")
+width = 12
+depth = 18
+floor_finish = 2
+north_door = false
+south_door = false
+east_door = false
+west_door = true
+roof_enabled = false
+
+[node name="Decontamination" type="Node3D" parent="."]
+position = Vector3(20, 0, 27)
+script = ExtResource("2")
+width = 8
+depth = 12
+floor_finish = 1
+north_door = true
+south_door = false
+east_door = false
+west_door = false
+roof_enabled = false
+
+[node name="ColdArchive" type="Node3D" parent="."]
+position = Vector3(20, 0, 11)
+script = ExtResource("2")
+width = 8
+depth = 12
+floor_finish = 2
+north_door = false
+south_door = true
+east_door = false
+west_door = false
+roof_enabled = false
+
+[node name="WingEquipment0" type="Node3D" parent="."]
+position = Vector3(31, 0, 12)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 0.9, 0.65)
+
+[node name="WingEquipment1" type="Node3D" parent="."]
+position = Vector3(34, 0, 12)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment2" type="Node3D" parent="."]
+position = Vector3(38, 0, 12)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment3" type="Node3D" parent="."]
+position = Vector3(38, 0, 24)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 0.9, 0.65)
+
+[node name="WingEquipment4" type="Node3D" parent="."]
+position = Vector3(17, 0, 7)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment5" type="Node3D" parent="."]
+position = Vector3(19, 0, 7)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment6" type="Node3D" parent="."]
+position = Vector3(22, 0, 7)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment7" type="Node3D" parent="."]
+position = Vector3(17, 0, 13)
+script = ExtResource("3")
+kind = 0
+collision_size = Vector3(0.9, 0.9, 0.65)
+
+[node name="WingEquipment8" type="Node3D" parent="."]
+position = Vector3(22, 0, 29)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(0.9, 0.9, 0.65)
+
+[node name="WingEquipment9" type="Node3D" parent="."]
+position = Vector3(18, 0, 29)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="WingEquipment10" type="Node3D" parent="."]
+position = Vector3(6, 0, 21)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 1.8, 0.65)
