@@ -11,13 +11,11 @@ var fall_angle:=0.0
 var fall_origin:=Vector2.ZERO
 var fall_target:=Vector2.ZERO
 var phase:=randf()*TAU
-const ATLAS=preload("res://assets/bunker/v9/volkov_parts.png")
+const ATLAS=preload("res://assets/bunker/v10/volkov_modules.png")
 var parts9: Dictionary={}
 func _ready() -> void:
-    var regions: Dictionary=preload("res://scripts/bunker/v6_assets.gd").REGIONS
-    for key in ["torso","head"]:
-        var uv: Array=regions[key];var t:=AtlasTexture.new();t.atlas=ATLAS
-        t.region=Rect2(Vector2(uv[0],uv[1])*ATLAS.get_size(),Vector2(uv[2],uv[3])*ATLAS.get_size());parts9[key]=t
+    var assets=preload("res://scripts/bunker/v10/actor_assets.gd")
+    for key in ["torso","head"]: parts9[key]=assets.texture(key)
 func update_pose(angle: float, _walk: float, moving: float, delta: float) -> void:
     if fallen: return
     heading=lerp_angle(heading,angle,1.0-exp(-delta*(4.5 if infected else 9.0)))
@@ -62,7 +60,7 @@ func _draw() -> void:
     # Textured shoulders, pockets and a recognisable crown replace plain circles.
     if parts9.has("torso"):
         draw_set_transform(body,heading+fall_angle*collapse+PI/2)
-        draw_texture_rect(parts9.torso,Rect2(-18,-12,36,26),false,outfit.lightened(.4))
+        draw_texture_rect(parts9.torso,Rect2(-17,-10.5,34,21),false,outfit.lightened(.4))
         draw_set_transform(Vector2.ZERO)
     draw_line(body-f*9,body+f*5,outfit.lightened(0.23),1.2,true)
     for side in [-1,1]:
@@ -83,6 +81,6 @@ func _draw() -> void:
     _oval(body+f*12,Vector2(3,5),Color(0.50,0.46,0.38),f.angle())
     if parts9.has("head"):
         draw_set_transform(body+f*6,heading+fall_angle*collapse+PI/2)
-        draw_texture_rect(parts9.head,Rect2(-8,-9,16,18),false,Color(.78,.79,.72))
+        draw_texture_rect(parts9.head,Rect2(-7,-8.5,14,17),false,Color(.78,.79,.72))
         draw_set_transform(Vector2.ZERO)
     if infected: draw_line(body+s*9-f*7,body+s*11+f*2,Color(0.25,0.07,0.055),3,true)

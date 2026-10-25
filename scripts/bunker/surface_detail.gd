@@ -9,8 +9,8 @@ func _draw() -> void:
     var half:=MATERIAL.get_size()*.5
     for f in L.FLOOR:
         var room: Rect2=f[0];var kind: String=f[1]
-        var cell:=Vector2(0,0) if kind in ["med","quarantine"] else (Vector2(0,1) if kind in ["lab","archive","observation"] else Vector2(1,0))
-        var r:=room.grow(-22)
+        var cell:=Vector2(0,0) if kind in ["med","quarantine"] else (Vector2(0,1) if kind in ["lab","archive","observation","office","staff"] else Vector2(1,0))
+        var r:=room.grow(-8)
         draw_texture_rect_region(MATERIAL,r,Rect2(cell*half,half),Color(.70,.75,.79))
         # Broad sealed edging and cable trench, not a small repeated tile grid.
         draw_rect(r,Color(.07,.11,.14,.55),false,6)
@@ -37,5 +37,5 @@ func _draw() -> void:
             draw_line(start,finish,Color(.025,.045,.06),5,true)
             draw_line(start-n,finish-n,Color(.35,.43,.48),1,true)
     # Floor directions and bay identifiers stay sparse and lie on the floor plane.
-    for datum in [[Vector2(250,700),"V–17  /  RECOVERY"],[Vector2(1780,515),"B–02  /  SECURITY"],[Vector2(1440,1540),"C–12  /  RESEARCH"],[Vector2(680,1680),"D–04  /  POWER"],[Vector2(700,2690),"Q–05  /  ISOLATION"]]:
-        draw_string(ThemeDB.fallback_font,datum[0],datum[1],HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color(.64,.73,.76,.4))
+    for datum in [[Vector2(250,700),"МЕДИЦИНСКИЙ БЛОК / V–17"],[Vector2(1780,515),"КОНТРОЛЬ ДОСТУПА"],[Vector2(1440,1540),"ЛАБОРАТОРИЯ / №12"],[Vector2(680,1680),"ТЕХНИЧЕСКИЙ СЕКТОР"],[Vector2(700,2690),"ИЗОЛЯЦИЯ"],[Vector2(2397,1030),"КАБИНЕТ ИССЛЕДОВАТЕЛЯ"],[Vector2(680,1120),"КОМНАТА ОТДЫХА"],[Vector2(1360,1100),"СЕРВЕРНЫЙ АРХИВ"]]:
+        draw_string(ThemeDB.fallback_font,datum[0],datum[1],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.70,.79,.82,.65))

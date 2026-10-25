@@ -11,7 +11,8 @@ static func build(prop: Dictionary) -> void:
     var key:=str(spr.texture.get_rid().get_id())+str(spr.texture.get_size())
     if spr.texture is AtlasTexture: key+=str(spr.texture.region)
     var contour:=PackedVector2Array()
-    if contours.has(key): contour=contours[key]
+    if prop.has("footprint10"): contour=prop.footprint10
+    elif contours.has(key): contour=contours[key]
     else:
         var image:=spr.texture.get_image()
         if image==null: return
@@ -42,7 +43,7 @@ static func build(prop: Dictionary) -> void:
     contact.show_behind_parent=true
     contact.z_index=-1
     spr.add_child(contact)
-    var tall: bool=prop["kind"] in ["cabinet","wall_storage","server","wall_server","generator","capsule","exp12_capsule","ventplant","shelf"]
+    var tall: bool=bool(prop.get("tall10",false)) or prop["kind"] in ["cabinet","wall_storage","server","wall_server","generator","capsule","exp12_capsule","ventplant","shelf"]
     prop["blocks_view7"]=tall
     if prop["solid"] or tall:
         var occ:=LightOccluder2D.new()

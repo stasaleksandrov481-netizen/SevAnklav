@@ -1,42 +1,70 @@
 extends "res://scripts/ui/viewport_control.gd"
 const V=preload("res://scripts/ui/visual_theme.gd")
 var b
+var panel: PanelContainer
+var content: VBoxContainer
+var closing:=false
+var clock:=0.0
+var signal_view: Control
+var confirmation:=""
 func _ready() -> void:
-    super._ready()
-    mouse_filter=MOUSE_FILTER_STOP
-    var shade:=ColorRect.new();shade.color=Color(0.003,0.009,0.015,0.93);shade.set_anchors_preset(PRESET_FULL_RECT);add_child(shade)
-    var margin:=MarginContainer.new();margin.set_anchors_preset(PRESET_FULL_RECT)
-    for edge in ["left","right","top","bottom"]: margin.add_theme_constant_override("margin_"+edge,36)
-    add_child(margin)
-    var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;margin.add_child(scroll)
-    var root:=VBoxContainer.new();root.size_flags_horizontal=SIZE_EXPAND_FILL;root.add_theme_constant_override("separation",18);scroll.add_child(root)
-    root.add_child(ZUI.label("СЕВЕРНЫЙ АНКЛАВ  /  ОБЪЕКТ ЗАРЯ",13,ZUI.ICE))
-    root.add_child(ZUI.label("ПАУЗА",40,ZUI.TEXT))
-    root.add_child(ZUI.label("Контрольная точка сохранена",14,ZUI.MUTED))
-    _button(root,"ПРОДОЛЖИТЬ",func(): queue_free())
-    var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",V.panel(Color(0.024,0.043,0.055),Color(0.18,0.32,0.39),18));root.add_child(card)
-    var options:=VBoxContainer.new();options.add_theme_constant_override("separation",12);card.add_child(options)
-    options.add_child(ZUI.label("ЗВУК И ИЗОБРАЖЕНИЕ",16,ZUI.ICE))
-    _slider(options,"Музыка",G.music_vol,0,1,func(v): G.set_music_vol(v))
-    _slider(options,"Звуки",G.sfx_vol,0,1,func(v): G.set_sfx_vol(v))
-    var prefs: Dictionary=G.zsave.get("bunker_visual",{})
-    _slider(options,"Яркость",float(prefs.get("brightness",1.0)),0.75,1.3,func(v):
-        var visual: Dictionary=G.zsave.get("bunker_visual",{});visual["brightness"]=v;G.zsave["bunker_visual"]=visual)
-    var full:=CheckButton.new();full.text="Полный экран";full.button_pressed=G.fullscreen;full.toggled.connect(func(on): G.set_fullscreen(on));options.add_child(full)
-    var controls:=PanelContainer.new();controls.add_theme_stylebox_override("panel",V.panel(Color(0.018,0.032,0.041),Color(0.14,0.25,0.30),18));root.add_child(controls)
-    var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",32);grid.add_theme_constant_override("v_separation",9);controls.add_child(grid)
-    for entry in [["WASD / ЛЕВЫЙ СТИК","Движение"],["МЫШЬ / ПРАВЫЙ СТИК","Прицеливание"],["E / ДЕЙСТВИЕ","Взаимодействие"],["R","Перезарядка"],["F","Фонарь"],["ESC","Продолжить"]]:
-        grid.add_child(ZUI.label(entry[0],12,ZUI.ICE));grid.add_child(ZUI.label(entry[1],14,ZUI.TEXT))
-    _button(root,"СОХРАНИТЬ И ВЫЙТИ В МЕНЮ",func(): b._save_checkpoint();b.main_ref.to_main_menu())
-    modulate.a=0;create_tween().tween_property(self,"modulate:a",1.0,0.18)
-func _button(root: VBoxContainer,text: String,callback: Callable) -> void:
-    var button:=Button.new();button.text=text;button.custom_minimum_size.y=54
-    button.add_theme_stylebox_override("normal",V.panel(Color(0.04,0.08,0.10),Color(0.28,0.47,0.52),14))
-    button.add_theme_stylebox_override("hover",V.panel(Color(0.08,0.15,0.18),Color(0.52,0.72,0.73),14));button.pressed.connect(callback);root.add_child(button)
-func _slider(root: VBoxContainer,title: String,value: float,lo: float,hi: float,callback: Callable) -> void:
-    var label:=ZUI.label(title+"  %d%%"%roundi(value*100),14,ZUI.MUTED);root.add_child(label)
-    var slider:=HSlider.new();slider.min_value=lo;slider.max_value=hi;slider.step=0.01;slider.value=value;slider.custom_minimum_size.y=26;root.add_child(slider)
-    slider.value_changed.connect(func(v): label.text=title+"  %d%%"%roundi(v*100);callback.call(v))
+    process_mode=Node.PROCESS_MODE_ALWAYS;super._ready();mouse_filter=MOUSE_FILTER_STOP
+    var shade:=ColorRect.new();shade.set_anchors_preset(PRESET_FULL_RECT);add_child(shade)
+    var shader:=Shader.new();shader.code="shader_type canvas_item; uniform sampler2D screen_tex: hint_screen_texture, filter_linear; void fragment(){vec3 c=texture(screen_tex,SCREEN_UV).rgb;float g=dot(c,vec3(.2126,.7152,.0722));COLOR=vec4(mix(c,vec3(g),.55)*.68,1.0);}"
+    var material:=ShaderMaterial.new();material.shader=shader;shade.material=material
+    panel=PanelContainer.new();panel.add_theme_stylebox_override("panel",V.panel(Color(.055,.08,.10,.94),Color(.42,.58,.64,.45),24));add_child(panel)
+    content=VBoxContainer.new();content.add_theme_constant_override("separation",12);panel.add_child(content)
+    content.add_child(ZUI.label("V–17 / ЛОКАЛЬНАЯ НЕЙРОСВЯЗЬ",12,V.ICE))
+    content.add_child(ZUI.label("Замерший сигнал",28,V.TEXT))
+    content.add_child(ZUI.label("Симуляция остановлена. Канал удерживается.",13,V.MUTED))
+    signal_view=SignalTrace.new();signal_view.custom_minimum_size=Vector2(0,80);content.add_child(signal_view)
+    for entry in [["Продолжить",resume],["Настройки",settings],["Загрузить контрольную точку",func(): confirm("checkpoint")],["Главное меню",func(): confirm("menu")]]:
+        var button:=V.button(entry[0]);button.custom_minimum_size.y=48;button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.pressed.connect(entry[1]);content.add_child(button)
+    _fit_viewport();modulate.a=0;create_tween().tween_property(self,"modulate:a",1,.16)
+func _fit_viewport() -> void:
+    super._fit_viewport()
+    if panel!=null:
+        panel.size=Vector2(470,minf(530,size.y-40));panel.position=Vector2(clampf(size.x*.62,24,size.x-panel.size.x-24),(size.y-panel.size.y)*.5)
+func settings() -> void:
+    if confirmation!="": return
+    var screen:=preload("res://scripts/ui/v10/settings.gd").new();screen.b=b;b.ui_layer.add_child(screen);b._freeze_ui10(screen)
+func confirm(action: String) -> void:
+    if confirmation!="": return
+    confirmation=action
+    var screen:=preload("res://scripts/ui/v10/field_panel.gd").new();screen.caption="ПОДТВЕРЖДЕНИЕ";screen.extent=Vector2(580,330);b.ui_layer.add_child(screen);b._freeze_ui10(screen)
+    var text: String="Прогресс после последней контрольной точки будет заменён её состоянием." if action=="checkpoint" else "Выйти в главное меню? Текущее состояние будет сохранено."
+    screen.column.add_child(ZUI.wrap_label(text,18,V.TEXT,0))
+    var accept:=V.button("ЗАГРУЗИТЬ" if action=="checkpoint" else "СОХРАНИТЬ И ВЫЙТИ");accept.custom_minimum_size.y=50;screen.column.add_child(accept)
+    screen.tree_exiting.connect(func(): confirmation="")
+    accept.pressed.connect(func():
+        accept.disabled=true
+        if action=="checkpoint": b._reload_checkpoint10()
+        else: b._save_checkpoint();get_tree().paused=false;b.main_ref.to_main_menu())
+func resume() -> void:
+    if closing or confirmation!="": return
+    closing=true
+    signal_view.running=true
+    var tw:=create_tween();tw.tween_property(self,"modulate:a",0,.16);tw.tween_callback(queue_free)
 func _unhandled_key_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
-        get_viewport().set_input_as_handled();queue_free()
+        get_viewport().set_input_as_handled();resume()
+class SignalTrace extends Control:
+    var running:=false
+    var phase:=0.0
+    func _process(delta: float) -> void:
+        phase+=delta
+        if running or int(phase*8)!=int((phase-delta)*8): queue_redraw()
+    func _draw() -> void:
+        var points:=PackedVector2Array()
+        for i in range(100):
+            var x:=float(i)/99.0*size.x
+            var p:=sin(float(i)*.10)*1.5
+            if i%37==17: p=-12
+            if i%37==18: p=22
+            if i%37==19: p=-5
+            if running: p+=sin(float(i)*.25+phase*9)*2
+            points.append(Vector2(x,38+p))
+        draw_line(Vector2(0,38),Vector2(size.x,38),Color(.2,.36,.43,.4),1)
+        draw_polyline(points,Color(.6,.79,.84,.85),1.5,true)
+        draw_circle(Vector2(size.x-2,38+sin(phase)*1.5),2,Color(.66,.84,.87,.65+.15*sin(phase)))
+        draw_string(ThemeDB.fallback_font,Vector2(0,74),"СИГНАЛ ВОССТАНАВЛИВАЕТСЯ" if running else "ПОТОК ЗАФИКСИРОВАН",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color(.49,.66,.74))
