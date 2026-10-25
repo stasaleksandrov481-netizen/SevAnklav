@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1"]
+[ext_resource type="PackedScene" path="res://iso/buildings/bunker_start.tscn" id="2"]
+[ext_resource type="Script" path="res://iso/underground_surround.gd" id="3"]
+
+[node name="Sector_55_45" type="Node3D"]
+script = ExtResource("1")
+ground_kind = 1
+ground_enabled = false
+
+[node name="UndergroundSurround" type="Node3D" parent="."]
+script = ExtResource("3")
+
+[node name="Bunker" parent="." instance=ExtResource("2")]
+position = Vector3(20, 0, 20)

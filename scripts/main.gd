@@ -513,14 +513,11 @@ func _to_main_menu() -> void:
 		add_child(mm)
 		mm.play_pressed.connect(func():
 				G.play_sfx("ui_click", -6.0)
-				pending_new_z = true
-				_open_campaign_select(mm))
+				start_new_iso_campaign())
 		mm.continue_pressed.connect(func():
-				pending_new_z = false
-				start_z_campaign())
+				continue_iso_campaign())
 		mm.load_pressed.connect(func():
-				pending_new_z = false
-				_open_campaign_select(mm))
+				continue_iso_campaign())
 		mm.mil_pressed.connect(func():
 				G.play_sfx("ui_click", -6.0)
 				_open_terminal(mm))
@@ -533,6 +530,43 @@ func _to_main_menu() -> void:
 		mm.quit_pressed.connect(func():
 				G.write_save()
 				get_tree().quit())
+
+func start_new_iso_campaign() -> void:
+		G.zsave = G._default_zsave()
+		G.zsave["iso_active"] = true
+		G.zsave["iso_layer"] = "bunker"
+		G.write_save()
+		_flash_warning_done()
+
+func continue_iso_campaign() -> void:
+		if not bool(G.zsave.get("seen_prologue", false)):
+			_flash_warning_done()
+			return
+		_enter_iso_world()
+
+func _enter_iso_world() -> void:
+		_clear()
+		var saved_position: Variant = G.zsave.get("iso_position", Vector3(3547, 0.95, 2892))
+		var spawn_at: Vector3 = saved_position if saved_position is Vector3 else Vector3(3547, 0.95, 2892)
+		var scene_path := "res://iso/bunker_world.tscn" if str(G.zsave.get("iso_layer", "bunker")) == "bunker" else "res://iso/city_world.tscn"
+		var world: Node3D = (load(scene_path) as PackedScene).instantiate() as Node3D
+		world.get_node("Volkov").position = spawn_at
+		current_screen = world
+		add_child(world)
+		var campaign_ui := preload("res://iso/campaign_hud.gd").new()
+		campaign_ui.name = "CampaignHUD"
+		world.add_child(campaign_ui)
+
+func enter_surface_world() -> void:
+		G.zsave["iso_layer"] = "surface"
+		G.write_save()
+		_enter_iso_world()
+
+func start_world_atlas() -> void:
+		_clear()
+		var atlas := preload("res://iso/atlas/world_atlas.tscn").instantiate()
+		current_screen = atlas
+		add_child(atlas)
 
 
 # ================= ВЫБОР КАМПАНИИ (FIX7v2: одна кнопка ИГРАТЬ) =================
@@ -1029,18 +1063,11 @@ func _prologue_done() -> void:
 				G.zsave["pstate"] = Med.mk_state()
 				G.zsave["infect"] = 0.0
 				G.write_save()
-				_clear()
-				battle_node = null
-				var b = BunkerStory.new()
-				battle_node = b
-				b.setup({
-								"sector_idx": 0,
-								"mission": "bunker",
-								"sector_name": "СЕКТОР 1: БУНКЕР «ЗАРЯ»",
-				})
-				b.main_ref = self
-				current_screen = b
-				add_child(b)
+				G.zsave["iso_active"] = true
+				G.zsave["iso_layer"] = "bunker"
+				G.zsave["iso_position"] = Vector3(3547, 0.95, 2892)
+				G.write_save()
+				_enter_iso_world()
 
 func _to_zcampaign_map() -> void:
 		await show_loading("Сборка карты секторов…", 0.4)

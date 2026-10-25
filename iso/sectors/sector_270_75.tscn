@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1_bbcjq"]
+[ext_resource type="Script" path="res://iso/tree.gd" id="2_4kreh"]
+
+[node name="Sector_270_75" type="Node3D" unique_id=423410266]
+script = ExtResource("1_bbcjq")
+ground_kind = 3
+
+[node name="Tree_4537" type="Node3D" parent="." unique_id=447584315]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.56194, 0, 4.0401244)
+script = ExtResource("2_4kreh")
+height = 5.680000000000001
+variation = 4537
+
+[node name="Tree_4538" type="Node3D" parent="." unique_id=536512567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.096478, 0, 45.870125)
+script = ExtResource("2_4kreh")
+height = 5.960000000000001
+variation = 4538
+
+[node name="Tree_4539" type="Node3D" parent="." unique_id=346458226]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.78273, 0, 17.683626)
+script = ExtResource("2_4kreh")
+height = 6.24
+variation = 4539
+
+[node name="Tree_4540" type="Node3D" parent="." unique_id=467343880]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.771233, 0, 38.857613)
+script = ExtResource("2_4kreh")
+height = 6.5200000000000005
+variation = 4540
+
+[node name="Tree_4541" type="Node3D" parent="." unique_id=1985658158]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.912525, 0, 23.441118)
+script = ExtResource("2_4kreh")
+height = 6.800000000000001
+variation = 4541

@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1_iv0ee"]
+[ext_resource type="Script" path="res://iso/city_building.gd" id="2_p2085"]
+[ext_resource type="Shader" path="res://iso/surface.gdshader" id="3_ne8c4"]
+[ext_resource type="Texture2D" path="res://assets/iso/asphalt.png" id="4_imb5w"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7yxat"]
+albedo_color = Color(0.32941177, 0.32941177, 0.31764707, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_edmmb"]
+size = Vector3(18, 0.05, 18)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1p10v"]
+size = Vector3(18, 0.05, 18)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e6ttt"]
+render_priority = 0
+shader = ExtResource("3_ne8c4")
+shader_parameter/albedo_texture = ExtResource("4_imb5w")
+shader_parameter/tint = Color(0.68, 0.72, 0.73, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jmg05"]
+size = Vector3(27, 0.05, 27)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4yvvl"]
+albedo_color = Color(0.77254903, 0.77254903, 0.7019608, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o4tcj"]
+size = Vector3(0.65, 0.01, 9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q6i13"]
+size = Vector3(0.65, 0.01, 9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p2ih0"]
+size = Vector3(6.4, 0.01, 0.7)
+
+[node name="Sector_250_30" type="Node3D" unique_id=1886039093]
+script = ExtResource("1_iv0ee")
+ground_kind = 1
+
+[node name="BuildingPad_2" type="MeshInstance3D" parent="." unique_id=1492535637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.025, 49)
+material_override = SubResource("StandardMaterial3D_7yxat")
+mesh = SubResource("BoxMesh_edmmb")
+
+[node name="Facility_2" type="Node3D" parent="." unique_id=1099919229]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 49)
+script = ExtResource("2_p2085")
+style = 2
+width = 10.711207
+depth = 11.623704
+
+[node name="BuildingPad_3" type="MeshInstance3D" parent="." unique_id=1699983760]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 0.025, 49)
+material_override = SubResource("StandardMaterial3D_7yxat")
+mesh = SubResource("BoxMesh_1p10v")
+
+[node name="Facility_3" type="Node3D" parent="." unique_id=1412256440]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49, 0, 49)
+script = ExtResource("2_p2085")
+style = 3
+width = 10.6919565
+depth = 9.715869
+
+[node name="LandingApron" type="MeshInstance3D" parent="." unique_id=1896354373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.035, 32)
+material_override = SubResource("ShaderMaterial_e6ttt")
+mesh = SubResource("BoxMesh_jmg05")
+
+[node name="HelipadH" type="MeshInstance3D" parent="." unique_id=330391238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.2, 0.07, 32)
+material_override = SubResource("StandardMaterial3D_4yvvl")
+mesh = SubResource("BoxMesh_o4tcj")
+
+[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=1639744098]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.8, 0.07, 32)
+material_override = SubResource("StandardMaterial3D_4yvvl")
+mesh = SubResource("BoxMesh_q6i13")
+
+[node name="HelipadCrossbar" type="MeshInstance3D" parent="." unique_id=196396768]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.075, 32)
+material_override = SubResource("StandardMaterial3D_4yvvl")
+mesh = SubResource("BoxMesh_p2ih0")

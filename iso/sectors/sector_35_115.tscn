@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1_1rgw1"]
+[ext_resource type="Script" path="res://iso/city_building.gd" id="2_kdijr"]
+[ext_resource type="Script" path="res://iso/tree.gd" id="3_ggcc6"]
+
+[node name="Sector_35_115" type="Node3D" unique_id=2089690869]
+script = ExtResource("1_1rgw1")
+ground_kind = 3
+
+[node name="House_0" type="Node3D" parent="." unique_id=2027788540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 14)
+script = ExtResource("2_kdijr")
+width = 9.0
+depth = 8.0
+floors = 1
+
+[node name="House_1" type="Node3D" parent="." unique_id=1505636420]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31, 0, 50)
+script = ExtResource("2_kdijr")
+width = 9.0
+depth = 8.0
+floors = 1
+
+[node name="House_2" type="Node3D" parent="." unique_id=72815573]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0, 14)
+script = ExtResource("2_kdijr")
+width = 9.0
+depth = 8.0
+floors = 1
+
+[node name="Tree_7968" type="Node3D" parent="." unique_id=1547434520]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.77697, 0, 52.833397)
+script = ExtResource("3_ggcc6")
+height = 5.4
+variation = 7968
+
+[node name="Tree_7969" type="Node3D" parent="." unique_id=1919709333]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.39991, 0, 50.53409)
+script = ExtResource("3_ggcc6")
+height = 5.680000000000001
+variation = 7969
+
+[node name="Tree_7970" type="Node3D" parent="." unique_id=321538367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.295017, 0, 35.705177)
+script = ExtResource("3_ggcc6")
+height = 5.960000000000001
+variation = 7970
+
+[node name="Tree_7971" type="Node3D" parent="." unique_id=1343684052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.981669, 0, 49.997063)
+script = ExtResource("3_ggcc6")
+height = 6.24
+variation = 7971

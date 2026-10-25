@@ -1,0 +1,176 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://iso/atlas/world_atlas.gd" id="1_vw3jp"]
+[ext_resource type="Script" path="res://iso/atlas/atlas_path.gd" id="2_mghqd"]
+[ext_resource type="Script" path="res://iso/atlas/atlas_marker.gd" id="3_xh2pv"]
+
+[sub_resource type="Curve2D" id="Curve2D_rh0pi"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 525, -70.200005, -4.86, 70.200005, 4.86, 200, 527, -65.700005, -8.64, 65.700005, 8.64, 390, 552, -64.8, -5.94, 64.8, 5.94, 565, 575, -66.600006, -2.7, 66.600006, 2.7, 750, 585, -95.4, 0, 95.4, 0, 935, 590, 0, 0, 0, 0, 1280, 585)
+}
+point_count = 7
+
+[sub_resource type="Curve2D" id="Curve2D_jvryv"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 350, -68.4, 11.700001, 68.4, -11.700001, 200, 340, -59.4, 20.7, 59.4, -20.7, 380, 285, -57.600002, 17.1, 57.600002, -17.1, 530, 225, -60.300003, 10.26, 60.300003, -10.26, 700, 190, -88.200005, -4.5, 88.200005, 4.5, 865, 168, 0, 0, 0, 0, 1190, 215)
+}
+point_count = 7
+
+[sub_resource type="Curve2D" id="Curve2D_kot2m"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 220, 180, -28.800001, -18.900002, 28.800001, 18.900002, 290, 205, 0, 0, 0, 0, 380, 285)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_hh00v"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 480, 335, -54.000004, 8.1, 54.000004, -8.1, 570, 295, -59.4, -10.8, 59.4, 10.8, 780, 290, -25.2, -40.5, 25.2, 40.5, 900, 355, 13.500001, -37.800003, -13.500001, 37.800003, 920, 515, 64.8, -6.3, -64.8, 6.3, 825, 565, 63.000004, 20.7, -63.000004, -20.7, 560, 550, 14.400001, 38.7, -14.400001, -38.7, 475, 450, 0, 0, 0, 0, 480, 335)
+}
+point_count = 9
+
+[sub_resource type="Curve2D" id="Curve2D_mu8ms"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 900, 355, -52.2, 25.2, 52.2, -25.2, 1025, 275, 0, 0, 0, 0, 1190, 215)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_kxfkc"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 650, 550, -20.7, -36.9, 20.7, 36.9, 670, 625, -48.600002, -44.100002, 48.600002, 44.100002, 765, 755, 0, 0, 0, 0, 940, 870)
+}
+point_count = 4
+
+[sub_resource type="Curve2D" id="Curve2D_jqm6r"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 80, 470, -55.800003, -14.76, 55.800003, 14.76, 230, 445, 0, 0, 0, 0, 390, 552)
+}
+point_count = 3
+
+[node name="WorldAtlas" type="Node2D" unique_id=886703161]
+script = ExtResource("1_vw3jp")
+
+[node name="Camera" type="Camera2D" parent="." unique_id=1367091037]
+position = Vector2(640, 480)
+zoom = Vector2(0.88, 0.88)
+
+[node name="EditableZones" type="Node2D" parent="." unique_id=2037452126]
+
+[node name="Severograd" type="Polygon2D" parent="EditableZones" unique_id=1746048389]
+color = Color(0.55, 0.6, 0.64, 0.2)
+polygon = PackedVector2Array(475, 300, 855, 285, 940, 555, 510, 560)
+
+[node name="NorthernLake" type="Polygon2D" parent="EditableZones" unique_id=1042343019]
+color = Color(0.12, 0.39, 0.56, 0.22)
+polygon = PackedVector2Array(540, 20, 730, 5, 785, 130, 685, 175, 560, 145)
+
+[node name="WesternLake" type="Polygon2D" parent="EditableZones" unique_id=790890539]
+color = Color(0.12, 0.39, 0.56, 0.22)
+polygon = PackedVector2Array(140, 350, 300, 320, 380, 385, 310, 460, 160, 455)
+
+[node name="SouthernReservoir" type="Polygon2D" parent="EditableZones" unique_id=337633841]
+color = Color(0.12, 0.39, 0.56, 0.25)
+polygon = PackedVector2Array(540, 620, 745, 600, 900, 700, 825, 795, 610, 775)
+
+[node name="MilitaryBase" type="Polygon2D" parent="EditableZones" unique_id=1410405346]
+color = Color(0.34, 0.41, 0.42, 0.25)
+polygon = PackedVector2Array(870, 35, 1140, 35, 1160, 180, 860, 180)
+
+[node name="Quarantine" type="Polygon2D" parent="EditableZones" unique_id=1563092183]
+color = Color(0.6, 0.12, 0.12, 0.3)
+polygon = PackedVector2Array(990, 200, 1220, 215, 1265, 360, 1140, 425, 950, 355)
+
+[node name="SouthwestFarms" type="Polygon2D" parent="EditableZones" unique_id=1078115938]
+color = Color(0.49, 0.41, 0.22, 0.25)
+polygon = PackedVector2Array(80, 550, 350, 570, 330, 730, 90, 705)
+
+[node name="EditableRoads" type="Node2D" parent="." unique_id=2074900153]
+
+[node name="M7_Highway" type="Path2D" parent="EditableRoads" unique_id=2051176422]
+curve = SubResource("Curve2D_rh0pi")
+script = ExtResource("2_mghqd")
+line_color = Color(0.83137256, 0.78431374, 0.7019608, 1)
+road_width = 6.0
+
+[node name="NorthernRoute" type="Path2D" parent="EditableRoads" unique_id=1148448030]
+curve = SubResource("Curve2D_jvryv")
+script = ExtResource("2_mghqd")
+line_color = Color(0.77254903, 0.7490196, 0.6862745, 1)
+
+[node name="BunkerApproach" type="Path2D" parent="EditableRoads" unique_id=1516613227]
+curve = SubResource("Curve2D_kot2m")
+script = ExtResource("2_mghqd")
+line_color = Color(0.69803923, 0.72156864, 0.6784314, 1)
+road_width = 3.0
+
+[node name="CityRing" type="Path2D" parent="EditableRoads" unique_id=839214722]
+curve = SubResource("Curve2D_hh00v")
+script = ExtResource("2_mghqd")
+line_color = Color(0.78431374, 0.7647059, 0.7176471, 1)
+
+[node name="EastConnection" type="Path2D" parent="EditableRoads" unique_id=641935734]
+curve = SubResource("Curve2D_mu8ms")
+script = ExtResource("2_mghqd")
+line_color = Color(0.72156864, 0.72156864, 0.6784314, 1)
+
+[node name="DamRoad" type="Path2D" parent="EditableRoads" unique_id=335810486]
+curve = SubResource("Curve2D_kxfkc")
+script = ExtResource("2_mghqd")
+line_color = Color(0.72156864, 0.72156864, 0.6784314, 1)
+road_width = 3.0
+
+[node name="VillageRoad" type="Path2D" parent="EditableRoads" unique_id=909325785]
+curve = SubResource("Curve2D_jqm6r")
+script = ExtResource("2_mghqd")
+line_color = Color(0.72156864, 0.72156864, 0.6784314, 1)
+road_width = 3.0
+
+[node name="Markers" type="Node2D" parent="." unique_id=861917361]
+
+[node name="Severograd" type="Node2D" parent="Markers" unique_id=2043117881]
+position = Vector2(640, 420)
+script = ExtResource("3_xh2pv")
+title = "Североград · игровая заготовка"
+playable_scene = "res://iso/city_world.tscn"
+
+[node name="BunkerHorizon" type="Node2D" parent="Markers" unique_id=1905949838]
+position = Vector2(220, 180)
+script = ExtResource("3_xh2pv")
+title = "Бункер Горизонт · игровая заготовка"
+kind = 1
+playable_scene = "res://iso/bunker_world.tscn"
+
+[node name="MilitaryNorth" type="Node2D" parent="Markers" unique_id=1486561578]
+position = Vector2(1000, 125)
+script = ExtResource("3_xh2pv")
+title = "Военная база Северная"
+kind = 2
+
+[node name="RedForest" type="Node2D" parent="Markers" unique_id=1393201105]
+position = Vector2(1080, 310)
+script = ExtResource("3_xh2pv")
+title = "Рыжий Лес · карантин"
+kind = 3
+
+[node name="Farm" type="Node2D" parent="Markers" unique_id=1062410173]
+position = Vector2(185, 640)
+script = ExtResource("3_xh2pv")
+title = "Фермы Зеленые Луга"
+kind = 4
+
+[node name="Dam" type="Node2D" parent="Markers" unique_id=2143616504]
+position = Vector2(780, 760)
+script = ExtResource("3_xh2pv")
+title = "ГЭС Сосновая"
+kind = 5
+
+[node name="WestVillage" type="Node2D" parent="Markers" unique_id=1167671722]
+position = Vector2(185, 465)
+script = ExtResource("3_xh2pv")
+title = "Деревня Сосновка"
+kind = 4
+
+[node name="EasternPower" type="Node2D" parent="Markers" unique_id=177073412]
+position = Vector2(1000, 580)
+script = ExtResource("3_xh2pv")
+title = "АЭС Рассвет"
+kind = 5

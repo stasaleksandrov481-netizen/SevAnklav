@@ -1,0 +1,78 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1"]
+[ext_resource type="Script" path="res://iso/road.gd" id="2"]
+[ext_resource type="Script" path="res://iso/city_building.gd" id="3"]
+[ext_resource type="Script" path="res://iso/tree.gd" id="4"]
+
+[node name="Sector_161_105" type="Node3D"]
+script = ExtResource("1")
+ground_kind = 3
+
+[node name="StreetEastWest" type="Node3D" parent="."]
+position = Vector3(32, 0, 32)
+script = ExtResource("2")
+direction = 0
+width = 12
+
+[node name="StreetNorthSouth" type="Node3D" parent="."]
+position = Vector3(32, 0, 32)
+script = ExtResource("2")
+direction = 1
+width = 8
+
+[node name="Building1" type="Node3D" parent="."]
+position = Vector3(14, 0, 14)
+script = ExtResource("3")
+style = 2
+width = 16
+depth = 14
+floors = 1
+
+[node name="Building2" type="Node3D" parent="."]
+position = Vector3(50, 0, 14)
+script = ExtResource("3")
+style = 3
+width = 12
+depth = 11
+floors = 3
+
+[node name="Building3" type="Node3D" parent="."]
+position = Vector3(14, 0, 50)
+script = ExtResource("3")
+style = 0
+width = 12
+depth = 11
+floors = 2
+
+[node name="Building4" type="Node3D" parent="."]
+position = Vector3(50, 0, 50)
+script = ExtResource("3")
+style = 1
+width = 12
+depth = 11
+floors = 2
+
+[node name="Tree1" type="Node3D" parent="."]
+position = Vector3(4, 0, 4)
+script = ExtResource("4")
+height = 3.8
+variation = 162050
+
+[node name="Tree2" type="Node3D" parent="."]
+position = Vector3(60, 0, 4)
+script = ExtResource("4")
+height = 4.4
+variation = 162051
+
+[node name="Tree3" type="Node3D" parent="."]
+position = Vector3(4, 0, 60)
+script = ExtResource("4")
+height = 5.0
+variation = 162052
+
+[node name="Tree4" type="Node3D" parent="."]
+position = Vector3(60, 0, 60)
+script = ExtResource("4")
+height = 3.8
+variation = 162053

@@ -37,7 +37,7 @@ func _ready() -> void:
     canvas.add_child(bg)
     var callbacks := [func(): continue_pressed.emit(), func(): play_pressed.emit(), func(): load_pressed.emit(), func(): settings_pressed.emit(), func(): quit_pressed.emit()]
     var labels := ["Продолжить", "Новая игра", "Загрузить игру", "Настройки", "Выход"]
-    for i in range(5):
+    for i in range(callbacks.size()):
         var b := Button.new()
         b.tooltip_text = labels[i]
         b.accessibility_name = labels[i]

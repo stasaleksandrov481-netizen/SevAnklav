@@ -1,0 +1,139 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://iso/sector.gd" id="1_s7nn2"]
+[ext_resource type="Shader" path="res://iso/surface.gdshader" id="2_mwt56"]
+[ext_resource type="Texture2D" path="res://assets/iso/grass_soil.png" id="3_hgvkb"]
+[ext_resource type="Script" path="res://iso/city_building.gd" id="4_hwxw8"]
+[ext_resource type="Script" path="res://iso/tree.gd" id="5_tbiw2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lilhh"]
+render_priority = 0
+shader = ExtResource("2_mwt56")
+shader_parameter/albedo_texture = ExtResource("3_hgvkb")
+shader_parameter/tint = Color(0.58, 0.45, 0.34, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_287gb"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5bjsw"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5tgqx"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nrtgo"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2s1fg"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p76n1"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vlsbe"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lsfvx"]
+size = Vector3(52, 0.04, 2.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_smui0"]
+cull_mode = 2
+albedo_color = Color(0.3764706, 0.45490196, 0.29803923, 1)
+roughness = 0.98
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hkrxc"]
+material = SubResource("StandardMaterial3D_smui0")
+top_radius = 0.06
+bottom_radius = 0.22
+height = 0.75
+radial_segments = 4
+
+[sub_resource type="MultiMesh" id="MultiMesh_af84g"]
+transform_format = 1
+instance_count = 368
+mesh = SubResource("CylinderMesh_hkrxc")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_detyv"]
+albedo_color = Color(0.43137255, 0.4627451, 0.4392157, 1)
+metallic = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_3gn2b"]
+top_radius = 2.1
+bottom_radius = 2.1
+height = 7.0
+
+[node name="Sector_42_155" type="Node3D" unique_id=723761821]
+script = ExtResource("1_s7nn2")
+ground_kind = 3
+
+[node name="Furrow_0" type="MeshInstance3D" parent="." unique_id=119378265]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 6)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_287gb")
+
+[node name="Furrow_1" type="MeshInstance3D" parent="." unique_id=163544208]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 13)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_5bjsw")
+
+[node name="Furrow_2" type="MeshInstance3D" parent="." unique_id=2298054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 20)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_5tgqx")
+
+[node name="Furrow_3" type="MeshInstance3D" parent="." unique_id=1187844959]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 27)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_nrtgo")
+
+[node name="Furrow_4" type="MeshInstance3D" parent="." unique_id=1354848934]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 34)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_2s1fg")
+
+[node name="Furrow_5" type="MeshInstance3D" parent="." unique_id=1465078189]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 41)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_p76n1")
+
+[node name="Furrow_6" type="MeshInstance3D" parent="." unique_id=860767770]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 48)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_vlsbe")
+
+[node name="Furrow_7" type="MeshInstance3D" parent="." unique_id=973215326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.02, 55)
+material_override = SubResource("ShaderMaterial_lilhh")
+mesh = SubResource("BoxMesh_lsfvx")
+
+[node name="CropPlants" type="MultiMeshInstance3D" parent="." unique_id=1610092237]
+multimesh = SubResource("MultiMesh_af84g")
+
+[node name="Farmhouse" type="Node3D" parent="." unique_id=455227722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 19)
+script = ExtResource("4_hwxw8")
+
+[node name="Barn" type="Node3D" parent="." unique_id=52024864]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0, 42)
+script = ExtResource("4_hwxw8")
+style = 2
+width = 18.0
+depth = 14.0
+floors = 1
+
+[node name="GrainSilo" type="MeshInstance3D" parent="." unique_id=1283939531]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 3.5, 16)
+material_override = SubResource("StandardMaterial3D_detyv")
+mesh = SubResource("CylinderMesh_3gn2b")
+
+[node name="Tree_269" type="Node3D" parent="." unique_id=49211589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.208492, 0, 15.170406)
+script = ExtResource("5_tbiw2")
+height = 6.800000000000001
+variation = 269
+
+[node name="Tree_270" type="Node3D" parent="." unique_id=1558202989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 51.02619, 0, 33.80452)
+script = ExtResource("5_tbiw2")
+height = 7.08
+variation = 270

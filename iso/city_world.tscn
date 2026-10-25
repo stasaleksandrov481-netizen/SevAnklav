@@ -1,0 +1,71 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://iso/world_stream.gd" id="1"]
+[ext_resource type="Script" path="res://iso/room.gd" id="2"]
+[ext_resource type="Script" path="res://iso/prop.gd" id="3"]
+[ext_resource type="Script" path="res://iso/volkov_3d.gd" id="4"]
+[ext_resource type="Script" path="res://iso/camera_3d.gd" id="5"]
+[ext_resource type="PackedScene" path="res://iso/touch_controls.tscn" id="6"]
+[ext_resource type="Script" path="res://iso/volkov_visual.gd" id="7"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
+radius = 0.34
+height = 1.78
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.34
+height = 1.78
+
+[sub_resource type="StandardMaterial3D" id="Uniform"]
+albedo_color = Color(0.19, 0.25, 0.28, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(48, 0.12, 40)
+
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(48, 0.12, 40)
+
+[node name="SeverogradWorld" type="Node3D"]
+script = ExtResource("1")
+lighting_profile = 1
+
+[node name="Sectors" type="Node3D" parent="."]
+
+[node name="Volkov" type="CharacterBody3D" parent="."]
+position = Vector3(10272, 0.95, 6752)
+script = ExtResource("4")
+
+[node name="Collision" type="CollisionShape3D" parent="Volkov"]
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="Visual" type="Node3D" parent="Volkov"]
+script = ExtResource("7")
+
+[node name="Camera" type="Camera3D" parent="."]
+script = ExtResource("5")
+target_path = NodePath("../Volkov")
+current = true
+initial_size = 36.0
+
+[node name="Ambient" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.75, -0.6, 0)
+light_energy = 0.48
+shadow_enabled = true
+
+[node name="EmergencyLight" type="OmniLight3D" parent="."]
+position = Vector3(6, 2.4, 0)
+light_color = Color(1, 0.14, 0.08, 1)
+light_energy = 0.7
+omni_range = 6.0
+
+[node name="Help" type="CanvasLayer" parent="."]
+
+[node name="Controls" type="Label" parent="Help"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 560.0
+offset_bottom = 54.0
+text = "СЕВЕРОГРАД · ИЗОМЕТРИЧЕСКИЙ МИР · WASD — движение · Shift — бег · колесо — масштаб"
+
+[node name="TouchControls" parent="." instance=ExtResource("6")]

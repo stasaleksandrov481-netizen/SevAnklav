@@ -1,0 +1,253 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://iso/room.gd" id="2"]
+[ext_resource type="Script" path="res://iso/prop.gd" id="3"]
+[ext_resource type="Script" path="res://iso/bunker_detail.gd" id="4"]
+[ext_resource type="Script" path="res://iso/story_point.gd" id="5"]
+[ext_resource type="Script" path="res://iso/capsule.gd" id="6"]
+
+[node name="BunkerStart" type="Node3D"]
+
+[node name="Lab" type="Node3D" parent="."]
+position = Vector3(-7.5, 0, -8)
+script = ExtResource("2")
+width = 11
+depth = 8
+floor_finish = 1
+east_door = true
+north_door = true
+south_door = false
+roof_enabled = false
+
+[node name="StaffRoom" type="Node3D" parent="."]
+position = Vector3(-7.5, 0, -15)
+script = ExtResource("2")
+width = 11
+depth = 6
+floor_finish = 0
+south_door = true
+roof_enabled = false
+
+[node name="Records" type="Node3D" parent="."]
+position = Vector3(19, 0, -8)
+script = ExtResource("2")
+width = 10
+depth = 8
+floor_finish = 2
+west_door = true
+south_door = false
+roof_enabled = false
+
+[node name="Medical" type="Node3D" parent="."]
+position = Vector3(8, 0, -8)
+script = ExtResource("2")
+width = 12
+depth = 8
+floor_finish = 1
+west_door = true
+east_door = true
+south_door = false
+roof_enabled = false
+
+[node name="Storage" type="Node3D" parent="."]
+position = Vector3(5.5, 0, 0)
+script = ExtResource("2")
+width = 7
+depth = 8
+west_door = true
+south_door = false
+roof_enabled = false
+
+[node name="Generator" type="Node3D" parent="."]
+position = Vector3(8, 0, 8)
+script = ExtResource("2")
+width = 12
+depth = 8
+floor_finish = 2
+west_door = true
+south_door = true
+roof_enabled = false
+
+[node name="Security" type="Node3D" parent="."]
+position = Vector3(-6, 0, 0)
+script = ExtResource("2")
+width = 8
+depth = 8
+floor_finish = 2
+east_door = true
+south_door = false
+roof_enabled = false
+
+[node name="Quarantine" type="Node3D" parent="."]
+position = Vector3(-7, 0, 8)
+script = ExtResource("2")
+width = 10
+depth = 8
+floor_finish = 2
+east_door = true
+south_door = false
+roof_enabled = false
+
+[node name="CorridorNorth" type="Node3D" parent="."]
+position = Vector3(0, 0, -8)
+script = ExtResource("2")
+width = 4
+depth = 8
+floor_finish = 2
+east_door = true
+west_door = true
+roof_enabled = false
+
+[node name="CorridorCenter" type="Node3D" parent="."]
+script = ExtResource("2")
+width = 4
+depth = 8
+floor_finish = 2
+north_door = true
+east_door = true
+west_door = true
+roof_enabled = false
+
+[node name="CorridorSouth" type="Node3D" parent="."]
+position = Vector3(0, 0, 8)
+script = ExtResource("2")
+width = 4
+depth = 8
+floor_finish = 2
+north_door = true
+east_door = true
+west_door = true
+south_door = false
+roof_enabled = false
+
+[node name="LabDesk" type="Node3D" parent="."]
+position = Vector3(-9, 0, -9)
+script = ExtResource("3")
+collision_size = Vector3(1.6, 0.8, 0.8)
+
+[node name="Terminal" type="Node3D" parent="."]
+position = Vector3(-5, 0, -9.2)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 1.7, 0.6)
+story_id = "terminal"
+display_name = "Терминал персонала"
+
+[node name="MedicalBed" type="Node3D" parent="."]
+position = Vector3(6, 0, -5.7)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(2, 0.9, 0.9)
+
+[node name="Locker" type="Node3D" parent="."]
+position = Vector3(5.5, 0, 0.8)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 2, 0.55)
+story_id = "journal"
+display_name = "Шкаф с журналом №12"
+
+[node name="MedicalBedSecond" type="Node3D" parent="."]
+position = Vector3(10, 0, -5.7)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(2, 0.9, 0.9)
+
+[node name="V17Capsule" type="Node3D" parent="."]
+position = Vector3(11, 0, -9.5)
+script = ExtResource("6")
+
+[node name="QuarantineBed" type="Node3D" parent="."]
+position = Vector3(-8, 0, 8)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(2, 0.9, 0.9)
+
+[node name="QuarantineLocker" type="Node3D" parent="."]
+position = Vector3(-10.5, 0, 9.8)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 2, 0.55)
+
+[node name="StaffBedA" type="Node3D" parent="."]
+position = Vector3(-10, 0, -15)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(2, 0.9, 0.9)
+
+[node name="StaffBedB" type="Node3D" parent="."]
+position = Vector3(-5, 0, -15)
+script = ExtResource("3")
+kind = 2
+collision_size = Vector3(2, 0.9, 0.9)
+
+[node name="StaffLocker" type="Node3D" parent="."]
+position = Vector3(-7.5, 0, -16.5)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 2, 0.55)
+
+[node name="RecordsDesk" type="Node3D" parent="."]
+position = Vector3(18, 0, -9)
+script = ExtResource("3")
+collision_size = Vector3(1.6, 0.8, 0.8)
+
+[node name="RecordsTerminal" type="Node3D" parent="."]
+position = Vector3(21, 0, -10)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 1.7, 0.6)
+
+[node name="LabTerminalSecond" type="Node3D" parent="."]
+position = Vector3(-10.5, 0, -7)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 1.7, 0.6)
+
+[node name="StorageLockerSecond" type="Node3D" parent="."]
+position = Vector3(7.5, 0, 2)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 2, 0.55)
+
+[node name="SecurityLocker" type="Node3D" parent="."]
+position = Vector3(-8, 0, 2)
+script = ExtResource("3")
+kind = 1
+collision_size = Vector3(0.9, 2, 0.55)
+
+[node name="GeneratorWorktop" type="Node3D" parent="."]
+position = Vector3(6.2, 0, 9.6)
+script = ExtResource("3")
+collision_size = Vector3(1.6, 0.8, 0.8)
+
+[node name="GeneratorConsole" type="Node3D" parent="."]
+position = Vector3(10, 0, 8)
+script = ExtResource("3")
+kind = 3
+collision_size = Vector3(0.9, 1.7, 0.6)
+story_id = "generator"
+display_name = "Пульт резервного питания"
+
+[node name="SecurityDesk" type="Node3D" parent="."]
+position = Vector3(-7.5, 0, -1)
+script = ExtResource("3")
+collision_size = Vector3(1.6, 0.8, 0.8)
+story_id = "gear"
+display_name = "Пост наблюдения"
+
+[node name="ServiceDoor" type="Node3D" parent="."]
+position = Vector3(2, 0, -8)
+script = ExtResource("5")
+story_id = "door"
+display_name = "Служебная дверь"
+
+[node name="ExitAirlock" type="Node3D" parent="."]
+position = Vector3(8, 0, 12)
+script = ExtResource("5")
+story_id = "exit"
+display_name = "Выходной шлюз"
+
+[node name="Details" type="Node3D" parent="."]
+script = ExtResource("4")
+
