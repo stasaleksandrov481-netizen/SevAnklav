@@ -1,0 +1,89 @@
+[gd_scene load_steps=12 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pywba"]
+albedo_color = Color(0.5058824, 0.5764706, 0.60784316, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_s8giv"]
+size = Vector3(2.4, 0.12, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1ebcd"]
+size = Vector3(2.4, 0.12, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1i0kr"]
+albedo_color = Color(0.22745098, 0.29803923, 0.33333334, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_okc5n"]
+size = Vector3(0.08, 0.8, 0.7)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w4w28"]
+size = Vector3(0.08, 0.8, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_buqc7"]
+albedo_color = Color(0.54901963, 0.62352943, 0.6431373, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wq8y5"]
+top_radius = 0.36
+bottom_radius = 0.36
+height = 0.35
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0jvxd"]
+albedo_color = Color(0.5176471, 0.65882355, 0.69411767, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_rq2mk"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.4
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_gi317"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.4
+radial_segments = 16
+
+[node name="Лабораторный_стол_lab1" type="Node3D"]
+
+[node name="_MeshInstance3D_302" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_pywba")
+mesh = SubResource("BoxMesh_s8giv")
+
+[node name="_StaticBody3D_303" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -4.7683717e-08)
+
+[node name="_CollisionShape3D_304" type="CollisionShape3D" parent="_StaticBody3D_303"]
+shape = SubResource("BoxShape3D_1ebcd")
+
+[node name="_MeshInstance3D_305" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.4, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_1i0kr")
+mesh = SubResource("BoxMesh_okc5n")
+
+[node name="_MeshInstance3D_306" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.4, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_1i0kr")
+mesh = SubResource("BoxMesh_w4w28")
+
+[node name="_MeshInstance3D_307" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_buqc7")
+mesh = SubResource("CylinderMesh_wq8y5")
+
+[node name="_MeshInstance3D_308" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.1, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_0jvxd")
+mesh = SubResource("CylinderMesh_rq2mk")
+
+[node name="_MeshInstance3D_309" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.1, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_0jvxd")
+mesh = SubResource("CylinderMesh_gi317")

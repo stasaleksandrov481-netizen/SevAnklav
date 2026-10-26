@@ -5,6 +5,9 @@ const Door = preload("res://iso/zarya/door.gd")
 const Prop = preload("res://iso/prop.gd")
 const ORIGIN := Vector3(3540,0,2900)
 var state
+var state_key := "zarya2"
+var story_enabled := true
+var player_start := Vector3.ZERO
 var layout: Dictionary
 var rooms := {}
 var doors: Array = []
@@ -31,7 +34,8 @@ func _ready() -> void:
 	_build()
 	var pos: Array = state.data.position
 	player.position = ORIGIN+Vector3(pos[0],pos[1],pos[2])
-	if not state.data.awake: player.position = ORIGIN+Vector3(-24,1.1,-10)
+	if not story_enabled and room_at(player.global_position).is_empty(): player.global_position=player_start
+	if not state.data.awake: player.global_position = rooms.capsule.get_node("V17Capsule").global_position+Vector3(0,1.1,0)
 	$Camera.position=player.position+$Camera._offset
 	var environment := WorldEnvironment.new()
 	environment.environment = Environment.new()
@@ -41,12 +45,14 @@ func _ready() -> void:
 	environment.environment.ambient_light_energy = 0.0
 	add_child(environment)
 	for drop in state.data.drops: create_drop(drop)
-	call_deferred("_start")
+	if not get_meta("authoring_export",false): call_deferred("_start")
 func _start() -> void:
 	if hud == null: add_child(preload("res://iso/zarya/hud.gd").new())
 	if not state.data.awake:
 		player.locked = true
-		if hud != null: hud.prologue()
+		if bool(get_node("/root/G").zsave.get("seen_prologue",false)):
+			player.awaken()
+		elif hud != null: hud.prologue()
 func mat(color: Color, texture := false) -> StandardMaterial3D:
 	var key := color.to_html()+str(texture)
 	if materials.has(key): return materials[key]
@@ -87,6 +93,10 @@ func cylinder(parent: Node3D, at: Vector3, radius: float, height: float, color: 
 	visual.material_override = mat(color)
 	parent.add_child(visual)
 func _build() -> void:
+	var path: String=get_meta("map_path",ProjectSettings.get_setting("anklav/active_map","res://iso/maps/zarya_bunker.tscn"))
+	if ResourceLoader.exists(path) and not get_meta("authoring_export",false):
+		preload("res://iso/editor/runtime.gd").build(self,path)
+		return
 	var root := Node3D.new()
 	root.position = ORIGIN
 	root.name = "LevelMinusTwo"
@@ -210,12 +220,12 @@ func _process(delta: float) -> void:
 		var known: bool = state.data.visited.has(id) or room_visible.has(id)
 		room.visible = known
 		if not known: continue
-		var bounds := Rect2(Vector2(room.global_position.x-6,room.global_position.z-5),Vector2(12,10))
+		var bounds := Rect2(Vector2(room.global_position.x-room.width/2.0,room.global_position.z-room.depth/2.0),Vector2(room.width,room.depth))
 		if update_cutaway: room.update_occlusion(player.global_position,$Camera,step,bounds)
 		for lamp in room_lights.get(id,[]):
 			var target := 0.0
 			if room_visible.has(id):
-				target = 2.7 if lamp.normal and (state.flag("power") or id in ["capsule","observation","staff"]) else (1.4 if not lamp.normal else 0.0)
+				target = float(lamp.get("energy",2.7 if lamp.normal else 1.4)) if (not lamp.normal or state.flag("power") or id in ["capsule","observation","staff"]) else 0.0
 			elif state.data.visited.has(id): target = 0.17
 			if not state.data.awake: target *= player.wake_light
 			if not is_equal_approx(lamp.node.light_energy,target):
@@ -277,6 +287,7 @@ func activate(id: String) -> bool:
 	save_state()
 	return true
 func objective() -> String:
+	if not story_enabled: return "Исследовать локацию"
 	for entry in [["staff","Осмотреть терминал персонала"],["armed","Найти оружие на контрольном посту"],["card","Найти карту инженера Серова"],["experiment","Изучить запись эксперимента"],["power","Восстановить питание / предохранитель в серверной"],["archive","Прочитать архив наблюдения"],["clearance","Снять карантинную блокировку"],["level_complete","Добраться до лестницы на уровень −1"]]:
 		if not state.flag(entry[0]): return entry[1]
 	return "Уровень −2 исследован. Ожидание доступа на −1."
@@ -313,6 +324,7 @@ func _furnish(room: Node3D, entry: Dictionary) -> void:
 		for z in [-3.4,3.4]:
 			if entry.id in ["corridor","service","stairs","capsule"]: continue
 			var prop = Prop.new()
+			prop.name="Мебель_"+str(x)+"_"+str(z)
 			prop.kind = 2 if entry.id in ["observation","isolation_a","isolation_b"] else (3 if entry.id in ["lab1","lab2","control"] else 1)
 			prop.position=Vector3(x,0,z)
 			prop.collision_size=Vector3(2,0.9,0.9) if prop.kind==2 else Vector3(0.9,1.8,0.65)
@@ -323,8 +335,9 @@ func _furnish(room: Node3D, entry: Dictionary) -> void:
 		box(room,Vector3(11.2,0.06,0.08),Vector3(0,1.7,z),Color("#516773"))
 	if entry.id in ["server","electrical"]:
 		for x in [-3.8,-2.4,2.4,3.8]:
-			box(room,Vector3(0.95,2.1,0.9),Vector3(x,1.05,-3.2),Color("#33454f"),true)
-			for y in range(8): box(room,Vector3(0.85,0.08,0.06),Vector3(x,0.3+y*0.21,-2.7),Color("#7b8a8e"))
+			var rack:=Node3D.new(); rack.name="Серверная_стойка_"+str(x); rack.position=Vector3(x,0,-3.2); room.add_child(rack)
+			box(rack,Vector3(0.95,2.1,0.9),Vector3(0,1.05,0),Color("#33454f"),true)
+			for y in range(8): box(rack,Vector3(0.85,0.08,0.06),Vector3(0,0.3+y*0.21,0.5),Color("#7b8a8e"))
 	if entry.id == "stairs":
 		for i in range(11): box(room,Vector3(2,0.15,0.3),Vector3(0,0.12+i*0.14,2.0-i*0.3),Color("#6c7c83"))
 		box(room,Vector3(2.4,0.15,0.8),Vector3(0,1.65,-1.5),Color("#485f6c"))
@@ -350,24 +363,30 @@ func _equipment(room: Node3D, entry: Dictionary) -> void:
 	floor_mesh.material_override=floor_material
 	var helper=preload("res://iso/bunker_detail.gd").new()
 	if entry.id in ["capsule","observation","lab1","lab2","workshop"]:
-		helper._trolley(room,Vector3(-4,0,1.8),entry.id in ["capsule","observation"])
-	if entry.id in ["archive","workshop","pump","staff"]: helper._shelf(room,Vector3(3,0,-3.8),entry.id=="archive")
+		var trolley:=Node3D.new(); trolley.name="Медицинская_тележка" if entry.id in ["capsule","observation"] else "Инструментальная_тележка"; trolley.position=Vector3(-4,0,1.8); room.add_child(trolley)
+		helper._trolley(trolley,Vector3.ZERO,entry.id in ["capsule","observation"])
+	if entry.id in ["archive","workshop","pump","staff"]:
+		var shelf:=Node3D.new(); shelf.name="Архивный_стеллаж" if entry.id=="archive" else "Стеллаж"; shelf.position=Vector3(3,0,-3.8); room.add_child(shelf)
+		helper._shelf(shelf,Vector3.ZERO,entry.id=="archive")
 	helper.free()
 	if entry.id in ["lab1","lab2","capsule"]:
-		box(room,Vector3(2.4,0.12,0.9),Vector3(0,0.85,-3.7),Color("#81939b"),true)
-		for x in [-0.9,0.9]: box(room,Vector3(0.08,0.8,0.7),Vector3(x,0.4,-3.7),Color("#3a4c55"))
+		var bench:=Node3D.new(); bench.name="Лабораторный_стол_"+entry.id; room.add_child(bench)
+		box(bench,Vector3(2.4,0.12,0.9),Vector3(0,0.85,-3.7),Color("#81939b"),true)
+		for x in [-0.9,0.9]: box(bench,Vector3(0.08,0.8,0.7),Vector3(x,0.4,-3.7),Color("#3a4c55"))
 		if entry.id=="lab1":
-			cylinder(room,Vector3(0,1.1,-3.7),0.36,0.35,Color("#8c9fa4"))
-			for x in [-0.7,0.7]: cylinder(room,Vector3(x,1.1,-3.7),0.08,0.4,Color("#84a8b1"))
+			cylinder(bench,Vector3(0,1.1,-3.7),0.36,0.35,Color("#8c9fa4"))
+			for x in [-0.7,0.7]: cylinder(bench,Vector3(x,1.1,-3.7),0.08,0.4,Color("#84a8b1"))
 		elif entry.id=="lab2":
-			for x in [-0.6,-0.3,0,0.3,0.6]: cylinder(room,Vector3(x,1.08,-3.7),0.055,0.35,Color("#70939b"))
+			for x in [-0.6,-0.3,0,0.3,0.6]: cylinder(bench,Vector3(x,1.08,-3.7),0.055,0.35,Color("#70939b"))
 		else:
-			box(room,Vector3(0.85,0.5,0.14),Vector3(0,1.25,-3.8),Color("#416d7b"))
+			box(bench,Vector3(0.85,0.5,0.14),Vector3(0,1.25,-3.8),Color("#416d7b"))
 	if entry.id in ["generator","pump"]:
-		var motor:=Node3D.new(); motor.position=Vector3(3,0.85,2); motor.rotation.z=PI/2; room.add_child(motor)
+		var machine:=Node3D.new(); machine.name="Генератор" if entry.id=="generator" else "Насос"; machine.position=Vector3(3,0,2); room.add_child(machine)
+		var motor:=Node3D.new(); motor.position=Vector3(0,0.85,0); motor.rotation.z=PI/2; machine.add_child(motor)
 		cylinder(motor,Vector3.ZERO,0.62,2.2,Color("#526e7a"))
 		for y in [-0.8,-0.4,0.0,0.4,0.8]: cylinder(motor,Vector3(0,y,0),0.66,0.06,Color("#263e4a"))
-		box(room,Vector3(3,0.25,1.6),Vector3(3,0.15,2),Color("#324b56"),true)
+		box(machine,Vector3(3,0.25,1.6),Vector3(0,0.15,0),Color("#324b56"),true)
+	if get_meta("authoring_export",false): return
 	# Merge static ornament meshes by material, while preserving walls,
 	# articulated actors, animated doors and the capsule as independent nodes.
 	var groups: Dictionary={}

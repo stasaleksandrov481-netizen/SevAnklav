@@ -38,5 +38,20 @@ func run() -> void:
 	for frame in range(12): await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://zarya_pda.png")
+	world.hud.close_modal()
+	root.size=Vector2i(2340,1080)
+	for frame in range(20): await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://zarya_wide_hud.png")
+	world.hud.open_inventory()
+	for frame in range(16): await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://zarya_wide_inventory.png")
+	world.hud.root.hide()
+	var layer:=CanvasLayer.new(); layer.layer=100; root.add_child(layer)
+	var intro=load("res://scripts/zprologue_zarya.gd").new(); layer.add_child(intro); intro.reveal=1.0
+	for frame in range(35): await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://zarya_prologue.png")
 	print("ZARYA_VISUAL_OK")
 	quit()

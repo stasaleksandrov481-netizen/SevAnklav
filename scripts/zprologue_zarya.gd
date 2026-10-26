@@ -8,20 +8,31 @@ var root: VBoxContainer
 var reveal := 0.0
 var branch := ""
 var transitioning := false
+var content_margin: MarginContainer
+var background: TextureRect
 func _ready() -> void:
     super._ready()
     mouse_filter=Control.MOUSE_FILTER_STOP
-    var bg:=ColorRect.new();bg.color=Color(0.003,0.005,0.007);bg.set_anchors_preset(Control.PRESET_FULL_RECT);add_child(bg)
+    background=TextureRect.new(); background.texture=preload("res://assets/ui/prologue/capsule_v17.png"); background.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; background.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED; background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(background)
+    var bg:=ColorRect.new();bg.color=Color(0.003,0.005,0.007,0.30);bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(bg)
     var margin:=MarginContainer.new();margin.set_anchors_preset(Control.PRESET_FULL_RECT)
     for edge in ["left","right"]: margin.add_theme_constant_override("margin_"+edge,100)
     for edge in ["top","bottom"]: margin.add_theme_constant_override("margin_"+edge,55)
-    add_child(margin)
+    add_child(margin); content_margin=margin
+    resized.connect(_layout_prologue)
     root=VBoxContainer.new();root.alignment=BoxContainer.ALIGNMENT_CENTER;root.add_theme_constant_override("separation",28);margin.add_child(root)
+    _layout_prologue()
     _page()
+func _layout_prologue() -> void:
+    if not content_margin: return
+    content_margin.add_theme_constant_override("margin_left",int(maxf(32,size.x*0.055)))
+    content_margin.add_theme_constant_override("margin_right",int(maxf(32,size.x*0.35)))
 func _page() -> void:
     transitioning=false
     for c in root.get_children(): root.remove_child(c);c.queue_free()
-    var tag:=ZUI.label("ОБЪЕКТ «ЗАРЯ»   /   V-17   /   %02d"%(step+1),14,Color(0.38,0.49,0.55));root.add_child(tag)
+    var tag:=ZUI.label("СЕВЕРНЫЙ АНКЛАВ   /   ОБЪЕКТ «ЗАРЯ»   /   0%d — 03"%(step+1),15,Color(0.49,0.61,0.67));root.add_child(tag)
+    var heading:=ZUI.label(["ВОЗВРАЩЕНИЕ", "СОЗНАНИЕ ВОССТАНОВЛЕНО", "АЛЕКСЕЙ ВОЛКОВ"][step],34,Color(0.88,0.91,0.91));root.add_child(heading)
+    root.add_child(HSeparator.new())
     var text: String
     var answers: Array
     match step:
@@ -34,11 +45,12 @@ func _page() -> void:
         _:
             text="Ответа нет. На запястье — метка: «ВОЛКОВ / ЭКСПЕРИМЕНТ №12».\n\nВы не знаете, что произошло с комплексом. Сначала нужно выбраться из капсулы и найти персонал."
             answers=["Открыть глаза."]
-    body=ZUI.wrap_label(text,25,Color(0.78,0.82,0.82),1100);root.add_child(body)
+    body=ZUI.wrap_label(text,24,Color(0.78,0.82,0.82),0)
+    body.custom_minimum_size=Vector2(0,220);root.add_child(body)
     body.visible_ratio=0;reveal=0
     choices=VBoxContainer.new();choices.add_theme_constant_override("separation",12);root.add_child(choices)
     for i in range(answers.size()):
-        var button:=Button.new();button.text="—  "+answers[i];button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+        var button:=Button.new();button.text="0%d   /   "% (i+1)+answers[i];button.alignment=HORIZONTAL_ALIGNMENT_LEFT
         button.custom_minimum_size=Vector2(0,62);button.add_theme_font_size_override("font_size",18)
         var style:=ZUI.panel_style(Color(0.025,0.035,0.042),Color(0.16,0.23,0.27),18)
         button.add_theme_stylebox_override("normal",style)
