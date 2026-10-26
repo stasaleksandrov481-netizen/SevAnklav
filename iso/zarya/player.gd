@@ -53,12 +53,13 @@ func _physics_process(delta: float) -> void:
 	rig.weapon.visible=armed
 	var left: String=world.state.data.slots.get("left",{}).get("id","")
 	var right_item: String=world.state.data.slots.get("right",{}).get("id","")
-	var weapon_hand: String="arm_l" if left in ["pistol","rifle"] else "arm_r"
-	if rig.weapon.get_parent().bone_name!=weapon_hand: rig.weapon.get_parent().bone_name=weapon_hand
+	rig.weapon_hand="left" if left in ["pistol","rifle"] else "right"
+	rig.flashlight_hand="left" if left=="flashlight" else ("right" if right_item=="flashlight" else "")
 	torch.visible=(left=="flashlight" or right_item=="flashlight") and bool(world.state.data.get("flash_on",false))
-	torch.position=Vector3(-0.3 if left=="flashlight" else 0.3,0.2,0.3)
+	rig.flashlight_on=torch.visible
+	if torch.visible: torch.global_position=rig.flash.to_global(Vector3(0,-.17,0))
 	if aim_direction.length()>0.1: torch.look_at(torch.global_position+aim_direction)
-	rig.aiming=armed and (aim.length()>0.1 or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT))
+	rig.aiming=armed and (aim.length()>0.1 or fire or Input.is_action_pressed("shoot") or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT))
 	busy=maxf(0,busy-delta)
 	if busy==0 and reload_pending:
 		reload_pending=false
@@ -96,13 +97,14 @@ func awaken() -> void:
 	var capsule=world.rooms.capsule.get_node("V17Capsule")
 	global_position=capsule.global_position+Vector3(0,1.1,0)
 	rig.rotation.z=PI/2
-	var tween:=create_tween()
+	rig.perform("wake")
+	var tween:=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(self,"wake_light",1.0,1.8)
 	await tween.finished
 	var shell=capsule.get_node("Generated").find_child("Glass shell",false,false)
 	if shell:
 		tween=create_tween(); tween.tween_property(shell,"position:z",-1.3,1.2); await tween.finished
-	tween=create_tween().set_parallel()
+	tween=create_tween().set_parallel().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(rig,"rotation:z",0.0,1.4)
 	tween.tween_property(self,"global_position",capsule.global_position+Vector3(0,0.95,1.5),1.4)
 	await tween.finished

@@ -107,7 +107,7 @@ func run() -> void:
 	await world.player.awaken()
 	check(state.data.awake and not world.player.locked,"Awakening hands control to player")
 	check(world.player.get_node("Visual").scale==Vector3.ONE,"Awakening never stretches model")
-	check(world.player.get_node("Visual").skeleton.get_bone_count()==7,"Character has actual bone rig")
+	check(world.player.get_node("Visual").skeleton.get_bone_count()==15,"Character has actual bone rig")
 	check(world.player.get_node("Visual").skeleton.get_bone_global_pose(2).origin.y>0.5,"Bone rest translations retained")
 	print("ZARYA_CHECKS ",checks," FAILED ",failures)
 	quit(1 if failures else 0)
