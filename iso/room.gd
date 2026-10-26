@@ -64,6 +64,7 @@ func _box(parent: Node3D, label: String, box_size: Vector3, at: Vector3, mat: Ma
 	visual.position = at
 	if label.begins_with("North") or label.begins_with("South") or label.begins_with("East") or label.begins_with("West"):
 		_wall_visuals.append(visual)
+		if label.begins_with("South") or label.begins_with("East"): visual.add_to_group("memory_exclude")
 	if near_visual and is_instance_valid(_near_walls): _near_walls.add_child(visual)
 	else: parent.add_child(visual)
 	if solid:

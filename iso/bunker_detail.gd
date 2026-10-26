@@ -6,6 +6,9 @@ extends Node3D
 
 func _ready() -> void:
 	_rebuild()
+	if not Engine.is_editor_hint():
+		explored = get_node("/root/G").zsave.get("bunker_explored", {}).duplicate()
+		call_deferred("_build_memory")
 
 func _mat(color: Color, glow := false) -> StandardMaterial3D:
 	var key := color.to_html() + str(glow)
@@ -48,6 +51,10 @@ var materials := {}
 var lamps: Array[OmniLight3D] = []
 var room_bounds := Rect2()
 var active_room := Rect2()
+var explored: Dictionary = {}
+var memory_material: StandardMaterial3D
+var memory_meshes: Dictionary = {}
+var detail_clock := 0.0
 var hidden_emitters: Array[MeshInstance3D] = []
 var wall_details: Array[MeshInstance3D] = []
 const Cutaway = preload("res://iso/wall_cutaway.gd")
@@ -56,6 +63,7 @@ var elapsed := 0.0
 func _light(parent: Node3D, at: Vector3, color: Color, strength: float, emergency := false) -> void:
 	var fixture := Node3D.new()
 	fixture.name = "WallFixture"
+	fixture.set_meta("fixture",true)
 	fixture.position = at
 	parent.add_child(fixture)
 	parent = fixture
@@ -97,6 +105,11 @@ func _process(delta: float) -> void:
 		if distance < closest:
 			closest = distance
 			active_room = rect
+	var room_key := str(active_room)
+	explored[room_key] = true
+	get_node("/root/G").zsave["bunker_explored"] = explored
+	for key in memory_meshes:
+		memory_meshes[key].visible = explored.has(key) and key != room_key
 	for lamp in lamps:
 		var active: bool = lamp.get_meta("room") == active_room
 		# Hide the whole assembly, including its emissive diffuser.
@@ -107,13 +120,17 @@ func _process(delta: float) -> void:
 			var wave := pow(maxf(0.0, sin(elapsed * 2.2 + float(lamp.get_meta("phase")))), 3.0)
 			energy *= 0.35 + 0.65 * wave
 		lamp.light_energy = energy
+	detail_clock += delta
+	if detail_clock < 0.05: return
+	var step := detail_clock
+	detail_clock = 0.0
 	for part in wall_details:
 		var at := part.position
 		var axis := camera.global_basis.z
 		var edge_x := active_room.end.x if axis.x > 0 else active_room.position.x
 		var edge_z := active_room.end.y if axis.z > 0 else active_room.position.y
 		var front := (absf(at.x-edge_x) < 0.6 and at.z >= active_room.position.y and at.z <= active_room.end.y) or (absf(at.z-edge_z) < 0.6 and at.x >= active_room.position.x and at.x <= active_room.end.x)
-		Cutaway.update(part, camera.target.global_position, camera, delta, front)
+		Cutaway.update(part, camera.target.global_position, camera, step, front)
 	for emitter in hidden_emitters:
 		var at := to_local(emitter.global_position)
 		emitter.visible = active_room.grow(0.15).has_point(Vector2(at.x,at.z))
@@ -196,6 +213,8 @@ func _rebuild() -> void:
 		for vent in range(8):
 			_box(generated, "Cooling fin", Vector3(1.76, 0.04, 1.86), Vector3(38.8, 0.5 + vent * 0.14, z), Color("#26363e"))
 
+	_round_details(generated)
+	_signage(generated)
 	_furnish(generated)
 	_batch_static(generated)
 	if not Engine.is_editor_hint(): call_deferred("_collect_emitters")
@@ -284,7 +303,91 @@ func _furnish(parent: Node3D) -> void:
 func _collect_emitters() -> void:
 	hidden_emitters.clear()
 	for visual in get_parent().find_children("*", "MeshInstance3D", true, false):
-		if visual.get_parent().name.begins_with("WallFixture"): continue
+		if visual.get_parent().has_meta("fixture"): continue
 		var material = visual.material_override
 		if material is StandardMaterial3D and material.emission_enabled:
 			hidden_emitters.append(visual)
+
+func _build_memory() -> void:
+	var rooms := get_tree().get_nodes_in_group("iso_rooms")
+	for room in rooms:
+		var center := to_local(room.global_position)
+		var rect := Rect2(Vector2(center.x-room.width/2.0,center.z-room.depth/2.0),Vector2(room.width,room.depth))
+		var group := Node3D.new()
+		group.visible = false
+		add_child(group)
+		memory_meshes[str(rect)] = group
+		var batches := {}
+		var snapshot_materials := {}
+		for source in get_parent().find_children("*","MeshInstance3D",true,false):
+			if source.is_ancestor_of(group) or source.get_parent() == group: continue
+			# Remember floors and tangible furniture, never lights, actors or
+			# complete wall panels that would obstruct the remembered floor.
+			var ancestor: Node = source
+			var furniture := false
+			while ancestor != get_parent() and ancestor != null:
+				if ancestor.get_script() == preload("res://iso/prop.gd") or ancestor.get_script() == preload("res://iso/capsule.gd"): furniture = true
+				ancestor = ancestor.get_parent()
+			if source.name != "Floor" and not furniture: continue
+			var at := to_local(source.global_position)
+			if not rect.grow(0.1).has_point(Vector2(at.x,at.z)): continue
+			var mat = source.material_override
+			if not mat is StandardMaterial3D: continue
+			var remembered := mat.duplicate() as StandardMaterial3D
+			remembered.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			remembered.albedo_color = remembered.albedo_color * Color(0.14,0.18,0.21,1)
+			remembered.emission_enabled = false
+			remembered.render_priority = 1
+			var key := str(remembered.albedo_color)+str(remembered.albedo_texture)
+			if not batches.has(key):
+				var builder := SurfaceTool.new()
+				builder.begin(Mesh.PRIMITIVE_TRIANGLES)
+				batches[key] = builder
+				snapshot_materials[key] = remembered
+			for surface in range(source.mesh.get_surface_count()):
+				batches[key].append_from(source.mesh,surface,global_transform.affine_inverse()*source.global_transform)
+		for key in batches:
+			var mesh := MeshInstance3D.new()
+			mesh.mesh = batches[key].commit()
+			mesh.material_override = snapshot_materials[key]
+			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			group.add_child(mesh)
+
+func _signage(parent: Node3D) -> void:
+	for entry in [["01 / МЕДИЦИНСКИЙ БЛОК",Vector3(8,1.9,-11.85)],["V-17 • СТАБИЛИЗАЦИЯ",Vector3(11,1.4,-11.84)],["02 / ИССЛЕДОВАНИЯ",Vector3(-7.5,1.9,-11.85)],["03 / ПОСТ ОХРАНЫ",Vector3(-6,1.9,-3.85)],["04 / КАРАНТИН",Vector3(-7,1.9,4.15)],["05 / ЭНЕРГОУЗЕЛ",Vector3(35,1.9,10.15)],["06 / ОБЕЗЗАРАЖИВАНИЕ",Vector3(20,1.9,21.15)],["АРХИВ • ДОПУСК B",Vector3(19,1.9,-11.85)]]:
+		var sign := Label3D.new()
+		sign.text = entry[0]
+		sign.position = entry[1]
+		sign.font_size = 64
+		sign.pixel_size = 0.004
+		sign.no_depth_test = false
+		sign.shaded = true
+		sign.modulate = Color("#b3c3c7")
+		parent.add_child(sign)
+
+func _cylinder(parent: Node3D, at: Vector3, radius: float, height: float, color: Color) -> void:
+	var visual := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 12
+	visual.mesh = mesh
+	visual.position = at
+	visual.material_override = _mat(color)
+	parent.add_child(visual)
+
+func _round_details(parent: Node3D) -> void:
+	for at in [Vector3(3,0,-10.8),Vector3(-12,0,-10.8),Vector3(30,0,12)]:
+		_cylinder(parent,at+Vector3(0,0.68,0),0.14,1.15,Color("#8b4038"))
+		_box(parent,"Extinguisher handle",Vector3(0.19,0.07,0.13),at+Vector3(0,1.32,0),Color("#202c32"))
+		_box(parent,"Safety label",Vector3(0.17,0.23,0.02),at+Vector3(0,0.85,0.145),Color("#c3c5b8"))
+	for at in [Vector3(-8,0,-10.7),Vector3(6,0,-10.8)]:
+		for x in [-0.18,0.18]:
+			_cylinder(parent,at+Vector3(x,0.6,0),0.12,1.05,Color("#5d7d86"))
+			_cylinder(parent,at+Vector3(x,1.16,0),0.05,0.13,Color("#abb5ad"))
+		_solid(parent,at+Vector3(0,0.6,0),Vector3(0.62,1.2,0.3))
+	for at in [Vector3(-9,0,-7.7),Vector3(6,0,9),Vector3(18,0,-7.8)]:
+		_cylinder(parent,at+Vector3(0,0.52,0),0.28,0.10,Color("#475f68"))
+		_cylinder(parent,at+Vector3(0,0.27,0),0.045,0.5,Color("#7d8c90"))
+		_box(parent,"Stool base",Vector3(0.56,0.06,0.12),at+Vector3(0,0.05,0),Color("#35464e"))

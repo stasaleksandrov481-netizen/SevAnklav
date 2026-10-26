@@ -49,7 +49,14 @@ func _process(_delta: float) -> void:
 		if room.get_script() == RoomScript:
 			room.set_roof_visible(lighting_profile != 0 and not room.contains_world_point(player.global_position))
 			if world_layer == 1:
-				room.update_occlusion(player.global_position, $Camera, _delta, occupied_bounds)
+				var cut_bounds := occupied_bounds
+				var detail = room.get_parent().get_node_or_null("Details")
+				if detail != null:
+					var at: Vector3 = detail.to_local(room.global_position)
+					var remembered := Rect2(Vector2(at.x-room.width/2.0,at.z-room.depth/2.0),Vector2(room.width,room.depth))
+					if detail.explored.has(str(remembered)) and not room.contains_world_point(player.global_position):
+						cut_bounds = Rect2(Vector2(room.global_position.x-room.width/2.0,room.global_position.z-room.depth/2.0),Vector2(room.width,room.depth))
+				room.update_occlusion(player.global_position, $Camera, _delta, cut_bounds)
 			else:
 				room.set_front_transparency(0.82 if room.contains_world_point(player.global_position) else 0.0)
 	for building in get_tree().get_nodes_in_group("iso_buildings"):

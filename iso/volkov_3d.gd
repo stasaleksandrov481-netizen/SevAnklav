@@ -30,3 +30,36 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if direction.length() > 0.1:
 		$Visual.rotation.y = lerp_angle($Visual.rotation.y, atan2(direction.x, direction.z), minf(1.0, delta * 12.0))
+
+var shooting := false
+var shot_clock := 0.0
+func _process(delta: float) -> void:
+	shot_clock = maxf(0,shot_clock-delta)
+	var game = get_node("/root/G")
+	var armed := bool(game.zsave.get("iso_armed",false))
+	var gun = get_node_or_null("Visual/Weapon")
+	if gun == null:
+		gun = MeshInstance3D.new()
+		gun.name = "Weapon"
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(0.12,0.14,0.42)
+		gun.mesh = mesh
+		gun.position = Vector3(0.35,0.12,0.32)
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color("#596970")
+		gun.material_override = material
+		$Visual.add_child(gun)
+	gun.visible = armed
+	if not armed or not is_physics_processing(): return
+	if (Input.is_action_pressed("shoot") or shooting) and shot_clock <= 0:
+		var ammo: Dictionary = game.zsave.get("ammo",{})
+		if int(ammo.get("pistol",0)) <= 0: return
+		ammo["pistol"] = int(ammo["pistol"])-1
+		game.zsave["ammo"] = ammo
+		shot_clock = 0.32
+		var start := global_position + Vector3.UP*0.25
+		var direction: Vector3 = $Visual.global_basis.z
+		var query := PhysicsRayQueryParameters3D.create(start,start+direction*22)
+		query.exclude = [get_rid()]
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty() and hit.collider.has_method("damage"): hit.collider.damage(34)

@@ -378,3 +378,67 @@ position = Vector3(6, 0, 21)
 script = ExtResource("3")
 kind = 1
 collision_size = Vector3(0.9, 1.8, 0.65)
+
+[node name="ExperimentPlayback" type="Node3D" parent="."]
+position = Vector3(-11,0,-6)
+script = ExtResource("3")
+kind = 3
+story_id = "video"
+display_name = "ЭКСПЕРИМЕНТ №12"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="FuseCabinet" type="Node3D" parent="."]
+position = Vector3(7,0,-2)
+script = ExtResource("3")
+kind = 3
+story_id = "fuse"
+display_name = "Резервный предохранитель"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="LowerAccess" type="Node3D" parent="."]
+position = Vector3(10,0,15)
+script = ExtResource("3")
+kind = 3
+story_id = "lower"
+display_name = "Технический переход"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="IsolationPanel" type="Node3D" parent="."]
+position = Vector3(-10,0,6)
+script = ExtResource("3")
+kind = 3
+story_id = "isolation"
+display_name = "Блокировка карантина"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="ObservationArchive" type="Node3D" parent="."]
+position = Vector3(21,0,-9)
+script = ExtResource("3")
+kind = 3
+story_id = "archive"
+display_name = "Архив наблюдения"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="HydraulicPump" type="Node3D" parent="."]
+position = Vector3(18,0,25)
+script = ExtResource("3")
+kind = 3
+story_id = "pump"
+display_name = "Гидронасос шлюза"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="GateDrive" type="Node3D" parent="."]
+position = Vector3(22,0,27)
+script = ExtResource("3")
+kind = 3
+story_id = "drive"
+display_name = "Привод шлюза"
+collision_size = Vector3(0.9,1.7,0.6)
+
+[node name="GatePower" type="Node3D" parent="."]
+position = Vector3(18,0,30)
+script = ExtResource("3")
+kind = 3
+story_id = "hold"
+display_name = "Питание внешнего шлюза"
+collision_size = Vector3(0.9,1.7,0.6)
