@@ -35,6 +35,14 @@ func label(parent: Node, text: String, size := 18) -> Label:
 	result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(result)
 	return result
+func icon_button(parent: Node, id: String, hint: String, callback: Callable) -> Button:
+	var b:=button(parent,"",callback,60)
+	b.custom_minimum_size=Vector2(60,60); b.tooltip_text=hint
+	b.icon=load("res://assets/ui/controls/"+id+".svg"); b.expand_icon=true
+	b.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER; b.add_theme_constant_override("icon_max_width",32)
+	var disabled:=style(); disabled.bg_color=Color("#10171c"); b.add_theme_stylebox_override("disabled",disabled)
+	b.add_theme_color_override("icon_disabled_color",Color(0.4,0.5,0.55,0.4))
+	return b
 func button(parent: Node, text: String, callback: Callable, width := 110) -> Button:
 	var b:=Button.new(); b.text=text; b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.custom_minimum_size=Vector2(width,52)
@@ -56,6 +64,7 @@ var icon_cache := {}
 var detail_title: Label
 var detail_description: Label
 var detail_image: TextureRect
+var item_actions := {}
 var shade: ColorRect
 var hud_body
 var last_map_position := Vector3.INF
@@ -65,72 +74,94 @@ func place(node: Control, rect: Rect2) -> void:
 	node.position=rect.position; node.size=rect.size
 func _fit_canvas() -> void:
 	var viewport_size:=get_viewport().get_visible_rect().size
-	var factor:=minf(viewport_size.x/1600.0,viewport_size.y/900.0)
-	root.scale=Vector2.ONE*factor
-	root.size=viewport_size/factor
+	var safe:=Rect2(Vector2.ZERO,viewport_size)
+	if OS.has_feature("mobile"):
+		var pixels:=DisplayServer.get_display_safe_area()
+		var window_pixels:=Vector2(DisplayServer.window_get_size())
+		if pixels.has_area() and window_pixels.x>0 and window_pixels.y>0:
+			var ratio:=viewport_size/window_pixels
+			safe=Rect2(Vector2(pixels.position)*ratio,Vector2(pixels.size)*ratio).intersection(safe)
+	var factor:=minf(1.0,minf(safe.size.x/1600.0,safe.size.y/900.0))
+	root.scale=Vector2.ONE*factor; root.position=safe.position; root.size=safe.size/factor
 	canvas_size=root.size
-	# Layout is computed in a stable 1600×900 design space; wide screens keep safe edges.
-	root.position=(viewport_size-Vector2(1600,900)*factor)*0.5
+	_layout_hud()
+func _layout_hud() -> void:
+	if not root.has_node("Tasks"): return
+	var w:=canvas_size.x; var h:=canvas_size.y
+	var rects: Dictionary={
+		"Tasks":Rect2(18,18,300,130),"Vitals":Rect2(w/2-160,16,320,72),
+		"Tools":Rect2(w-452,18,198,60),"Condition":Rect2(18,162,112,142),
+		"Map":Rect2(w-232,18,214,168),"Belt":Rect2(w/2-345,h-148,690,130),
+		"Check":Rect2(w/2-450,h-126,90,96),"MoveStick":Rect2(22,h-395,245,245),
+		"AimStick":Rect2(w-267,h-395,245,245),"Interact":Rect2(w-340,h-193,64,64),
+		"Weapon":Rect2(w-397,h-92,379,72),"Utilities":Rect2(18,h-80,238,60),
+		"Notice":Rect2(w/2-350,114,700,64)}
+	for key in rects:
+		var n=root.get_node_or_null(NodePath(key))
+		if n: n.position=rects[key].position; n.size=rects[key].size
+	if is_instance_valid(shade): shade.size=canvas_size
+	if is_instance_valid(modal):
+		modal.position=Vector2(24,36); modal.size=canvas_size-Vector2(48,72)
 func _ready() -> void:
 	world=get_parent(); world.hud=self
 	root=Control.new(); root.mouse_filter=Control.MOUSE_FILTER_IGNORE; add_child(root)
 	_fit_canvas(); get_viewport().size_changed.connect(_fit_canvas)
-	var task:=panel(root,Vector2(20,24),Vector2(350,166))
+	var task:=panel(root,Vector2(20,24),Vector2(300,130)); task.name="Tasks"
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",14); task.add_child(column)
 	label(column,"▤   ЗАДАЧИ",15)
 	column.add_child(HSeparator.new())
 	objective=label(column,"",20)
 	objective.add_theme_color_override("font_color",Color("#e0e4e3"))
-	var status:=panel(root,Vector2(566,18),Vector2(390,76))
+	var status:=panel(root,Vector2(566,18),Vector2(320,72)); status.name="Vitals"
 	var stack:=VBoxContainer.new(); stack.add_theme_constant_override("separation",10); status.add_child(stack)
 	for entry in [["food","ПИТАНИЕ",Color("#dbb567")],["water","ВОДА",Color("#74b4cf")]]:
 		var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",16); stack.add_child(row)
-		var title:=label(row,entry[1],13); title.custom_minimum_size.x=88
-		var bar:=preload("res://iso/zarya/meter.gd").new(); bar.tint=entry[2]; bar.custom_minimum_size=Vector2(220,19)
+		var title:=label(row,entry[1],13); title.custom_minimum_size.x=78
+		var bar:=preload("res://iso/zarya/meter.gd").new(); bar.tint=entry[2]; bar.custom_minimum_size=Vector2(180,19)
 		row.add_child(bar); bars[entry[0]]=bar
-	var tools:=HBoxContainer.new(); tools.position=Vector2(980,22); tools.add_theme_constant_override("separation",8); root.add_child(tools)
-	var bag_button:=button(tools,"РЮКЗАК\n[ TAB ]",open_inventory,112)
-	bag_button.icon=preload("res://assets/icons/bag.svg"); bag_button.add_theme_constant_override("icon_max_width",26)
-	var pda_button:=button(tools,"КПК\n[ M ]",open_pda,86)
-	pda_button.icon=preload("res://assets/icons/pda.svg"); pda_button.add_theme_constant_override("icon_max_width",23)
-	button(tools,"Ⅱ",pause_menu,52)
-	var condition:=panel(root,Vector2(392,18),Vector2(148,160))
+	var tools:=HBoxContainer.new(); tools.position=Vector2(980,22); tools.add_theme_constant_override("separation",8); root.add_child(tools); tools.name="Tools"
+	icon_button(tools,"bag","Рюкзак",open_inventory)
+	icon_button(tools,"pda","КПК",open_pda)
+	icon_button(tools,"pause","Пауза",pause_menu)
+	var condition:=panel(root,Vector2(392,18),Vector2(112,142)); condition.name="Condition"
 	var condition_stack:=VBoxContainer.new(); condition.add_child(condition_stack)
-	label(condition_stack,"V-17 / СОСТОЯНИЕ",11)
+	label(condition_stack,"V-17",11)
 	var body_area:=Control.new(); body_area.custom_minimum_size=Vector2(120,100); condition_stack.add_child(body_area)
 	hud_body=preload("res://iso/zarya/body.gd").new(); hud_body.ui=self
-	hud_body.scale=Vector2(0.25,0.25); hud_body.position=Vector2(18,0); hud_body.size=Vector2(340,410)
+	hud_body.scale=Vector2(0.25,0.25); hud_body.position=Vector2(1,0); hud_body.size=Vector2(340,410)
 	hud_body.mouse_filter=Control.MOUSE_FILTER_IGNORE; body_area.add_child(hud_body)
 	var body_hit:=Button.new(); body_hit.flat=true; body_hit.tooltip_text="Состояние организма / лечение"
 	body_hit.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); body_hit.pressed.connect(open_medical); body_area.add_child(body_hit)
-	var map_frame:=panel(root,Vector2(1325,18),Vector2(255,205))
+	var map_frame:=panel(root,Vector2(1325,18),Vector2(214,168)); map_frame.name="Map"
 	var map_stack:=VBoxContainer.new(); map_frame.add_child(map_stack)
 	label(map_stack,"ПОДЗЕМНЫЙ УРОВЕНЬ\nЗАРЯ  /  −2",14)
-	minimap=preload("res://iso/zarya/minimap.gd").new(); minimap.world=world; minimap.custom_minimum_size=Vector2(225,130); map_stack.add_child(minimap)
-	var bottom:=HBoxContainer.new(); bottom.position=Vector2(418,752); bottom.add_theme_constant_override("separation",7); root.add_child(bottom)
+	minimap=preload("res://iso/zarya/minimap.gd").new(); minimap.world=world; minimap.custom_minimum_size=Vector2(184,98); map_stack.add_child(minimap)
+	var bottom:=HBoxContainer.new(); bottom.position=Vector2(418,752); bottom.add_theme_constant_override("separation",7); root.add_child(bottom); bottom.name="Belt"
 	var index:=1
 	for entry in [["left","ЛЕВАЯ РУКА"],["right","ПРАВАЯ РУКА"],["quick0","ЛЕЧЕНИЕ"],["quick1","БЫСТРЫЙ ДОСТУП"],["quick2","БЫСТРЫЙ ДОСТУП"],["quick3","УТИЛИТЫ"]]:
 		var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",3); bottom.add_child(col)
 		var heading:=label(col,entry[1],11); heading.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		var cell:=make_slot(col,entry[0]); cell.custom_minimum_size=Vector2(110,104)
 		var key_label:=label(col,str(index),12); key_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; index+=1
-	var check:=button(root,"ПАТРОНЫ",world.player.check_ammo,100); place(check,Rect2(304,777,102,103)); check.icon=icon_for("ammo"); check.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER; check.vertical_icon_alignment=VERTICAL_ALIGNMENT_TOP; check.expand_icon=true; check.add_theme_constant_override("icon_max_width",35)
+	var check:=icon_button(root,"ammo","Проверить магазин",world.player.check_ammo); check.name="Check"
 	for side in [0,1]:
 		var stick:=preload("res://iso/zarya/stick.gd").new(); stick.set_meta("side",side); root.add_child(stick)
 		place(stick,Rect2(55 if side==0 else 1285,510,245,245))
 		stick.name="MoveStick" if side==0 else "AimStick"
-	var interact:=button(root,"ВЗАИМОДЕЙСТВИЕ  [ E ]",func(): world.interact(),214); place(interact,Rect2(1300,756,265,50))
-	var gun_panel:=panel(root,Vector2(1150,816),Vector2(430,66)); var gun_row:=HBoxContainer.new(); gun_panel.add_child(gun_row)
+	var interact:=icon_button(root,"hand","Взаимодействовать",func(): world.interact()); interact.name="Interact"
+	var gun_panel:=panel(root,Vector2(1150,816),Vector2(379,72)); gun_panel.name="Weapon"
+	var gun_row:=HBoxContainer.new(); gun_panel.add_child(gun_row)
 	weapon_status=label(gun_row,"",14); weapon_status.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	button(gun_row,"ПЕРЕЗАРЯДКА",world.player.reload,132)
-	var utility:=HBoxContainer.new(); utility.position=Vector2(26,820); utility.add_theme_constant_override("separation",7); root.add_child(utility)
-	button(utility,"ФОНАРЬ",func(): world.state.data["flash_on"]=not world.state.data.get("flash_on",false),112)
-	button(utility,"−",func(): world.get_node("Camera").desired_size=minf(24,world.get_node("Camera").desired_size+1),52)
-	button(utility,"+",func(): world.get_node("Camera").desired_size=maxf(10,world.get_node("Camera").desired_size-1),52)
-	notice=label(root,"",18); place(notice,Rect2(560,116,700,64))
+	icon_button(gun_row,"reload","Перезарядить",world.player.reload)
+	var utility:=HBoxContainer.new(); utility.position=Vector2(26,820); utility.add_theme_constant_override("separation",7); root.add_child(utility); utility.name="Utilities"
+	icon_button(utility,"flashlight","Фонарь",func(): world.state.data["flash_on"]=not world.state.data.get("flash_on",false))
+	icon_button(utility,"minus","Отдалить камеру",func(): world.get_node("Camera").desired_size=minf(24,world.get_node("Camera").desired_size+1))
+	icon_button(utility,"plus","Приблизить камеру",func(): world.get_node("Camera").desired_size=maxf(10,world.get_node("Camera").desired_size-1))
+	notice=label(root,"",18); notice.name="Notice"; place(notice,Rect2(560,116,700,64))
 	world.state.changed.connect(func(): hud_body.queue_redraw())
 	world.state.changed.connect(refresh_slots)
 	refresh_slots()
+	call_deferred("_fit_canvas")
 func icon_for(id: String) -> Texture2D:
 	if icon_cache.has(id): return icon_cache[id]
 	var custom_path: String="res://assets/ui/zarya/"+id+".svg"
@@ -207,9 +238,9 @@ func window(title: String) -> VBoxContainer:
 	close_modal()
 	for child in root.get_children():
 		if child!=modal: child.hide()
-	shade=ColorRect.new(); shade.color=Color(0.005,0.01,0.015,0.65); shade.size=Vector2(1600,900); root.add_child(shade)
+	shade=ColorRect.new(); shade.color=Color(0.005,0.01,0.015,0.65); shade.size=canvas_size; root.add_child(shade)
 	modal=PanelContainer.new(); modal.set_anchors_preset(Control.PRESET_CENTER)
-	modal.position=Vector2(180,110); modal.size=Vector2(1240,680)
+	modal.position=Vector2(24,36); modal.size=canvas_size-Vector2(48,72)
 	modal.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var surface:=style(); surface.bg_color=Color(0.025,0.035,0.04,0.97); surface.set_content_margin_all(24)
 	modal.add_theme_stylebox_override("panel",surface); root.add_child(modal)
@@ -217,7 +248,7 @@ func window(title: String) -> VBoxContainer:
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",16); modal.add_child(column)
 	var header:=HBoxContainer.new(); column.add_child(header)
 	var text:=label(header,title,22); text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	button(header,"ЗАКРЫТЬ  ×",close_modal)
+	icon_button(header,"close","Закрыть",close_modal)
 	column.add_child(HSeparator.new())
 	modal.modulate.a=0; create_tween().tween_property(modal,"modulate:a",1.0,0.18)
 	call_deferred("_redraw_overlay")
@@ -245,22 +276,45 @@ func update_details() -> void:
 	var item: Dictionary=world.state.data.slots.get(selected,{})
 	detail_title.text=State.ITEMS.get(item.get("id",""),{}).get("name","ВЫБЕРИТЕ ПРЕДМЕТ")
 	detail_image.texture=icon_for(item.id) if not item.is_empty() else null
+	for key in item_actions:
+		if is_instance_valid(item_actions[key]):
+			item_actions[key].disabled=item.is_empty() or (key=="use" and item.get("id","") not in ["food","water"]) or (key=="hand" and not State.ITEMS.get(item.get("id",""),{}).has("hands"))
 	detail_description.text=("КОЛИЧЕСТВО  %s    /    СОСТОЯНИЕ  %s%%\n\nПеретащите предмет в ячейку или выберите действие." % [item.get("count",1),item.get("condition",100)]) if not item.is_empty() else "Снаряжение, карманы и быстрые слоты.\nВыберите предмет для осмотра."
 func open_inventory() -> void:
-	var column:=window("СНАРЯЖЕНИЕ  /  АЛЕКСЕЙ ВОЛКОВ")
-	var tabs:=HBoxContainer.new(); column.add_child(tabs)
-	button(tabs,"СНАРЯЖЕНИЕ",open_inventory,180); button(tabs,"ОРГАНИЗМ",open_medical,180); button(tabs,"ЗАПИСИ / КПК",open_pda,180)
-	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",28); column.add_child(row); bag(row)
-	var side:=VBoxContainer.new(); side.custom_minimum_size.x=530; side.add_theme_constant_override("separation",10); row.add_child(side)
-	detail_title=label(side,"",22)
-	detail_image=TextureRect.new(); detail_image.custom_minimum_size=Vector2(480,120); detail_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; detail_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; side.add_child(detail_image)
-	detail_description=label(side,"",15)
-	button(side,"ВЗЯТЬ В СВОБОДНУЮ РУКУ",func(): world.state.equip(selected); refresh_slots(); update_details(),240)
-	var actions:=HBoxContainer.new(); side.add_child(actions)
-	button(actions,"В КАРМАН",func(): world.state.move_slot(selected,"pocket0"); refresh_slots(); update_details(),160)
-	button(actions,"ИСПОЛЬЗОВАТЬ",consume,160)
-	button(actions,"ВЫЛОЖИТЬ",drop_selected,160)
-	update_details()
+	var column:=window("СНАРЯЖЕНИЕ / АЛЕКСЕЙ ВОЛКОВ")
+	var tabs:=HBoxContainer.new(); tabs.add_theme_constant_override("separation",12); column.add_child(tabs)
+	button(tabs,"ИНВЕНТАРЬ",open_inventory,180); button(tabs,"ОРГАНИЗМ",open_medical,180); button(tabs,"КПК",open_pda,180)
+	var row:=HBoxContainer.new(); row.size_flags_vertical=Control.SIZE_EXPAND_FILL; row.add_theme_constant_override("separation",24); column.add_child(row)
+	var equipment:=VBoxContainer.new(); equipment.custom_minimum_size.x=234; row.add_child(equipment)
+	label(equipment,"ЭКИПИРОВКА / V-17",13)
+	var silhouette_area:=Control.new(); silhouette_area.custom_minimum_size=Vector2(230,270); equipment.add_child(silhouette_area)
+	var silhouette=preload("res://iso/zarya/body.gd").new(); silhouette.ui=self; silhouette.scale=Vector2.ONE*0.64; silhouette.position.x=6; silhouette_area.add_child(silhouette)
+	var hands:=HBoxContainer.new(); equipment.add_child(hands)
+	for key in ["left","right"]:
+		var cell:=make_slot(hands,key); cell.custom_minimum_size=Vector2(110,100)
+	label(equipment,"ОДЕЖДА / КАРМАНЫ",12)
+	var pockets:=HBoxContainer.new(); equipment.add_child(pockets)
+	for key in ["clothes","pocket0","pocket1"]:
+		var cell:=make_slot(pockets,key); cell.custom_minimum_size=Vector2(72,76)
+	var center:=VBoxContainer.new(); center.size_flags_horizontal=Control.SIZE_EXPAND_FILL; center.custom_minimum_size.x=552; center.add_theme_constant_override("separation",14); row.add_child(center)
+	label(center,"РЮКЗАК / 18 ЯЧЕЕК",14)
+	var grid:=GridContainer.new(); grid.columns=6; grid.add_theme_constant_override("h_separation",6); grid.add_theme_constant_override("v_separation",6); center.add_child(grid)
+	for i in range(18):
+		var cell:=make_slot(grid,"bag"+str(i)); cell.custom_minimum_size=Vector2(86,94)
+	label(center,"БЫСТРЫЙ ДОСТУП",13)
+	var quick:=HBoxContainer.new(); quick.add_theme_constant_override("separation",6); center.add_child(quick)
+	for key in ["quick0","quick1","quick2","quick3"]: make_slot(quick,key)
+	var side:=VBoxContainer.new(); side.custom_minimum_size.x=360; side.size_flags_horizontal=Control.SIZE_EXPAND_FILL; side.add_theme_constant_override("separation",16); row.add_child(side)
+	detail_title=label(side,"",24)
+	detail_image=TextureRect.new(); detail_image.custom_minimum_size=Vector2(330,210); detail_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; detail_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; side.add_child(detail_image)
+	detail_description=label(side,"",16)
+	var actions:=HBoxContainer.new(); actions.add_theme_constant_override("separation",12); side.add_child(actions)
+	item_actions["hand"]=icon_button(actions,"hand","Взять в свободную руку",func(): world.state.equip(selected); refresh_slots(); update_details())
+	item_actions["use"]=icon_button(actions,"use","Использовать паёк или воду",consume)
+	icon_button(actions,"medical","Открыть лечение",open_medical)
+	item_actions["trash"]=icon_button(actions,"trash","Выложить предмет на пол",drop_selected)
+	label(side,"Взять · Использовать · Лечение · Выложить",12)
+	refresh_slots(); update_details()
 func consume() -> void:
 	var entry: Dictionary=world.state.data.slots.get(selected,{})
 	if entry.is_empty(): return
@@ -310,6 +364,7 @@ func open_terminal(action: Dictionary) -> void:
 	var records: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://iso/bunker_records.json"))
 	var record: Dictionary=records.get(action.record,{"title":"СЛУЖЕБНАЯ ЗАПИСЬ / СЕРОВ","body":"Резервный предохранитель оставлен в серверной. Карту заберите с моего рабочего места. После восстановления питания проверьте карантинную блокировку. Верхний уровень не отвечает."})
 	record=record.duplicate(true)
+	if not str(action.get("custom_text","")).is_empty(): record={"title":action.title,"body":action.custom_text}
 	if action.id in ["power","generator","pump"]:
 		record.body="Предохранитель установлен. Резервная цепь научно-технического уровня −2 готова к работе.\nПроверьте карантинную блокировку перед доступом к вертикальному узлу."
 	if action.id=="archive": record.body=str(record.body)+"\n\nСИСТЕМА: грузовой шлюз требует подтверждения с верхнего уровня. Следуйте к лестничному узлу −1."
@@ -368,7 +423,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func restart_level() -> void:
 	var game=get_node("/root/G")
-	game.zsave.erase("zarya2")
+	game.zsave.erase(world.state_key)
 	game.zsave["iso_layer"]="bunker"
 	var mains=get_tree().get_nodes_in_group("main_root")
 	if not mains.is_empty(): mains[0]._enter_iso_world()

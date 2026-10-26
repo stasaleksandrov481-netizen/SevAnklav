@@ -8,10 +8,10 @@ const ITEMS := {
  "ammo":{"name":"9×18 мм","icon":"ammo"},"card":{"name":"Карта инженера","icon":"keycard"},"fuse":{"name":"Предохранитель","icon":"gear"},"tool":{"name":"Инструменты","icon":"gear"}}
 const ZONES := ["Голова","Торс","Левая рука","Правая рука","Левая нога","Правая нога"]
 var data: Dictionary
-func _init(save: Dictionary = {}) -> void:
-	if not save.has("zarya2"):
-		save["zarya2"] = {"version":1,"awake":false,"flags":{},"visited":{},"doors":{},"containers":{},"enemies":{},"records":{},"slots":{},"health":100.0,"food":100.0,"water":100.0,"wounds":{},"mag":0,"chamber":0,"checked":false,"position":[-24.0,0.95,-10.0],"drops":[]}
-	data = save["zarya2"]
+func _init(save: Dictionary = {}, save_key := "zarya2") -> void:
+	if not save.has(save_key):
+		save[save_key] = {"version":1,"awake":false,"flags":{},"visited":{},"doors":{},"containers":{},"enemies":{},"records":{},"slots":{},"health":100.0,"food":100.0,"water":100.0,"wounds":{},"mag":0,"chamber":0,"checked":false,"position":[-24.0,0.95,-10.0],"drops":[]}
+	data = save[save_key]
 	for zone in ZONES:
 		if not data.wounds.has(zone): data.wounds[zone] = {"damage":0.0,"bleeding":0.0,"pain":0.0}
 func flag(id: String) -> bool: return bool(data.flags.get(id,false))

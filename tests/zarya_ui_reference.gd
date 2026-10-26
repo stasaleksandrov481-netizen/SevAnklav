@@ -50,5 +50,9 @@ func run() -> void:
 		var end: Vector2=ui.root.position+Vector2(1600,900)*ui.root.scale
 		var logical_size:=root.get_visible_rect().size
 		check(end.x<=logical_size.x+1 and end.y<=logical_size.y+1,"HUD fits "+str(resolution))
+		var right_edge: float=ui.root.get_node("AimStick").get_global_rect().end.x
+		var available: float=logical_size.x-right_edge
+		check(available<40*ui.root.scale.x,"Right stick reaches safe screen edge "+str(resolution))
+		check(ui.root.position.x<1,"No fixed-width horizontal letterboxing "+str(resolution))
 	print("ZARYA_UI_CHECKS ",checks," FAILED ",failures)
 	quit(1 if failures else 0)

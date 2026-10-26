@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pywba"]
+albedo_color = Color(0.5058824, 0.5764706, 0.60784316, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_dy4wt"]
+size = Vector3(2.4, 0.12, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l7npu"]
+size = Vector3(2.4, 0.12, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1i0kr"]
+albedo_color = Color(0.22745098, 0.29803923, 0.33333334, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_gh5ah"]
+size = Vector3(0.08, 0.8, 0.7)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hnkhw"]
+size = Vector3(0.08, 0.8, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vk3nt"]
+albedo_color = Color(0.25490198, 0.42745098, 0.48235294, 1)
+metallic = 0.18
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_et1jy"]
+size = Vector3(0.85, 0.5, 0.14)
+
+[node name="Лабораторный_стол_capsule" type="Node3D"]
+
+[node name="_MeshInstance3D_78" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_pywba")
+mesh = SubResource("BoxMesh_dy4wt")
+
+[node name="_StaticBody3D_79" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -4.7683717e-08)
+
+[node name="_CollisionShape3D_80" type="CollisionShape3D" parent="_StaticBody3D_79"]
+shape = SubResource("BoxShape3D_l7npu")
+
+[node name="_MeshInstance3D_81" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.4, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_1i0kr")
+mesh = SubResource("BoxMesh_gh5ah")
+
+[node name="_MeshInstance3D_82" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.4, -4.7683717e-08)
+material_override = SubResource("StandardMaterial3D_1i0kr")
+mesh = SubResource("BoxMesh_hnkhw")
+
+[node name="_MeshInstance3D_83" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, -0.09999995)
+material_override = SubResource("StandardMaterial3D_vk3nt")
+mesh = SubResource("BoxMesh_et1jy")
