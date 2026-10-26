@@ -35,6 +35,8 @@ class_name IsoRoom
 		roof_enabled = value
 		_refresh()
 
+@export var door_widths: Dictionary = {}
+
 var _wall_visuals: Array[MeshInstance3D] = []
 var _roof: Node3D
 var _near_walls: Node3D
@@ -83,12 +85,13 @@ func _wall(parent: Node3D, label: String, length: float, along_x: bool, center: 
 	if not opening or length <= 2.5:
 		_box(parent, label, Vector3(length, height, 0.2) if along_x else Vector3(0.2, height, length), center + Vector3.UP * 1.4, mat, true, near)
 		return
-	var side := (length - 1.4) * 0.5
+	var gap: float = float(door_widths.get(label,1.4))
+	var side := (length - gap) * 0.5
 	for signum in [-1.0, 1.0]:
-		var offset: float = float(signum) * (1.4 + side) * 0.5
+		var offset: float = float(signum) * (gap + side) * 0.5
 		var at := center + (Vector3(offset, 1.4, 0) if along_x else Vector3(0, 1.4, offset))
 		_box(parent, label + str(signum), Vector3(side, height, 0.2) if along_x else Vector3(0.2, height, side), at, mat, true, near)
-	_box(parent, label + "Lintel", Vector3(1.4, 0.5, 0.2) if along_x else Vector3(0.2, 0.5, 1.4), center + Vector3.UP * 2.55, mat, true, near)
+	_box(parent, label + "Lintel", Vector3(gap, 0.5, 0.2) if along_x else Vector3(0.2, 0.5, gap), center + Vector3.UP * 2.55, mat, true, near)
 
 func _rebuild() -> void:
 	_wall_visuals.clear()
