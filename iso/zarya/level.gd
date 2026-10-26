@@ -10,6 +10,10 @@ var rooms := {}
 var doors: Array = []
 var stations: Array = []
 var lights: Array = []
+var room_lights := {}
+var occlusion_point := Vector3.INF
+var occlusion_basis := Basis.IDENTITY
+var occlusion_settle := 0.0
 var enemies: Array = []
 var room_visible := {}
 var current := ""
@@ -174,6 +178,10 @@ func sees(from: Vector3, to: Vector3, exclude: Array = []) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 func _process(delta: float) -> void:
 	if paused: return
+	if room_lights.is_empty():
+		for lamp in lights:
+			if not room_lights.has(lamp.room): room_lights[lamp.room]=[]
+			room_lights[lamp.room].append(lamp)
 	clock += delta
 	save_clock += delta
 	if save_clock>6: save_state(); save_clock=0
@@ -191,24 +199,31 @@ func _process(delta: float) -> void:
 		elif door.info.b == current: other = door.info.a
 		if not other.is_empty() and player.global_position.distance_to(door.global_position)<7 and sees(player.global_position,door.global_position+Vector3.UP,[player.get_rid()]):
 			room_visible[other] = true
+	if occlusion_point!=player.global_position or occlusion_basis!=$Camera.global_basis:
+		occlusion_point=player.global_position
+		occlusion_basis=$Camera.global_basis
+		occlusion_settle=0.3
+	var update_cutaway: bool=occlusion_settle>0
+	occlusion_settle=maxf(0,occlusion_settle-step)
 	for id in rooms:
 		var room = rooms[id]
 		var known: bool = state.data.visited.has(id) or room_visible.has(id)
 		room.visible = known
 		if not known: continue
 		var bounds := Rect2(Vector2(room.global_position.x-6,room.global_position.z-5),Vector2(12,10))
-		room.update_occlusion(player.global_position,$Camera,step,bounds)
-		for lamp in lights:
-			if lamp.room != id: continue
+		if update_cutaway: room.update_occlusion(player.global_position,$Camera,step,bounds)
+		for lamp in room_lights.get(id,[]):
 			var target := 0.0
 			if room_visible.has(id):
 				target = 2.7 if lamp.normal and (state.flag("power") or id in ["capsule","observation","staff"]) else (1.4 if not lamp.normal else 0.0)
 			elif state.data.visited.has(id): target = 0.17
 			if not state.data.awake: target *= player.wake_light
-			lamp.node.light_energy = move_toward(lamp.node.light_energy,target,step*2.5)
-			lamp.node.visible = lamp.node.light_energy>0.01
-			lamp.node.shadow_enabled = room_visible.has(id)
-			lamp.fixture.visible = room_visible.has(id)
+			if not is_equal_approx(lamp.node.light_energy,target):
+				lamp.node.light_energy = move_toward(lamp.node.light_energy,target,step*2.5)
+			var enabled: bool=lamp.node.light_energy>0.01
+			if lamp.node.visible!=enabled: lamp.node.visible=enabled
+			if lamp.node.shadow_enabled!=room_visible.has(id): lamp.node.shadow_enabled=room_visible.has(id)
+			if lamp.fixture.visible!=room_visible.has(id): lamp.fixture.visible=room_visible.has(id)
 	for door in doors: door.visible = state.data.visited.has(door.info.a) or state.data.visited.has(door.info.b)
 	for enemy in enemies: enemy.refresh_visibility()
 	if state.data.awake:

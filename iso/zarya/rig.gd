@@ -61,6 +61,7 @@ func perform(id: String) -> void:
 	action_time=0
 func _process(delta: float) -> void:
 	phase+=delta*(10 if moving<1.1 else 14)
+	if not is_visible_in_tree(): return
 	action_time+=delta
 	var gait:=sin(phase)*minf(moving,1.0)*0.5
 	skeleton.set_bone_pose_rotation(5,Quaternion(Vector3.RIGHT,gait))
