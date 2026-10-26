@@ -8,6 +8,8 @@ func _ready() -> void:
 	_rebuild()
 
 func _mat(color: Color, glow := false) -> StandardMaterial3D:
+	var key := color.to_html() + str(glow)
+	if materials.has(key): return materials[key]
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.metallic = 0.18
@@ -16,6 +18,7 @@ func _mat(color: Color, glow := false) -> StandardMaterial3D:
 		material.emission_enabled = true
 		material.emission = color
 		material.emission_energy_multiplier = 2.4
+	materials[key] = material
 	return material
 
 func _box(parent: Node3D, label: String, size: Vector3, at: Vector3, color: Color, glow := false) -> void:
@@ -29,6 +32,8 @@ func _box(parent: Node3D, label: String, size: Vector3, at: Vector3, color: Colo
 	if glow or label.begins_with("Wall lamp") or label == "Lamp guard":
 		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(part)
+	if size.y > 0.025 and at.y > 1.3 and (label.contains("wall") or label.contains("conduit") or label.contains("ventilation") or label.contains("bracket")):
+		wall_details.append(part)
 	if label == "Backup turbine":
 		var body := StaticBody3D.new()
 		body.position = at
@@ -39,10 +44,22 @@ func _box(parent: Node3D, label: String, size: Vector3, at: Vector3, color: Colo
 		collider.shape = shape
 		body.add_child(collider)
 
+var materials := {}
 var lamps: Array[OmniLight3D] = []
+var room_bounds := Rect2()
+var active_room := Rect2()
+var hidden_emitters: Array[MeshInstance3D] = []
+var wall_details: Array[MeshInstance3D] = []
+const Cutaway = preload("res://iso/wall_cutaway.gd")
 var elapsed := 0.0
 
 func _light(parent: Node3D, at: Vector3, color: Color, strength: float, emergency := false) -> void:
+	var fixture := Node3D.new()
+	fixture.name = "WallFixture"
+	fixture.position = at
+	parent.add_child(fixture)
+	parent = fixture
+	at = Vector3.ZERO
 	var lamp := OmniLight3D.new()
 	lamp.position = at
 	lamp.light_color = color
@@ -55,9 +72,10 @@ func _light(parent: Node3D, at: Vector3, color: Color, strength: float, emergenc
 	lamp.distance_fade_enabled = true
 	lamp.distance_fade_begin = 32.0
 	lamp.distance_fade_length = 9.0
+	lamp.set_meta("room", room_bounds)
 	lamp.set_meta("base_energy", strength)
 	lamp.set_meta("emergency", emergency)
-	lamp.set_meta("phase", at.x * 0.37 + at.z * 0.21)
+	lamp.set_meta("phase", fixture.position.x * 0.37 + fixture.position.z * 0.21)
 	parent.add_child(lamp)
 	lamps.append(lamp)
 	_box(parent, "Wall lamp housing", Vector3(1.05, 0.28, 0.18), at + Vector3(0, 0, -0.12), Color("#24313b"))
@@ -69,18 +87,39 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint(): return
 	elapsed += delta
 	var camera := get_viewport().get_camera_3d()
-	if camera != null:
-		var focus: Vector3 = camera.target.global_position if camera.get("target") != null else camera.global_position
-		lamps.sort_custom(func(a, b): return a.global_position.distance_squared_to(focus) < b.global_position.distance_squared_to(focus))
-		for i in range(lamps.size()):
-			lamps[i].visible = i < 12
+	if camera == null or camera.get("target") == null: return
+	var focus: Vector3 = to_local(camera.target.global_position)
+	var point := Vector2(focus.x, focus.z)
+	var closest := INF
 	for lamp in lamps:
-		if not is_instance_valid(lamp): continue
+		var rect: Rect2 = lamp.get_meta("room")
+		var distance := point.distance_squared_to(point.clamp(rect.position, rect.end))
+		if distance < closest:
+			closest = distance
+			active_room = rect
+	for lamp in lamps:
+		var active: bool = lamp.get_meta("room") == active_room
+		# Hide the whole assembly, including its emissive diffuser.
+		lamp.get_parent().visible = active
+		if not active: continue
+		var energy := float(lamp.get_meta("base_energy"))
 		if lamp.get_meta("emergency"):
 			var wave := pow(maxf(0.0, sin(elapsed * 2.2 + float(lamp.get_meta("phase")))), 3.0)
-			lamp.light_energy = float(lamp.get_meta("base_energy")) * (0.35 + 0.65 * wave)
+			energy *= 0.35 + 0.65 * wave
+		lamp.light_energy = energy
+	for part in wall_details:
+		var at := part.position
+		var axis := camera.global_basis.z
+		var edge_x := active_room.end.x if axis.x > 0 else active_room.position.x
+		var edge_z := active_room.end.y if axis.z > 0 else active_room.position.y
+		var front := (absf(at.x-edge_x) < 0.6 and at.z >= active_room.position.y and at.z <= active_room.end.y) or (absf(at.z-edge_z) < 0.6 and at.x >= active_room.position.x and at.x <= active_room.end.x)
+		Cutaway.update(part, camera.target.global_position, camera, delta, front)
+	for emitter in hidden_emitters:
+		var at := to_local(emitter.global_position)
+		emitter.visible = active_room.grow(0.15).has_point(Vector2(at.x,at.z))
 
 func _room(parent: Node3D, label: String, center: Vector3, width: float, depth: float, accent: Color) -> void:
+	room_bounds = Rect2(Vector2(center.x-width/2.0, center.z-depth/2.0), Vector2(width, depth))
 	var outline := Color("#1a3039")
 	# Long expansion joints and inset service hatches avoid a square tile grid.
 	for seam in range(1, int(depth / 2.4)):
@@ -102,6 +141,7 @@ func _room(parent: Node3D, label: String, center: Vector3, width: float, depth: 
 
 func _rebuild() -> void:
 	lamps.clear()
+	wall_details.clear()
 	for child in get_children():
 		if child.name == "Generated":
 			remove_child(child)
@@ -155,3 +195,96 @@ func _rebuild() -> void:
 		_box(generated, "Backup turbine", Vector3(1.7, 1.35, 1.8), Vector3(38.8, 0.98, z), Color("#53636c"))
 		for vent in range(8):
 			_box(generated, "Cooling fin", Vector3(1.76, 0.04, 1.86), Vector3(38.8, 0.5 + vent * 0.14, z), Color("#26363e"))
+
+	_furnish(generated)
+	_batch_static(generated)
+	if not Engine.is_editor_hint(): call_deferred("_collect_emitters")
+
+# Merge identical materials only within small spatial cells, retaining local
+# light selection and frustum culling. Geometry/normals/materials are unchanged.
+func _batch_static(parent: Node3D) -> void:
+	var groups := {}
+	for child in parent.get_children():
+		if not child is MeshInstance3D or child in wall_details: continue
+		if child.material_override.emission_enabled: continue
+		var key := str(child.material_override.get_instance_id()) + ":" + str(child.cast_shadow) + ":" + str(Vector2i(floori(child.position.x / 8), floori(child.position.z / 8)))
+		if not groups.has(key): groups[key] = []
+		groups[key].append(child)
+	for parts in groups.values():
+		if parts.size() < 2: continue
+		var builder := SurfaceTool.new()
+		builder.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for part in parts: builder.append_from(part.mesh, 0, part.transform)
+		var merged := MeshInstance3D.new()
+		merged.name = "StaticDetailBatch"
+		merged.set_meta("static_batch", true)
+		merged.mesh = builder.commit()
+		merged.material_override = parts[0].material_override
+		merged.cast_shadow = parts[0].cast_shadow
+		parent.add_child(merged)
+		for part in parts:
+			parent.remove_child(part)
+			part.free()
+
+func _solid(parent: Node3D, at: Vector3, size: Vector3) -> void:
+	var body := StaticBody3D.new()
+	body.position = at
+	parent.add_child(body)
+	var collision := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	collision.shape = box
+	body.add_child(collision)
+
+func _trolley(parent: Node3D, at: Vector3, medical: bool) -> void:
+	var metal := Color("#52646d")
+	for height in [0.27, 0.78]:
+		_box(parent, "Instrument tray", Vector3(0.85, 0.07, 0.55), at+Vector3(0,height,0), metal)
+	for x in [-0.36,0.36]:
+		for z in [-0.21,0.21]:
+			_box(parent,"Trolley upright",Vector3(0.035,0.7,0.035),at+Vector3(x,0.45,z),metal)
+			_box(parent,"Rubber caster",Vector3(0.10,0.12,0.08),at+Vector3(x,0.10,z),Color("#1c282f"))
+	for i in range(3):
+		_box(parent,"Sterile pack" if medical else "Tool case",Vector3(0.18,0.06,0.24),at+Vector3(-0.24+i*0.23,0.85,0),Color("#b6c4c2") if medical else Color("#916e42"))
+	_solid(parent,at+Vector3(0,0.45,0),Vector3(0.86,0.9,0.56))
+
+func _shelf(parent: Node3D, at: Vector3, archive: bool) -> void:
+	var steel := Color("#46565e")
+	for x in [-0.66,0.66]:
+		_box(parent,"Rack upright",Vector3(0.07,1.9,0.5),at+Vector3(x,0.95,0),steel)
+	for y in [0.15,0.7,1.25,1.8]:
+		_box(parent,"Rack shelf",Vector3(1.4,0.05,0.55),at+Vector3(0,y,0),steel)
+		if y < 1.8:
+			for x in [-0.42,0.0,0.42]:
+				_box(parent,"Archive box" if archive else "Sealed supplies",Vector3(0.32,0.34,0.4),at+Vector3(x,y+0.2,0),Color("#7c8077") if archive else Color("#637c82"))
+	_solid(parent,at+Vector3(0,0.95,0),Vector3(1.45,1.9,0.56))
+
+func _furnish(parent: Node3D) -> void:
+	# Kept against walls or next to the relevant workstation; central route clear.
+	for at in [Vector3(7.6,0,-5.7),Vector3(12.5,0,-10.5),Vector3(-9.7,0,7.5)]: _trolley(parent,at,true)
+	for at in [Vector3(-11.5,0,-9.5),Vector3(6,0,10.8),Vector3(31,0,25)]: _trolley(parent,at,false)
+	for at in [Vector3(16,0,-10.9),Vector3(22.5,0,-6),Vector3(22.7,0,15.5)]: _shelf(parent,at,true)
+	for at in [Vector3(7.6,0,-2.5),Vector3(-11.4,0,5.2),Vector3(17.4,0,24),Vector3(31,0,11)]: _shelf(parent,at,false)
+	# Diagnostic cart beside Volkov's capsule.
+	var base := Vector3(9.2,0,-10.6)
+	_box(parent,"Diagnostic pedestal",Vector3(0.55,0.7,0.45),base+Vector3(0,0.35,0),Color("#52646b"))
+	_box(parent,"Diagnostic bezel",Vector3(0.65,0.48,0.12),base+Vector3(0,1.12,0),Color("#243139"))
+	_box(parent,"Diagnostic glass",Vector3(0.54,0.35,0.025),base+Vector3(0,1.12,0.07),Color("#427d86"))
+	_solid(parent,base+Vector3(0,0.65,0),Vector3(0.65,1.3,0.48))
+	# Benchtop equipment, no extra floor obstruction.
+	for at in [Vector3(-9,0.85,-9),Vector3(18,0.85,-9),Vector3(-7.5,0.85,-1)]:
+		_box(parent,"Instrument enclosure",Vector3(0.48,0.25,0.38),at+Vector3(-0.35,0.12,0),Color("#75878b"))
+		for i in range(3):
+			_box(parent,"Instrument dial",Vector3(0.055,0.05,0.025),at+Vector3(-0.50+i*0.12,0.2,0.2),Color("#263b44"))
+		_box(parent,"Document folder",Vector3(0.3,0.025,0.32),at+Vector3(0.38,0.015,0),Color("#a7ada4"))
+	# Local accident evidence in the laboratory, not a corridor rubbish heap.
+	for i in range(5):
+		_box(parent,"Evacuation papers",Vector3(0.19,0.008,0.27),Vector3(-8.8+i*0.28,0.018,-6.2+sin(i)*0.22),Color("#a9b0a6"))
+
+func _collect_emitters() -> void:
+	hidden_emitters.clear()
+	for visual in get_parent().find_children("*", "MeshInstance3D", true, false):
+		if visual.get_parent().name.begins_with("WallFixture"): continue
+		var material = visual.material_override
+		if material is StandardMaterial3D and material.emission_enabled:
+			hidden_emitters.append(visual)

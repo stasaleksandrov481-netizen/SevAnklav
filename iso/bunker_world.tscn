@@ -47,6 +47,6 @@ script = ExtResource("7")
 script = ExtResource("5")
 target_path = NodePath("../Volkov")
 current = true
-initial_size = 21.0
+initial_size = 16.0
 
 [node name="TouchControls" parent="." instance=ExtResource("6")]
