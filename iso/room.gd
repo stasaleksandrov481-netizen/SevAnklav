@@ -138,27 +138,17 @@ func contains_world_point(point: Vector3) -> bool:
 	var local := to_local(point)
 	return absf(local.x) < width * 0.5 and absf(local.z) < depth * 0.5
 
-# Camera ray versus expanded wall bounds: fade any occluding wall, not only
-# the east/south pair. Physics and the opaque shadow caster remain unchanged.
-func update_occlusion(point: Vector3, camera: Camera3D, delta: float) -> void:
-	var target := point + Vector3.UP * 0.45
-	var eye := target + camera.global_basis.z * 50.0
+# Test the full body silhouette; opaque rooms stay on the opaque render path.
+const Cutaway = preload("res://iso/wall_cutaway.gd")
+func update_occlusion(point: Vector3, camera: Camera3D, delta: float, occupied_bounds := Rect2()) -> void:
 	for visual in _wall_visuals:
-		var bounds := visual.get_aabb().grow(0.38)
-		var blocked: bool = bounds.intersects_segment(visual.to_local(target), visual.to_local(eye)) != null
-		if not visual.has_meta("cutaway"):
-			var original := visual.material_override
-			var mat := original.duplicate() as StandardMaterial3D
-			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			visual.material_override = mat
-			visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			var caster := MeshInstance3D.new()
-			caster.mesh = visual.mesh
-			caster.material_override = original
-			caster.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-			visual.add_child(caster)
-			visual.set_meta("cutaway", true)
-		var material := visual.material_override as StandardMaterial3D
-		var color := material.albedo_color
-		color.a = move_toward(color.a, 0.08 if blocked else 1.0, delta * 4.0)
-		material.albedo_color = color
+		var front := false
+		if occupied_bounds.has_area():
+			var at := visual.global_position
+			var axis := camera.global_basis.z
+			var x_edge := occupied_bounds.end.x if axis.x > 0 else occupied_bounds.position.x
+			var z_edge := occupied_bounds.end.y if axis.z > 0 else occupied_bounds.position.y
+			# Include both faces of a shared wall. Otherwise the neighbouring
+			# room's opaque duplicate still hides the occupied room's interior.
+			front = (absf(at.x-x_edge) < 0.22 and at.z >= occupied_bounds.position.y and at.z <= occupied_bounds.end.y) or (absf(at.z-z_edge) < 0.22 and at.x >= occupied_bounds.position.x and at.x <= occupied_bounds.end.x)
+		Cutaway.update(visual, point, camera, delta, front)

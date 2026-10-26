@@ -38,11 +38,18 @@ func _setup_environment() -> void:
 func _process(_delta: float) -> void:
 	var center := _sector_at(player.global_position)
 	if center != last_center: _update_sectors()
-	for room in get_tree().get_nodes_in_group("iso_rooms"):
+	var rooms := get_tree().get_nodes_in_group("iso_rooms")
+	var occupied_bounds := Rect2()
+	if world_layer == 1:
+		for room in rooms:
+			if room.contains_world_point(player.global_position):
+				occupied_bounds = Rect2(Vector2(room.global_position.x-room.width/2.0,room.global_position.z-room.depth/2.0),Vector2(room.width,room.depth))
+				break
+	for room in rooms:
 		if room.get_script() == RoomScript:
 			room.set_roof_visible(lighting_profile != 0 and not room.contains_world_point(player.global_position))
 			if world_layer == 1:
-				room.update_occlusion(player.global_position, $Camera, _delta)
+				room.update_occlusion(player.global_position, $Camera, _delta, occupied_bounds)
 			else:
 				room.set_front_transparency(0.82 if room.contains_world_point(player.global_position) else 0.0)
 	for building in get_tree().get_nodes_in_group("iso_buildings"):
