@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://iso/zarya/player.gd" id="4"]
 [ext_resource type="Script" path="res://iso/camera_3d.gd" id="5"]
 [ext_resource type="PackedScene" path="res://iso/touch_controls.tscn" id="6"]
-[ext_resource type="Script" path="res://iso/zarya/rig.gd" id="7"]
+[ext_resource type="Script" path="res://iso/characters/volkov.gd" id="7"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
 radius = 0.34
