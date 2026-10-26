@@ -553,7 +553,7 @@ func _enter_iso_world() -> void:
 		world.get_node("Volkov").position = spawn_at
 		current_screen = world
 		add_child(world)
-		var campaign_ui := preload("res://iso/campaign_hud.gd").new()
+		var campaign_ui = preload("res://iso/zarya/hud.gd").new() if scene_path == "res://iso/bunker_world.tscn" else preload("res://iso/campaign_hud.gd").new()
 		campaign_ui.name = "CampaignHUD"
 		world.add_child(campaign_ui)
 

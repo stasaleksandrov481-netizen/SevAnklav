@@ -1,0 +1,411 @@
+{
+  "rooms": [
+    {
+      "id": "capsule",
+      "title": "12 / ЭКСПЕРИМЕНТАЛЬНАЯ V-17",
+      "x": -24,
+      "z": -10,
+      "finish": 1
+    },
+    {
+      "id": "observation",
+      "title": "13 / ПАЛАТА НАБЛЮДЕНИЯ",
+      "x": -24,
+      "z": 0,
+      "finish": 1
+    },
+    {
+      "id": "staff",
+      "title": "14 / ТЕРМИНАЛ ПЕРСОНАЛА",
+      "x": -12,
+      "z": 0,
+      "finish": 1
+    },
+    {
+      "id": "archive",
+      "title": "15 / АРХИВ ПРОЕКТА",
+      "x": -12,
+      "z": -10,
+      "finish": 0
+    },
+    {
+      "id": "lab1",
+      "title": "16 / ЛАБОРАТОРИЯ №1",
+      "x": 0,
+      "z": -10,
+      "finish": 1
+    },
+    {
+      "id": "lab2",
+      "title": "17 / ЛАБОРАТОРИЯ №2",
+      "x": 12,
+      "z": -10,
+      "finish": 1
+    },
+    {
+      "id": "server",
+      "title": "18 / СЕРВЕРНАЯ",
+      "x": -12,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "electrical",
+      "title": "19 / ЭЛЕКТРОЩИТОВАЯ",
+      "x": 0,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "generator",
+      "title": "20 / ГЕНЕРАТОРНАЯ",
+      "x": 12,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "pump",
+      "title": "21 / НАСОСНАЯ",
+      "x": 24,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "workshop",
+      "title": "22 / МАСТЕРСКАЯ СЕРОВА",
+      "x": 36,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "quarantine",
+      "title": "23 / КАРАНТИННЫЙ БЛОК",
+      "x": 24,
+      "z": 0,
+      "finish": 2
+    },
+    {
+      "id": "isolation_a",
+      "title": "24 / ИЗОЛЯТОР А",
+      "x": 36,
+      "z": -10,
+      "finish": 1
+    },
+    {
+      "id": "isolation_b",
+      "title": "25 / ИЗОЛЯТОР Б",
+      "x": 36,
+      "z": 0,
+      "finish": 1
+    },
+    {
+      "id": "control",
+      "title": "26 / КОНТРОЛЬНЫЙ ПОСТ",
+      "x": 12,
+      "z": 0,
+      "finish": 2
+    },
+    {
+      "id": "airlock",
+      "title": "27 / ГРУЗОВОЙ ШЛЮЗ",
+      "x": 48,
+      "z": 10,
+      "finish": 2
+    },
+    {
+      "id": "stairs",
+      "title": "ЛЕСТНИЦА / УРОВЕНЬ −1",
+      "x": -24,
+      "z": 10,
+      "finish": 0
+    },
+    {
+      "id": "corridor",
+      "title": "ГЛАВНАЯ ГАЛЕРЕЯ",
+      "x": 0,
+      "z": 0,
+      "finish": 2
+    },
+    {
+      "id": "service",
+      "title": "СЕРВИСНЫЙ ПЕРЕХОД",
+      "x": 24,
+      "z": -10,
+      "finish": 2
+    }
+  ],
+  "links": [
+    {
+      "a": "capsule",
+      "b": "observation",
+      "kind": "auto",
+      "lock": ""
+    },
+    {
+      "a": "capsule",
+      "b": "archive",
+      "kind": "card",
+      "lock": "card"
+    },
+    {
+      "a": "observation",
+      "b": "staff",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "observation",
+      "b": "stairs",
+      "kind": "electronic",
+      "lock": "clearance"
+    },
+    {
+      "a": "staff",
+      "b": "archive",
+      "kind": "electronic",
+      "lock": "staff"
+    },
+    {
+      "a": "staff",
+      "b": "corridor",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "staff",
+      "b": "server",
+      "kind": "card",
+      "lock": "card"
+    },
+    {
+      "a": "archive",
+      "b": "lab1",
+      "kind": "card",
+      "lock": "card"
+    },
+    {
+      "a": "lab1",
+      "b": "lab2",
+      "kind": "hermetic",
+      "lock": ""
+    },
+    {
+      "a": "lab2",
+      "b": "service",
+      "kind": "electronic",
+      "lock": "power"
+    },
+    {
+      "a": "service",
+      "b": "isolation_a",
+      "kind": "damaged",
+      "lock": ""
+    },
+    {
+      "a": "corridor",
+      "b": "lab1",
+      "kind": "card",
+      "lock": "card"
+    },
+    {
+      "a": "corridor",
+      "b": "control",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "corridor",
+      "b": "electrical",
+      "kind": "electronic",
+      "lock": "staff"
+    },
+    {
+      "a": "control",
+      "b": "lab2",
+      "kind": "hermetic",
+      "lock": ""
+    },
+    {
+      "a": "control",
+      "b": "quarantine",
+      "kind": "bulkhead",
+      "lock": "power"
+    },
+    {
+      "a": "electrical",
+      "b": "server",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "electrical",
+      "b": "generator",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "generator",
+      "b": "pump",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "pump",
+      "b": "workshop",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "workshop",
+      "b": "isolation_b",
+      "kind": "hermetic",
+      "lock": "power"
+    },
+    {
+      "a": "quarantine",
+      "b": "isolation_b",
+      "kind": "hermetic",
+      "lock": ""
+    },
+    {
+      "a": "isolation_b",
+      "b": "isolation_a",
+      "kind": "manual",
+      "lock": ""
+    },
+    {
+      "a": "workshop",
+      "b": "airlock",
+      "kind": "gate",
+      "lock": "sealed"
+    }
+  ],
+  "actions": [
+    {
+      "id": "identity",
+      "room": "capsule",
+      "title": "Маркировка V-17",
+      "kind": "record",
+      "record": "terminal"
+    },
+    {
+      "id": "staff",
+      "room": "staff",
+      "title": "Терминал персонала",
+      "kind": "terminal",
+      "record": "terminal"
+    },
+    {
+      "id": "weapon",
+      "room": "control",
+      "title": "Оружие дежурного",
+      "kind": "loot",
+      "record": "weapon"
+    },
+    {
+      "id": "card",
+      "room": "workshop",
+      "title": "Карта инженера Серова",
+      "kind": "loot",
+      "record": "serov"
+    },
+    {
+      "id": "experiment",
+      "room": "lab1",
+      "title": "Видеозапись эксперимента №12",
+      "kind": "terminal",
+      "record": "journal_a"
+    },
+    {
+      "id": "journal",
+      "room": "lab2",
+      "title": "Журнал стабилизации",
+      "kind": "terminal",
+      "record": "journal_b"
+    },
+    {
+      "id": "fuse",
+      "room": "server",
+      "title": "Резервный предохранитель",
+      "kind": "loot",
+      "record": "fuse"
+    },
+    {
+      "id": "power",
+      "room": "electrical",
+      "title": "Распределительный щит",
+      "kind": "terminal",
+      "record": "power_note"
+    },
+    {
+      "id": "generator",
+      "room": "generator",
+      "title": "Резервный генератор",
+      "kind": "terminal",
+      "record": "power_note"
+    },
+    {
+      "id": "pump",
+      "room": "pump",
+      "title": "Пульт насосной",
+      "kind": "terminal",
+      "record": "power_note"
+    },
+    {
+      "id": "quarantine",
+      "room": "quarantine",
+      "title": "Контроль карантина",
+      "kind": "terminal",
+      "record": "isolation_note"
+    },
+    {
+      "id": "archive",
+      "room": "archive",
+      "title": "Архив наблюдения",
+      "kind": "terminal",
+      "record": "archive"
+    },
+    {
+      "id": "stairs",
+      "room": "stairs",
+      "title": "Подъём на уровень −1",
+      "kind": "stairs",
+      "record": ""
+    },
+    {
+      "id": "surface",
+      "room": "airlock",
+      "title": "Внешний грузовой шлюз",
+      "kind": "sealed",
+      "record": ""
+    },
+    {
+      "id": "engineer",
+      "room": "workshop",
+      "title": "Дневник Серова",
+      "kind": "record",
+      "record": "engineer"
+    },
+    {
+      "id": "guard",
+      "room": "control",
+      "title": "Тело сотрудника охраны",
+      "kind": "loot",
+      "record": "guard"
+    },
+    {
+      "id": "medical",
+      "room": "observation",
+      "title": "Медицинский шкаф",
+      "kind": "loot",
+      "record": "medical"
+    },
+    {
+      "id": "secret",
+      "room": "isolation_b",
+      "title": "Закрытый шкаф B-12",
+      "kind": "locked",
+      "record": "secret"
+    }
+  ]
+}
