@@ -15,12 +15,16 @@ var weapon_status: Label
 var dead_shown := false
 var timer := 0.0
 var refresh_clock := 0.0
+var interaction_hint: Label
+var interaction_icons := {}
+var interaction_marker: PanelContainer
+var interaction_marker_icon: TextureRect
 func style() -> StyleBoxFlat:
 	var s:=StyleBoxFlat.new()
-	s.bg_color=Color(0.018,0.027,0.032,0.88)
-	s.border_color=Color("#526068")
+	s.bg_color=Color(0.025,0.042,0.048,0.96)
+	s.border_color=Color("#3b555b")
 	s.set_border_width_all(1)
-	s.set_corner_radius_all(3)
+	s.set_corner_radius_all(7)
 	s.set_content_margin_all(12)
 	return s
 func surface_style() -> StyleBoxTexture:
@@ -37,7 +41,7 @@ func label(parent: Node, text: String, size := 18) -> Label:
 	return result
 func icon_button(parent: Node, id: String, hint: String, callback: Callable) -> Button:
 	var b:=button(parent,"",callback,60)
-	b.custom_minimum_size=Vector2(60,60); b.tooltip_text=hint
+	b.custom_minimum_size=Vector2(60,60); b.tooltip_text=hint; b.accessibility_name=hint
 	b.icon=load("res://assets/ui/controls/"+id+".svg"); b.expand_icon=true
 	b.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER; b.add_theme_constant_override("icon_max_width",32)
 	var disabled:=style(); disabled.bg_color=Color("#10171c"); b.add_theme_stylebox_override("disabled",disabled)
@@ -47,10 +51,13 @@ func button(parent: Node, text: String, callback: Callable, width := 110) -> But
 	var b:=Button.new(); b.text=text; b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.custom_minimum_size=Vector2(width,52)
 	b.add_theme_stylebox_override("normal",surface_style())
-	var hover:=style(); hover.bg_color=Color("#23343b"); hover.border_color=Color("#9aaeb5")
+	var hover:=style(); hover.bg_color=Color("#1c373c"); hover.border_color=Color("#83c6c3")
 	b.add_theme_stylebox_override("hover",hover)
-	var pressed:=style(); pressed.bg_color=Color("#334850")
+	var pressed:=style(); pressed.bg_color=Color("#304b4c"); pressed.border_color=Color("#dfbc82")
 	b.add_theme_stylebox_override("pressed",pressed)
+	var focus:=style(); focus.bg_color=Color.TRANSPARENT; focus.border_color=Color("#dfbc82"); focus.set_border_width_all(2)
+	b.add_theme_stylebox_override("focus",focus)
+	b.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	b.add_theme_font_size_override("font_size",14)
 	b.add_theme_color_override("font_color",Color("#b8d1dc"))
 	b.pressed.connect(callback)
@@ -95,6 +102,7 @@ func _layout_hud() -> void:
 		"Check":Rect2(w/2-450,h-126,90,96),"MoveStick":Rect2(22,h-395,245,245),
 		"AimStick":Rect2(w-267,h-395,245,245),"Interact":Rect2(w-340,h-193,64,64),
 		"Weapon":Rect2(w-397,h-92,379,72),"Utilities":Rect2(18,h-80,238,60),
+		"InteractionHint":Rect2(w-486,h-218,340,28),
 		"Notice":Rect2(w/2-350,114,700,64)}
 	for key in rects:
 		var n=root.get_node_or_null(NodePath(key))
@@ -108,7 +116,8 @@ func _ready() -> void:
 	_fit_canvas(); get_viewport().size_changed.connect(_fit_canvas)
 	var task:=panel(root,Vector2(20,24),Vector2(300,130)); task.name="Tasks"
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",14); task.add_child(column)
-	label(column,"▤   ЗАДАЧИ",15)
+	var task_heading:=label(column,"ТЕКУЩАЯ ЗАДАЧА",13)
+	task_heading.add_theme_color_override("font_color",Color("#80bbb9"))
 	column.add_child(HSeparator.new())
 	objective=label(column,"",20)
 	objective.add_theme_color_override("font_color",Color("#e0e4e3"))
@@ -149,6 +158,23 @@ func _ready() -> void:
 		place(stick,Rect2(55 if side==0 else 1285,510,245,245))
 		stick.name="MoveStick" if side==0 else "AimStick"
 	var interact:=icon_button(root,"hand","Взаимодействовать",func(): world.interact()); interact.name="Interact"
+	interaction_hint=label(root,"",14); interaction_hint.name="InteractionHint"
+	interaction_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	interaction_hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	interaction_hint.add_theme_color_override("font_color",Color("#e2c18b"))
+	for key in ["hand","door","terminal","search"]: interaction_icons[key]=load("res://assets/ui/controls/"+key+".svg")
+	interaction_marker=PanelContainer.new(); interaction_marker.name="InteractionMarker"
+	interaction_marker.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	interaction_marker.custom_minimum_size=Vector2(46,46)
+	var marker_style:=style(); marker_style.bg_color=Color(0.025,0.045,0.05,0.94)
+	marker_style.border_color=Color("#e2c18b"); marker_style.set_border_width_all(2); marker_style.set_content_margin_all(8)
+	interaction_marker.add_theme_stylebox_override("panel",marker_style)
+	root.add_child(interaction_marker)
+	interaction_marker_icon=TextureRect.new(); interaction_marker_icon.custom_minimum_size=Vector2(28,28)
+	interaction_marker_icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	interaction_marker_icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	interaction_marker_icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	interaction_marker.add_child(interaction_marker_icon); interaction_marker.hide()
 	var gun_panel:=panel(root,Vector2(1150,816),Vector2(379,72)); gun_panel.name="Weapon"
 	var gun_row:=HBoxContainer.new(); gun_panel.add_child(gun_row)
 	weapon_status=label(gun_row,"",14); weapon_status.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -201,6 +227,7 @@ func refresh_slots() -> void:
 		cell.tooltip_text=State.ITEMS.get(item.get("id",""),{}).get("name","Пусто")
 	slots=kept
 func _process(delta: float) -> void:
+	_update_world_marker()
 	if modal==null:
 		world.player.move_vector=root.get_node("MoveStick").get_move_vector()
 		world.player.aim_vector=root.get_node("AimStick").get_move_vector()
@@ -210,7 +237,8 @@ func _process(delta: float) -> void:
 	refresh_clock+=delta
 	if refresh_clock>0.15:
 		refresh_clock=0
-		objective.text="◯  "+world.objective()
+		objective.text=world.objective()
+		_update_interaction()
 		for key in bars: bars[key].value=world.state.data[key]
 		if last_map_position.distance_squared_to(world.player.position)>0.04 or last_map_count!=world.state.data.visited.size():
 			minimap.queue_redraw(); last_map_position=world.player.position; last_map_count=world.state.data.visited.size()
@@ -428,3 +456,31 @@ func restart_level() -> void:
 	var mains=get_tree().get_nodes_in_group("main_root")
 	if not mains.is_empty(): mains[0]._enter_iso_world()
 	else: get_tree().reload_current_scene()
+
+func _update_interaction() -> void:
+	var target: Dictionary=world.nearest()
+	var action_button: Button=root.get_node("Interact")
+	action_button.disabled=target.is_empty() or world.player.locked
+	var icon_id: String={"door":"door","terminal":"terminal","record":"terminal","loot":"search","locked":"search","container":"search"}.get(str(target.get("kind","")),"hand")
+	action_button.icon=interaction_icons[icon_id]
+	action_button.modulate=Color.WHITE if action_button.disabled else Color("#ffe1a9")
+	interaction_hint.text="" if target.is_empty() else str(target.get("title","ВЗАИМОДЕЙСТВОВАТЬ"))
+	interaction_hint.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	interaction_hint.autowrap_mode=TextServer.AUTOWRAP_OFF
+	action_button.tooltip_text="Нет объекта рядом" if target.is_empty() else str(target.get("title","Взаимодействовать"))
+
+func _update_world_marker() -> void:
+	if not is_instance_valid(interaction_marker): return
+	interaction_marker.hide()
+	if modal!=null or world.player.locked: return
+	var target: Dictionary=world.nearest()
+	if target.is_empty(): return
+	var camera: Camera3D=world.get_node("Camera")
+	var point: Vector3=target.node.global_position+Vector3.UP*1.8
+	if camera.is_position_behind(point): return
+	var screen: Vector2=camera.unproject_position(point)
+	if not get_viewport().get_visible_rect().has_point(screen): return
+	interaction_marker.position=(screen-root.position)/root.scale-Vector2(23,46)
+	var icon_id: String={"door":"door","terminal":"terminal","record":"terminal","loot":"search","locked":"search"}.get(str(target.get("kind","")),"hand")
+	interaction_marker_icon.texture=interaction_icons[icon_id]
+	interaction_marker.show()

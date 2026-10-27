@@ -4,10 +4,10 @@ func _notification(what: int) -> void:
 		_pointer=-1; _mouse_down=false; _vector=Vector2.ZERO
 func _draw() -> void:
 	var center:=size*0.5
-	var radius:=minf(size.x,size.y)*0.45
-	draw_circle(center,radius,Color(0.025,0.04,0.05,0.52))
-	draw_arc(center,radius,0,TAU,96,Color(0.52,0.61,0.65,0.7),1.2,true)
-	draw_arc(center,radius-7,0,TAU,96,Color(0.25,0.33,0.38,0.7),1,true)
+	var radius:=minf(size.x,size.y)*0.39
+	draw_circle(center,radius,Color(0.025,0.04,0.05,0.25))
+	draw_arc(center,radius,0,TAU,96,Color(0.52,0.61,0.65,0.35),1.2,true)
+	draw_arc(center,radius-7,0,TAU,96,Color(0.25,0.33,0.38,0.25),1,true)
 	var knob:=center+_vector*radius*0.55
 	if get_meta("side",0)==0:
 		for i in range(4):
@@ -16,8 +16,8 @@ func _draw() -> void:
 			var tip:=center+outward*(radius-20)
 			var tangent:=outward.orthogonal()*5
 			draw_colored_polygon(PackedVector2Array([tip,tip-outward*9+tangent,tip-outward*9-tangent]),Color("#62757e"))
-		draw_circle(knob,radius*0.34,Color(0.30,0.38,0.43,0.65))
-		draw_arc(knob,radius*0.34,0,TAU,64,Color("#94a4aa"),1,true)
+		draw_circle(knob,radius*0.34,Color(0.21,0.34,0.36,0.5))
+		draw_arc(knob,radius*0.34,0,TAU,64,Color("#83b8b7"),1,true)
 	else:
 		draw_arc(knob,radius*0.37,0,TAU,64,Color("#61737b"),1,true)
 		for i in range(4):

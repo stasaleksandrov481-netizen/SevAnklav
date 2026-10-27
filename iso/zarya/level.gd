@@ -43,6 +43,7 @@ func _ready() -> void:
 	environment.environment.background_color = Color("#070d11")
 	environment.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.environment.ambient_light_energy = 0.0
+	preload("res://iso/zarya/render_profile.gd").apply(get_viewport(),environment.environment)
 	add_child(environment)
 	for drop in state.data.drops: create_drop(drop)
 	if not get_meta("authoring_export",false): call_deferred("_start")
