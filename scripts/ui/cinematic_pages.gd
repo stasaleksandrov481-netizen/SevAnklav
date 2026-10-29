@@ -1,8 +1,10 @@
-extends Control
+extends "res://scripts/ui/page_canvas.gd"
+const Polar=preload("res://scripts/ui/polar/theme.gd")
+const Back=preload("res://scripts/ui/native_back.gd")
 # Fullscreen editorial pages over the live scene, with actual saved settings.
 const INK := Color(0.88,0.9,0.89)
-const MUTED := Color(0.48,0.54,0.55)
-const LINE := Color(0.5,0.6,0.62,0.25)
+const MUTED := Color(0.56,0.66,0.71)
+const LINE := Color(0.45,0.68,0.76,0.4)
 var main = null
 var mode := "settings"
 var content: VBoxContainer
@@ -14,18 +16,22 @@ var selected := 0
 var selected_tab := "ЗВУК"
 var settings: Dictionary = {}
 var tab_buttons: Array = []
+var closing:=false
 
 static func open(main_node, parent_ui: CanvasLayer, page: String) -> Control:
-    var scr := preload("res://scripts/ui/cinematic_pages.gd").new()
+    var source=load("res://scripts/ui/cinematic_pages.gd")
+    for child in parent_ui.get_children():
+        if child.get_script()==source and not child.is_queued_for_deletion() and not child.closing:return child
+    var scr = source.new()
     scr.main = main_node
     scr.mode = page
     parent_ui.add_child(scr)
     return scr
 
 func _ready() -> void:
-    set_anchors_preset(Control.PRESET_TOP_LEFT)
-    size = get_viewport_rect().size
-    get_viewport().size_changed.connect(func(): size=get_viewport_rect().size)
+    Back.install(self,_close)
+    super._ready()
+    theme=Polar.make_theme()
     mouse_filter = Control.MOUSE_FILTER_STOP
     settings = G.zsave.get("bunker_visual",{"brightness":1.0,"particles":true,"haptics":true})
     var shade := ColorRect.new()
@@ -34,7 +40,7 @@ func _ready() -> void:
     shader.code = "shader_type canvas_item; void fragment(){ float a=mix(0.96,0.75,smoothstep(0.15,1.0,UV.x)); COLOR=vec4(0.014,0.022,0.027,a); }"
     var mat := ShaderMaterial.new(); mat.shader = shader; shade.material = mat
     add_child(shade)
-    var margin := MarginContainer.new()
+    var margin := MarginContainer.new();margin.name="PageMargin"
     margin.set_anchors_preset(Control.PRESET_FULL_RECT)
     for key in ["left","right"]: margin.add_theme_constant_override("margin_"+key,64)
     for key in ["top","bottom"]: margin.add_theme_constant_override("margin_"+key,42)
@@ -59,7 +65,7 @@ func _ready() -> void:
     all.add_child(row)
     sidebar = VBoxContainer.new();sidebar.custom_minimum_size.x = 310
     sidebar.add_theme_constant_override("separation",8);row.add_child(sidebar)
-    var scroll := ScrollContainer.new()
+    var scroll := ScrollContainer.new();scroll.name="PageScroll";scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
     scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
     row.add_child(scroll)
@@ -83,8 +89,8 @@ func _ready() -> void:
         _paragraph("ВОЛКОВ / УПРАВЛЕНИЕ",INK,27)
         _paragraph("Левый стик — ходьба. Двойное касание левого стика — бег. Правый стик — взгляд; с оружием — прицеливание и огонь у края стика.",INK,20)
         _rule()
-        _paragraph("Кнопка действия рядом с правым стиком — осмотр, обыск и двери. Кнопка фонаря над стиком включает и выключает свет. Рюкзак — состояние тела и лечение. КПК — предметы, задачи и найденные записи.",MUTED,18)
-        _paragraph("ПК: WASD — ходьба · Shift — бег · R — перезарядка · E — действие · F — фонарь",MUTED,17)
+        _paragraph("Кнопка действия рядом с правым стиком — осмотр, обыск и двери. Кнопка с фонарём включает и выключает свет в руке. Рюкзак — предметы и экипировка. Схема тела — лечение. КПК — найденные записи, журнал — задачи.",MUTED,18)
+        if not OS.has_feature("mobile"):_paragraph("ПК: WASD — ходьба · Shift — бег · R — перезарядка · E — действие · F — фонарь",MUTED,17)
     elif mode=="difficulty":
         selected=1
         for i in range(3):
@@ -105,6 +111,8 @@ func _ready() -> void:
         _campaign_page()
     modulate.a = 0
     create_tween().tween_property(self,"modulate:a",1.0,0.3)
+
+func _exit_tree() -> void:Back.remove(self)
 
 func _clear_content() -> void:
     for c in content.get_children(): content.remove_child(c);c.queue_free()
@@ -127,6 +135,7 @@ func _button(text: String, px := 20) -> Button:
     b.add_theme_stylebox_override("hover",hover)
     b.add_theme_stylebox_override("focus",hover)
     b.add_theme_stylebox_override("pressed",hover)
+    Polar.button(b)
     return b
 func _select_sidebar(index: int) -> void:
     for i in range(tab_buttons.size()):
@@ -157,7 +166,7 @@ func _settings_page() -> void:
             if not OS.has_feature("mobile"):
                 _toggle("Полный экран",G.fullscreen,func(v): G.set_fullscreen(v); G.write_save())
         "УПРАВЛЕНИЕ":
-            _paragraph("Левый стик — движение. Правый — взгляд и прицеливание; с оружием отклонение до края — огонь. Фонарь переключается отдельной кнопкой над правым стиком. Двойное касание правого стика — перезарядка.")
+            _paragraph("Левый стик — движение. Двойное касание с удержанием — бег до отпускания стика. Правый — взгляд и прицеливание; с оружием отклонение до края — огонь. Двойное касание правого стика — перезарядка. Фонарь переключается отдельной кнопкой.")
             _toggle("Отклик на выстрел",bool(settings.get("haptics",true)),func(v): settings["haptics"]=v; _save_settings())
             _rule()
             _paragraph("Взгляд и корпус Волкова поворачиваются плавно. Шаги, руки и голова анимируются отдельно.",INK,16)
@@ -188,6 +197,7 @@ func _toggle(title: String, state: bool, cb: Callable) -> void:
     content.add_child(btn);_rule()
 func _save_settings() -> void:
     G.zsave["bunker_visual"] = settings
+    get_tree().call_group("bunker_visual_preferences","apply_preferences")
     G.write_save()
 
 func _campaign_page() -> void:
@@ -237,9 +247,11 @@ func _difficulty_page() -> void:
     action_bar.add_child(begin);primary_button=begin
 
 func _unhandled_key_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-        _close();get_viewport().set_input_as_handled()
+    if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+        Back.request(get_tree());get_viewport().set_input_as_handled()
 func _close() -> void:
+    if closing:return
+    closing=true
     if mode=="difficulty":
         main.to_main_menu()
         return

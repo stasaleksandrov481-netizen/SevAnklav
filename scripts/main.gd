@@ -48,7 +48,7 @@ func show_loading(message: String = "", min_time: float = 0.5) -> void:
 	var layer:=CanvasLayer.new();layer.layer=100;add_child(layer);loading_layer=layer
 	var screen:=preload("res://scripts/ui/loading_screen.gd").new()
 	screen.message=message;screen.entering=entering;layer.add_child(screen)
-	await get_tree().create_timer(maxf(7.0,min_time)).timeout
+	await get_tree().create_timer(maxf(0.35,min_time)).timeout
 	if not is_instance_valid(screen): return
 	await screen.fade_out()
 	layer.queue_free()
@@ -532,7 +532,12 @@ func _to_main_menu() -> void:
 				get_tree().quit())
 
 func start_new_iso_campaign() -> void:
+		var preferences: Dictionary=G.zsave.get("bunker_visual",{}).duplicate(true)
+		var graphics: String=str(G.zsave.get("zarya_layout3",{}).get("graphics_profile","balanced"))
 		G.zsave = G._default_zsave()
+		G.zsave["bunker_visual"]=preferences
+		var next_state=preload("res://iso/zarya/state.gd").new(G.zsave,"zarya_layout3")
+		next_state.data["graphics_profile"]=graphics
 		G.zsave["iso_active"] = true
 		G.zsave["iso_layer"] = "bunker"
 		G.write_save()

@@ -3,14 +3,14 @@ var ui
 var key := ""
 func _get_drag_data(_at: Vector2) -> Variant:
 	if not ui.world.state.data.slots.has(key): return null
+	ui.cancel_move()
 	var preview:=TextureRect.new(); preview.texture=icon; preview.custom_minimum_size=Vector2(64,64)
 	set_drag_preview(preview)
 	return key
-func _can_drop_data(_at: Vector2, data: Variant) -> bool: return data is String
+func _can_drop_data(_at: Vector2, data: Variant) -> bool:
+	return data is String and ui.world.state.can_move_slot(data,key)
 func _drop_data(_at: Vector2, data: Variant) -> void:
-	if ui.world.state.move_slot(data,key): ui.selected=key
-	ui.refresh_slots()
-	ui.update_details()
+	ui.move_item(data,key)
 
 func _draw() -> void:
 	if ui==null: return
@@ -27,3 +27,5 @@ func _draw() -> void:
 	if ui.selected==key:
 		draw_rect(Rect2(Vector2(1,1),size-Vector2(2,2)),Color("#c0d4db"),false,1.5)
 		draw_line(Vector2(2,2),Vector2(22,2),Color("#e2b572"),2)
+	elif not ui.moving_from.is_empty() and ui.world.state.can_move_slot(ui.moving_from,key):
+		draw_rect(Rect2(Vector2(2,2),size-Vector2(4,4)),Color("#78b9ac"),false,2)

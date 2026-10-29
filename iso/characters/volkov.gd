@@ -146,7 +146,7 @@ func _process(delta: float) -> void:
 	skeleton.set_bone_pose_position(indices.hips,Vector3(0,-.02+absf(sin(phase))*.025*stride,0))
 	pose("spine",Vector3(-run*.10+breath,sin(phase)*.045*stride,lying+sin(phase)*.022*stride),blend)
 	pose("head",Vector3(-breath,0,-sin(phase)*.018*stride),blend)
-	var duration:=5.0 if action=="wake" else (1.4 if action=="reload" else (.8 if action=="check" else (.26 if action=="shoot" else .7)))
+	var duration:=2.4 if action=="repair" else (5.0 if action=="wake" else (1.4 if action=="reload" else (.8 if action=="check" else (.26 if action=="shoot" else .7))))
 	var progress:=clampf(action_time/duration,0,1); var gesture:=sin(progress*PI) if action!="" else 0.0
 	for side in ["l","r"]:
 		var wave:=sin(phase+(PI if side=="r" else 0)); var arm_swing: float=wave*stride*.32
@@ -162,6 +162,7 @@ func _process(delta: float) -> void:
 		elif not holds and action=="reload": arm=lerpf(arm,-1.0,gesture); elbow=lerpf(elbow,-1.35,gesture); yaw=(.55 if side=="l" else -.55)*gesture
 		if holds and action=="shoot": arm-=sin(progress*PI)*.17; elbow-=sin(progress*PI)*.12
 		if action in ["pickup","use","treat","balance","wake"]: arm-=gesture*.35; elbow-=gesture*.45
+		if action=="repair": arm=-0.85-gesture*0.2; elbow=-0.8-sin(progress*PI*6)*0.12
 		var roll:=.07 if side=="r" else -.07
 		if not holds and flashlight_hand.is_empty():
 			roll=lerpf(roll,.7 if side=="l" else -.7,aim_blend)

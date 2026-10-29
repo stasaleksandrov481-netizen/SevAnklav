@@ -6,6 +6,13 @@ const Prop = preload("res://iso/prop.gd")
 const ORIGIN := Vector3(3540,0,2900)
 var state
 var state_key := "zarya2"
+var custom_layout := false
+var visibility_controller
+var spawn_recovery_pending := false
+var interaction_cache := {}
+var interaction_cache_time := -1
+func capsule_node() -> Node3D:
+	return get_node("LevelMinusTwo/V17Capsule") if custom_layout else rooms.capsule.get_node("V17Capsule")
 var story_enabled := true
 var player_start := Vector3.ZERO
 var layout: Dictionary
@@ -26,6 +33,9 @@ var clock := 0.0
 var save_clock := 0.0
 var materials := {}
 var message := ""
+var repair_action: Dictionary = {}
+var repair_elapsed := 0.0
+const REPAIR_SECONDS := 2.4
 @onready var player: CharacterBody3D = $Volkov
 func _ready() -> void:
 	state = State.new(get_node("/root/G").zsave)
@@ -34,19 +44,60 @@ func _ready() -> void:
 	_build()
 	var pos: Array = state.data.position
 	player.position = ORIGIN+Vector3(pos[0],pos[1],pos[2])
-	if not story_enabled and room_at(player.global_position).is_empty(): player.global_position=player_start
-	if not state.data.awake: player.global_position = rooms.capsule.get_node("V17Capsule").global_position+Vector3(0,1.1,0)
+	if (custom_layout or not story_enabled) and room_at(player.global_position).is_empty(): player.global_position=player_start
+	if not state.data.awake: player.global_position = capsule_node().global_position+Vector3(0,1.1,0)
 	$Camera.position=player.position+$Camera._offset
+	if custom_layout:
+		visibility_controller=preload("res://iso/maps/level2/room_visibility.gd").new()
+		visibility_controller.name="RoomVisibility";get_node("LevelMinusTwo").add_child(visibility_controller);visibility_controller.build(self)
 	var environment := WorldEnvironment.new()
 	environment.environment = Environment.new()
 	environment.environment.background_mode = Environment.BG_COLOR
 	environment.environment.background_color = Color("#070d11")
 	environment.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.environment.ambient_light_energy = 0.0
-	preload("res://iso/zarya/render_profile.gd").apply(get_viewport(),environment.environment)
-	add_child(environment)
+	if not custom_layout: preload("res://iso/zarya/render_profile.gd").apply(get_viewport(),environment.environment)
+	if not custom_layout: add_child(environment)
+	else: environment.free()
 	for drop in state.data.drops: create_drop(drop)
-	if not get_meta("authoring_export",false): call_deferred("_start")
+	clear_empty_drops()
+	if not get_meta("authoring_export",false):
+		call_deferred("_start")
+		if custom_layout:spawn_recovery_pending=bool(state.data.awake)
+func _physics_process(_delta: float) -> void:
+	if spawn_recovery_pending:
+		spawn_recovery_pending=false
+		_restore_clear_spawn()
+func _restore_clear_spawn() -> void:
+	# A saved position can be inside a desk moved by a later furnishing update.
+	if not is_inside_tree() or not is_instance_valid(player) or not state.data.awake:return
+	var start: Vector3=player.global_position
+	var query:=PhysicsShapeQueryParameters3D.new();query.shape=player.get_node("Collision").shape
+	query.exclude=[player.get_rid()];query.collision_mask=player.collision_mask
+	query.transform=Transform3D(Basis.IDENTITY,start+Vector3.UP*.04)
+	var space=get_world_3d().direct_space_state
+	var blockers=space.intersect_shape(query,16)
+	if blockers.is_empty():return
+	var room: String=visibility_controller.room_for(start)
+	var exclude: Array[RID]=[player.get_rid()]
+	for hit in blockers:exclude.append(hit.rid)
+	for radius in [.5,.85,1.2,1.6,2.0,2.5]:
+		for i in 16:
+			var angle=i*TAU/16.0
+			var candidate=start+Vector3(cos(angle)*radius,0,sin(angle)*radius)
+			if room_at(candidate)!=room:continue
+			query.transform.origin=candidate+Vector3.UP*.04
+			if not space.intersect_shape(query,1).is_empty():continue
+			var sight:=PhysicsRayQueryParameters3D.create(start+Vector3.UP*.35,candidate+Vector3.UP*.35)
+			sight.exclude=exclude
+			if not space.intersect_ray(sight).is_empty():continue
+			var floor_check:=PhysicsRayQueryParameters3D.create(candidate+Vector3.UP*.2,candidate-Vector3.UP*1.2)
+			floor_check.exclude=[player.get_rid()]
+			if space.intersect_ray(floor_check).is_empty():continue
+			player.global_position=candidate
+			$Camera.global_position=candidate+$Camera._offset
+			visibility_controller.switch_room(room);set_meta("spawn_recovered",true);save_state()
+			return
 func _start() -> void:
 	if hud == null: add_child(preload("res://iso/zarya/hud.gd").new())
 	if not state.data.awake:
@@ -94,6 +145,9 @@ func cylinder(parent: Node3D, at: Vector3, radius: float, height: float, color: 
 	visual.material_override = mat(color)
 	parent.add_child(visual)
 func _build() -> void:
+	preload("res://iso/maps/level2/runtime.gd").build(self)
+	return
+func _build_legacy() -> void:
 	var path: String=get_meta("map_path",ProjectSettings.get_setting("anklav/active_map","res://iso/maps/zarya_bunker.tscn"))
 	if ResourceLoader.exists(path) and not get_meta("authoring_export",false):
 		preload("res://iso/editor/runtime.gd").build(self,path)
@@ -189,6 +243,17 @@ func sees(from: Vector3, to: Vector3, exclude: Array = []) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 func _process(delta: float) -> void:
 	if paused: return
+	if not repair_action.is_empty(): _advance_repair(delta)
+	if custom_layout:
+		save_clock+=delta;clock+=delta
+		if save_clock>6:save_state();save_clock=0
+		if clock>=0.15:
+			if state.data.awake:
+				state.data.food=maxf(0,float(state.data.food)-clock*0.008)
+				state.data.water=maxf(0,float(state.data.water)-clock*0.014)
+				for wound in state.data.wounds.values():state.data.health=maxf(0,float(state.data.health)-float(wound.bleeding)*clock*0.07)
+			clock=0
+		return
 	if room_lights.is_empty():
 		for lamp in lights:
 			if not room_lights.has(lamp.room): room_lights[lamp.room]=[]
@@ -201,9 +266,9 @@ func _process(delta: float) -> void:
 	clock = 0
 	current = room_at(player.global_position)
 	if not current.is_empty(): state.data.visited[current] = true
-	room_visible.clear()
+	if not custom_layout: room_visible.clear()
 	room_visible[current] = true
-	for door in doors:
+	for door in ([] if custom_layout else doors):
 		if door.progress<0.96: continue
 		var other := ""
 		if door.info.a == current: other = door.info.b
@@ -235,7 +300,7 @@ func _process(delta: float) -> void:
 			if lamp.node.visible!=enabled: lamp.node.visible=enabled
 			if lamp.node.shadow_enabled!=room_visible.has(id): lamp.node.shadow_enabled=room_visible.has(id)
 			if lamp.fixture.visible!=room_visible.has(id): lamp.fixture.visible=room_visible.has(id)
-	for door in doors: door.visible = state.data.visited.has(door.info.a) or state.data.visited.has(door.info.b)
+	for door in ([] if custom_layout else doors): door.visible = state.data.visited.has(door.info.a) or state.data.visited.has(door.info.b)
 	for enemy in enemies: enemy.refresh_visibility()
 	if state.data.awake:
 		state.data.food = maxf(0,float(state.data.food)-step*0.008)
@@ -247,22 +312,51 @@ func save_state() -> void:
 	state.data.position = [local.x,local.y,local.z]
 	for enemy in enemies: enemy.store()
 	get_node("/root/G").write_save()
+func _notification(what: int) -> void:
+	# Save the latest position before mobile suspension or window closure.
+	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
+		if state != null and is_instance_valid(player):
+			cancel_repair()
+			player.clear_controls()
+			if is_instance_valid(hud):
+				hud.reset_controls()
+				if what!=NOTIFICATION_WM_CLOSE_REQUEST and state.data.awake and float(state.data.health)>0 and hud.modal==null:hud.pause_menu()
+			save_state()
 func notify(text: String) -> void:
 	message = text
 	if hud != null: hud.notify(text)
 func nearest() -> Dictionary:
+	var now := Time.get_ticks_msec()
+	if custom_layout and now-interaction_cache_time<100:return interaction_cache
 	var result := {}
 	var distance := 2.4
 	for action in stations:
 		var d: float = player.global_position.distance_to(action.node.global_position)
-		if d<distance: result=action; distance=d
+		if d<distance and (not custom_layout or can_interact_from(action,player.global_position)): result=action; distance=d
 	for door in doors:
 		var d: float = player.global_position.distance_to(door.global_position)
-		if d<distance: result={"kind":"door","node":door,"title":"ДВЕРЬ / "+str(door.info.kind)}; distance=d
+		var title: String="ШЛЮЗ ЗАБЛОКИРОВАН" if door.info.kind=="sealed" else ("ЗАКРЫТЬ ДВЕРЬ" if door.opened else "ОТКРЫТЬ ДВЕРЬ")
+		var action={"kind":"door","node":door,"title":title}
+		if d<distance and (not custom_layout or can_interact_from(action,player.global_position)): result=action; distance=d
+	interaction_cache=result;interaction_cache_time=now
 	return result
 func interact(action: Dictionary = {}) -> void:
+	if not player.can_act():return
 	if action.is_empty(): action=nearest()
 	if action.is_empty() or player.locked: return
+	if custom_layout and not can_interact_from(action,player.global_position): return
+	if action.kind == "evidence":
+		if custom_layout:get_node("LevelMinusTwo/Investigation").discover(action)
+		state.data.records[action.id]={"title":action.title,"body":action.body}
+		hud.open_evidence(action)
+		save_state()
+		return
+	if action.kind == "inspect":
+		get_node("LevelMinusTwo/Investigation").inspect(action)
+		return
+	if action.kind == "repair":
+		begin_repair(action)
+		return
 	if action.kind == "door": notify(action.node.request()); return
 	if action.kind == "sealed": notify("ГРУЗОВОЙ ШЛЮЗ ЗАБЛОКИРОВАН. НЕТ РАЗРЕШЕНИЯ НА ВЫХОД."); return
 	if action.kind == "stairs":
@@ -274,6 +368,47 @@ func interact(action: Dictionary = {}) -> void:
 	if action.kind == "locked" and state.amount("card") == 0: notify("ТРЕБУЕТСЯ КАРТА ИНЖЕНЕРА"); return
 	if action.kind in ["loot","locked"]: hud.open_loot(action); return
 	hud.open_terminal(action)
+func can_interact_from(action: Dictionary, from: Vector3, max_distance := 2.4) -> bool:
+	if custom_layout and visibility_controller!=null:
+		if action.kind=="door":
+			if visibility_controller.active not in action.node.adjacent:return false
+		elif action.get("room","")!=visibility_controller.active:return false
+	var target: Vector3=action.node.global_position
+	if from.distance_to(target)>max_distance: return false
+	target.y=maxf(target.y,ORIGIN.y+1.25)
+	var query:=PhysicsRayQueryParameters3D.create(from+Vector3.UP*0.35,target)
+	query.exclude=[player.get_rid()]
+	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.is_empty() or (action.kind=="door" and hit.collider==action.node.leaf)
+func begin_repair(action: Dictionary) -> void:
+	if not repair_action.is_empty(): return
+	if state.flag(action.id): notify("УЗЕЛ УЖЕ ОБСЛУЖЕН"); return
+	if action.id=="relay_k2" and state.amount("fuse")==0:
+		notify("НУЖНА ПЛАВКАЯ ВСТАВКА / ПРОВЕРЬТЕ МАСТЕРСКУЮ СЕРОВА"); return
+	if action.id=="pump_valve" and not state.flag("relay_k2"):
+		notify("СНАЧАЛА ВОССТАНОВИТЕ КОНТУР K-2 В ЭЛЕКТРОЩИТОВОЙ"); return
+	repair_action=action; repair_elapsed=0; player.locked=true
+	var facing: Vector3=action.node.global_position-player.global_position
+	player.rig.rotation.y=atan2(facing.x,facing.z)
+	player.rig.perform("repair"); hud.show_repair(action.title)
+func cancel_repair() -> void:
+	if repair_action.is_empty(): return
+	get_node("LevelMinusTwo/Furnishings").set_repair_progress(repair_action.id,0.0)
+	repair_action={}; repair_elapsed=0; player.locked=false; player.rig.perform("")
+	if hud!=null: hud.hide_repair()
+func _advance_repair(delta: float) -> void:
+	if repair_action.is_empty():return
+	if float(state.data.health)<=0: cancel_repair(); return
+	repair_elapsed+=delta
+	var progress:=minf(repair_elapsed/REPAIR_SECONDS,1.0)
+	hud.update_repair(progress)
+	get_node("LevelMinusTwo/Furnishings").set_repair_progress(repair_action.id,progress)
+	if progress<1: return
+	var id: String=repair_action.id
+	if id=="relay_k2" and not state.take("fuse"): cancel_repair(); return
+	state.mark(id); repair_action={}; player.locked=false; player.rig.perform(""); hud.hide_repair()
+	notify("ВСТАВКА K-2 ЗАМЕНЕНА. ПРОВЕРЬТЕ КЛАПАН В НАСОСНОЙ." if id=="relay_k2" else "РЕЗЕРВНЫЙ КЛАПАН ОТКРЫТ. ДАВЛЕНИЕ СТАБИЛИЗИРОВАНО.")
+	save_state()
 func activate(id: String) -> bool:
 	match id:
 		"staff": state.mark("staff")
@@ -288,6 +423,8 @@ func activate(id: String) -> bool:
 	save_state()
 	return true
 func objective() -> String:
+	if custom_layout:
+		return preload("res://iso/zarya/journal.gd").next_step(self).title
 	if not story_enabled: return "Исследовать локацию"
 	for entry in [["staff","Осмотреть терминал персонала"],["armed","Найти оружие на контрольном посту"],["card","Найти карту инженера Серова"],["experiment","Изучить запись эксперимента"],["power","Восстановить питание / предохранитель в серверной"],["archive","Прочитать архив наблюдения"],["clearance","Снять карантинную блокировку"],["level_complete","Добраться до лестницы на уровень −1"]]:
 		if not state.flag(entry[0]): return entry[1]
@@ -347,11 +484,29 @@ func _furnish(room: Node3D, entry: Dictionary) -> void:
 
 func create_drop(drop: Dictionary) -> void:
 	if not state.data.containers.has(drop.id): state.data.containers[drop.id]=[drop.item]
+	if state.data.containers[drop.id].is_empty():return
 	var node:=Node3D.new()
+	node.name="Dropped_"+str(drop.id)
 	node.position=Vector3(drop.position[0],drop.position[1]-0.85,drop.position[2])
 	add_child(node)
 	box(node,Vector3(0.28,0.1,0.22),Vector3.ZERO,Color("#849097"))
 	stations.append({"id":drop.id,"node":node,"room":room_at(node.global_position),"kind":"loot","title":"ПРЕДМЕТ НА ПОЛУ","record":""})
+	if custom_layout and visibility_controller!=null:
+		var room: String=visibility_controller.room_for(node.global_position)
+		visibility_controller.register_visual(node,room);node.visible=room==visibility_controller.active
+	interaction_cache_time=-1;interaction_cache={}
+func clear_empty_drops() -> void:
+	if state==null:return
+	for drop in state.data.drops.duplicate():
+		if not state.data.containers.has(drop.id) or not state.data.containers[drop.id].is_empty():continue
+		for action in stations.duplicate():
+			if action.id!=drop.id:continue
+			var node: Node3D=action.node
+			if custom_layout and visibility_controller!=null:
+				for list in visibility_controller.visuals.values():list.erase(node)
+			node.hide();node.queue_free();stations.erase(action)
+		state.data.drops.erase(drop);state.data.containers.erase(drop.id)
+		interaction_cache_time=-1;interaction_cache={}
 
 func _equipment(room: Node3D, entry: Dictionary) -> void:
 	var floor_mesh: MeshInstance3D=room.get_node("Generated/Floor")

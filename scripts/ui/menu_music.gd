@@ -17,3 +17,6 @@ func _ready() -> void:
     play()
 func _process(_delta: float) -> void:
     volume_db=linear_to_db(maxf(0.001,G.music_vol))
+func _exit_tree() -> void:
+    if is_instance_valid(repeat_timer):repeat_timer.stop()
+    stop();stream=null

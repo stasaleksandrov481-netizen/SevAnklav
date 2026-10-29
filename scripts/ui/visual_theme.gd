@@ -18,4 +18,5 @@ static func button(label: String) -> Button:
     b.add_theme_font_size_override("font_size",14);b.add_theme_color_override("font_color",TEXT)
     b.add_theme_stylebox_override("normal",panel(Color(0.10,0.14,0.17,0.94),Color.TRANSPARENT,10))
     for state in ["hover","pressed","focus"]: b.add_theme_stylebox_override(state,panel(Color(0.17,0.23,0.27),EDGE,10))
+    preload("res://scripts/ui/polar/theme.gd").button(b)
     return b

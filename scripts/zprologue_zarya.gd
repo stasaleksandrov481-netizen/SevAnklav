@@ -1,4 +1,5 @@
-extends "res://scripts/ui/viewport_control.gd"
+extends "res://scripts/ui/page_canvas.gd"
+const Back=preload("res://scripts/ui/native_back.gd")
 var main_ref = null
 var finished := false
 var step := 0
@@ -12,6 +13,9 @@ var content_margin: MarginContainer
 var background: TextureRect
 func _ready() -> void:
     super._ready()
+    Back.install(self,_back_to_menu)
+    step=clampi(int(G.zsave.get("intro_step",0)),0,2)
+    if step>0:branch="memory" if int(G.zsave.get("intro_response_0",0))==0 else "listen"
     mouse_filter=Control.MOUSE_FILTER_STOP
     background=TextureRect.new(); background.texture=preload("res://assets/ui/prologue/capsule_v17.png"); background.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; background.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED; background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(background)
     var bg:=ColorRect.new();bg.color=Color(0.003,0.005,0.007,0.30);bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(bg)
@@ -75,7 +79,13 @@ func _choose(index: int) -> void:
     choices.mouse_filter=Control.MOUSE_FILTER_STOP
     for c in choices.get_children(): c.disabled=true
     var tw:=create_tween();tw.tween_property(root,"modulate:a",0.0,0.25)
-    tw.tween_callback(func(): step+=1;_page())
+    tw.tween_callback(func(): step+=1;G.zsave["intro_step"]=step;G.write_save();_page())
+func _back_to_menu() -> void:
+    if finished or main_ref==null:return
+    G.zsave["intro_step"]=step;G.write_save();main_ref.to_main_menu()
+func _unhandled_key_input(event: InputEvent) -> void:
+    if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_ESCAPE:Back.request(get_tree());get_viewport().set_input_as_handled()
+func _exit_tree() -> void:Back.remove(self)
 func _finish_prologue() -> void:
     if finished: return
     finished=true
