@@ -347,7 +347,7 @@ func interact(action: Dictionary = {}) -> void:
 	if custom_layout and not can_interact_from(action,player.global_position): return
 	if action.kind == "evidence":
 		if custom_layout:get_node("LevelMinusTwo/Investigation").discover(action)
-		state.data.records[action.id]={"title":action.title,"body":action.body}
+		state.data.records[action.id]={"title":action.title,"body":action.body,"medium":hud.evidence_medium(action),"source_id":action.id}
 		hud.open_evidence(action)
 		save_state()
 		return

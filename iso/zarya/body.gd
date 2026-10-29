@@ -14,13 +14,14 @@ func _ready() -> void:
 func _draw() -> void:
 	for id in outlines:
 		var wound: Dictionary=ui.world.state.data.wounds[id]
-		var injured: bool=float(wound.damage)>0 or float(wound.bleeding)>0
-		var edge:=Color("#d48170") if injured else Color("#90a4aa")
-		var fill:=Color("#713e39") if injured else Color("#24353e")
+		var injured: bool=float(wound.damage)>0 or float(wound.bleeding)>0 or float(wound.pain)>0
+		var edge:=Color("#dc776b") if injured else Color("#79a5ae")
+		var fill:=Color("#783c38") if injured else Color("#14303a")
 		var points:=PackedVector2Array(outlines[id])
 		draw_colored_polygon(points,fill)
 		points.append(points[0]); draw_polyline(points,edge,2,true)
-		if ui.selected_zone==id and scale.x>0.5: draw_polyline(points,Color("#d3bb8e"),3,true)
+		if ui.selected_zone==id and scale.x>0.5:
+			draw_polyline(points,Color(.35,.8,.82,.15),9,true);draw_polyline(points,Color("#b1e6e2"),2,true)
 	# Sternum, ribs, pelvis and joints remain restrained, legible at HUD scale.
 	draw_line(Vector2(170,99),Vector2(170,180),Color("#627b87"),1,true)
 	for y in [112,123,134,145]:

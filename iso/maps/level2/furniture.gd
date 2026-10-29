@@ -186,7 +186,9 @@ func place(kind: String, x: float, z: float, angle := 0.0, base_y := 0.06, ident
 func finish() -> void:
  for key in batches:
   var node=MeshInstance3D.new();node.mesh=batches[key].commit();node.material_override=material(Color(key.get_slice("|",1)));node.set_meta("room_id",key.get_slice("|",0))
-  node.name="Batch_"+key.replace("|","_");node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON;add_child(node)
+  node.name="Batch_"+key.replace("|","_");add_child(node)
+  if Color(key.get_slice("|",1)).a>=1:preload("res://iso/maps/level2/opaque_shadow.gd").attach(node)
+  else:node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
  batches.clear()
 func incident_details() -> void:
  # Cables, trays and broken safety glass are visual-only; no hidden movement blockers.

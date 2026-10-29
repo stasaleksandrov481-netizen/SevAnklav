@@ -34,6 +34,7 @@ static func build(world:Node3D)->void:
   material.set_shader_parameter("textured",name=="WallMesh")
   material.set_shader_parameter("tint",Vector3(0.64,0.70,0.72) if name=="WallMesh" else Vector3(0.2,0.27,0.31))
   map.get_node(name).material_override=material;cut_materials.append(material)
+  preload("res://iso/maps/level2/opaque_shadow.gd").attach(map.get_node(name))
  var floor_material=ShaderMaterial.new();floor_material.shader=preload("res://iso/maps/level2/cutaway.gdshader")
  floor_material.set_shader_parameter("concrete",preload("res://iso/maps/level2/textures/floor.png"));floor_material.set_shader_parameter("floor_surface",true);floor_material.set_shader_parameter("tint",Vector3(0.6,0.67,0.69))
  map.get_node("FloorMesh").material_override=floor_material;cut_materials.append(floor_material)
