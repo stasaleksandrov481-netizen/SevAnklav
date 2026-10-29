@@ -1,7 +1,40 @@
 extends "res://iso/touch_pad.gd"
+signal double_tapped
+var input_enabled := true
+var double_held:=false
+var last_tap_ms:=-1000
+var last_tap_point:=Vector2.ZERO
+func reset(clear_taps:=true) -> void:
+	double_held=false
+	if clear_taps:last_tap_ms=-1000
+	_pointer=-1; _mouse_down=false; _vector=Vector2.ZERO; queue_redraw()
+func set_input_enabled(enabled: bool) -> void:
+	if input_enabled==enabled:return
+	input_enabled=enabled;reset()
+	mouse_filter=Control.MOUSE_FILTER_STOP if enabled else Control.MOUSE_FILTER_IGNORE
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
-		_pointer=-1; _mouse_down=false; _vector=Vector2.ZERO
+		reset()
+	if what in [NOTIFICATION_APPLICATION_PAUSED,NOTIFICATION_APPLICATION_FOCUS_OUT]:reset()
+func _gui_input(event: InputEvent) -> void:
+	if not input_enabled or not is_visible_in_tree():return
+	if event is InputEventMouse and _pointer!=-1:return
+	var press: bool=(event is InputEventScreenTouch and event.pressed and _pointer==-1) or (event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed)
+	if press:
+		var now:=Time.get_ticks_msec()
+		var double: bool=(event is InputEventMouseButton and event.double_click) or (now-last_tap_ms<=320 and event.position.distance_to(last_tap_point)<=minf(size.x,size.y)*.25)
+		last_tap_ms=-1000 if double else now;last_tap_point=event.position
+		if double:double_held=true;double_tapped.emit()
+	super._gui_input(event)
+func _input(event: InputEvent) -> void:
+	if not input_enabled:return
+	# Releases outside the control must also release the captured finger.
+	if event is InputEventScreenTouch and not event.pressed and event.index==_pointer:reset(false)
+	elif event is InputEventMouseButton and not event.pressed and event.button_index==MOUSE_BUTTON_LEFT and _mouse_down:reset(false)
+	elif event is InputEventScreenDrag and event.index==_pointer:
+		_set_from_point(get_global_transform_with_canvas().affine_inverse()*event.position)
+	elif event is InputEventMouseMotion and _mouse_down:
+		_set_from_point(get_global_transform_with_canvas().affine_inverse()*event.position)
 func _draw() -> void:
 	var center:=size*0.5
 	var radius:=minf(size.x,size.y)*0.39

@@ -27,7 +27,7 @@ func _draw() -> void:
 		draw_polyline(PackedVector2Array([Vector2(139,y),Vector2(151,y+6),Vector2(170,y+8),Vector2(189,y+6),Vector2(201,y)]),Color("#4b626d"),1,true)
 	for at in [Vector2(148,295),Vector2(192,295),Vector2(112,159),Vector2(228,159)]: draw_arc(at,7,0,TAU,20,Color("#607781"),1,true)
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
+	if (event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed) or (event is InputEventScreenTouch and event.pressed):
 		for id in zones:
 			if zones[id].has_point(event.position):
-				ui.selected_zone=id; queue_redraw(); ui.notify("ВЫБРАНО: "+id)
+				ui.select_zone(id);queue_redraw();accept_event();return

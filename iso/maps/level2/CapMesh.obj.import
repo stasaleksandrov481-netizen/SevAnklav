@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bpj7yb3bk5bnq"
+path="res://.godot/imported/CapMesh.obj-2583ba5cdfa1e1fbee5ef621b3601500.mesh"
+
+[deps]
+
+files=["res://.godot/imported/CapMesh.obj-2583ba5cdfa1e1fbee5ef621b3601500.mesh"]
+
+source_file="res://iso/maps/level2/CapMesh.obj"
+dest_files=["res://.godot/imported/CapMesh.obj-2583ba5cdfa1e1fbee5ef621b3601500.mesh", "res://.godot/imported/CapMesh.obj-2583ba5cdfa1e1fbee5ef621b3601500.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

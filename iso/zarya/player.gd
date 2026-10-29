@@ -4,11 +4,14 @@ var wake_light := 0.0
 var move_vector := Vector2.ZERO
 var aim_vector := Vector2.ZERO
 var fire := false
+var sprinting:=false
 var busy := 0.0
 var checking := false
 var reload_pending := false
+var reload_weapon: Dictionary={}
 var torch: SpotLight3D
 var aim_direction := Vector3.FORWARD
+var waking := false
 @onready var world = get_parent()
 @onready var rig = $Visual
 func _ready() -> void:
@@ -31,7 +34,7 @@ func _physics_process(delta: float) -> void:
 	var right:=camera.global_basis.x; right.y=0
 	var forward:=-camera.global_basis.z; forward.y=0
 	var direction:=right.normalized()*input.x-forward.normalized()*input.y
-	var speed:=6.0 if Input.is_action_pressed("run") else 3.7
+	var speed:=6.0 if Input.is_action_pressed("run") or sprinting else 3.7
 	velocity.x=move_toward(velocity.x,direction.x*speed,delta*16)
 	velocity.z=move_toward(velocity.z,direction.z*speed,delta*16)
 	velocity.y=-2
@@ -59,27 +62,46 @@ func _physics_process(delta: float) -> void:
 	rig.flashlight_on=torch.visible
 	if torch.visible: torch.global_position=rig.flash.to_global(Vector3(0,-.17,0))
 	if aim_direction.length()>0.1: torch.look_at(torch.global_position+aim_direction)
-	rig.aiming=armed and (aim.length()>0.1 or fire or Input.is_action_pressed("shoot") or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT))
+	rig.aiming=armed and (aim.length()>0.1 or fire or world_trigger_pressed() or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT))
 	busy=maxf(0,busy-delta)
 	if busy==0 and reload_pending:
 		reload_pending=false
+		if not is_same(held_weapon(),reload_weapon):
+			reload_weapon={};world.notify("ПЕРЕЗАРЯДКА ОТМЕНЕНА / ОРУЖИЕ УБРАНО ИЛИ ЗАМЕНЕНО");return
+		reload_weapon={}
 		var n:=mini(8-int(world.state.data.mag),world.state.amount("ammo"))
 		if n>0: world.state.take("ammo",n); world.state.data.mag+=n
 		if world.state.data.chamber==0 and world.state.data.mag>0:
 			world.state.data.mag-=1; world.state.data.chamber=1
 		world.state.data.checked=false
+		world.save_state()
 	if busy==0 and checking:
 		checking=false
 		world.state.data.checked=true
 		world.notify("МАГАЗИН: "+("ПОЧТИ ПОЛНЫЙ" if world.state.data.mag>=6 else ("МЕНЬШЕ ПОЛОВИНЫ" if world.state.data.mag>0 else "ПУСТ"))+" / ПАТРОННИК: "+("ЕСТЬ ПАТРОН" if world.state.data.chamber else "ПУСТ"))
-	if armed and busy==0 and (fire or Input.is_action_pressed("shoot")): shoot()
+	if armed and busy==0 and (fire or world_trigger_pressed()): shoot()
+func world_trigger_pressed() -> bool:
+	if not Input.is_action_pressed("shoot"):return false
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and is_instance_valid(world.hud):return not world.hud.pointer_blocks_world()
+	return true
+func can_act() -> bool:
+	return not locked and not world.paused and bool(world.state.data.awake) and float(world.state.data.health)>0
+func clear_controls() -> void:
+	move_vector=Vector2.ZERO;aim_vector=Vector2.ZERO;fire=false;sprinting=false;velocity=Vector3.ZERO
+func toggle_flashlight() -> void:
+	if not can_act():return
+	if world.state.data.slots.get("left",{}).get("id","")!="flashlight" and world.state.data.slots.get("right",{}).get("id","")!="flashlight":
+		world.notify("ВОЗЬМИТЕ ФОНАРЬ В РУКУ");return
+	world.state.data["flash_on"]=not world.state.data.get("flash_on",false)
 func shoot() -> void:
+	if not can_act() or world.state.weapon().is_empty() or busy>0:return
 	if world.state.data.chamber==0: world.notify("ЩЕЛЧОК. ПРОВЕРЬТЕ ОРУЖИЕ."); busy=0.4; return
 	world.state.data.chamber=0
 	if world.state.data.mag>0: world.state.data.mag-=1; world.state.data.chamber=1
 	world.state.data.checked=false
 	busy=0.28
 	rig.perform("shoot")
+	if OS.has_feature("mobile") and bool(get_node("/root/G").zsave.get("bunker_visual",{}).get("haptics",true)):Input.vibrate_handheld(25)
 	var start:=global_position+Vector3.UP*0.25
 	var query:=PhysicsRayQueryParameters3D.create(start,start+aim_direction*25)
 	query.exclude=[get_rid()]
@@ -87,14 +109,24 @@ func shoot() -> void:
 	if not hit.is_empty() and hit.collider.has_method("damage"): hit.collider.damage(34)
 	for enemy in world.enemies: enemy.hear(global_position,18)
 func reload() -> void:
-	if busy>0 or world.state.weapon().is_empty(): return
+	if not can_act() or busy>0 or world.state.weapon().is_empty(): return
+	if int(world.state.data.chamber)>0 and int(world.state.data.mag)>=8:world.notify("МАГАЗИН УЖЕ ЗАПОЛНЕН");return
+	if world.state.amount("ammo")==0 and not (int(world.state.data.chamber)==0 and int(world.state.data.mag)>0):world.notify("НЕТ ЗАПАСНЫХ ПАТРОНОВ");return
+	reload_weapon=held_weapon()
 	busy=1.4; reload_pending=true; rig.perform("reload")
+func held_weapon() -> Dictionary:
+	for hand in ["right","left"]:
+		var entry: Dictionary=world.state.data.slots.get(hand,{})
+		if entry.get("id","") in ["pistol","rifle"]:return entry
+	return {}
 func check_ammo() -> void:
-	if busy>0 or world.state.weapon().is_empty(): return
+	if not can_act() or busy>0 or world.state.weapon().is_empty(): return
 	busy=0.8; checking=true; rig.perform("check")
 func awaken() -> void:
+	if waking or world.state.data.awake:return
+	waking=true
 	locked=true
-	var capsule=world.rooms.capsule.get_node("V17Capsule")
+	var capsule=world.capsule_node()
 	global_position=capsule.global_position+Vector3(0,1.1,0)
 	rig.rotation.z=PI/2
 	rig.perform("wake")
@@ -113,10 +145,12 @@ func awaken() -> void:
 	world.state.data.awake=true
 	world.save_state()
 	locked=false
+	waking=false
 	world.notify("Волков… Это я? Что со мной сделали?")
 func _unhandled_input(event: InputEvent) -> void:
+	if not can_act():return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode==KEY_E: world.interact()
 		if event.keycode==KEY_R: reload()
 		if event.keycode==KEY_C: check_ammo()
-		if event.keycode==KEY_F: world.state.data["flash_on"]=not world.state.data.get("flash_on",false)
+		if event.keycode==KEY_F: toggle_flashlight()

@@ -526,8 +526,15 @@ func _setup_sfx_pool() -> void:
                 var p := AudioStreamPlayer.new()
                 p.bus = "SFX"
                 p.process_mode = Node.PROCESS_MODE_ALWAYS
-                get_tree().root.add_child.call_deferred(p)
+                add_child(p)
                 _sfx_pool.append(p)
+
+func _exit_tree() -> void:
+        for player in _sfx_pool:
+                if is_instance_valid(player):player.stop();player.stream=null
+        _sfx_pool.clear()
+        sfx.clear()
+        if is_instance_valid(music_player):music_player.stop();music_player.stream=null
 
 func play_sfx(sfx_name: String, volume_db := 0.0, pitch := 1.0) -> void:
         if not sfx.has(sfx_name) or _sfx_pool.is_empty():

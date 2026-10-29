@@ -1,0 +1,10 @@
+extends Node3D
+var room_id:String
+var title:String
+var width:=1.0
+var depth:=1.0
+var polygon:=PackedVector2Array()
+func contains_world_point(point:Vector3)->bool:
+ var p=to_local(point)
+ return Geometry2D.is_point_in_polygon(Vector2(p.x,p.z),polygon)
+func update_occlusion(_p:Vector3,_camera:Camera3D,_delta:float,_bounds:Rect2)->void:pass
