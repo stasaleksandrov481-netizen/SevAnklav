@@ -15,35 +15,33 @@ var coop_modal:Control
 var confirm_modal:Control
 var transitioning:=false
 func _ready()->void:
+ # The authored scene is the single source of the menu's visible layout.
+ # Script-only callers use that same layout instead of a second menu builder.
+ if not has_node("MenuRoot"):
+  var template=load("res://scenes/ui/MainMenu.tscn").instantiate()
+  var layout=template.get_node("MenuRoot");template.remove_child(layout);add_child(layout);template.free()
+ layer=10
+ menu_root=get_node("MenuRoot");menu_canvas=menu_root.get_node("MenuCanvas")
  Back.install(self,handle_back)
- for child in get_children():remove_child(child);child.queue_free()
  add_child(preload("res://scripts/ui/menu_music.gd").new())
- menu_root=Control.new();add_child(menu_root)
- menu_canvas=Control.new();menu_canvas.size=Vector2(1536,864);menu_canvas.theme=P.make_theme();menu_root.add_child(menu_canvas)
- _fit_menu();get_viewport().size_changed.connect(_fit_menu)
- var bg=TextureRect.new();bg.texture=preload("res://assets/ui/bunker/menu_background.png");bg.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;bg.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;bg.size=Vector2(1536,864);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(bg)
- var title_font=FontVariation.new();title_font.base_font=P.FONT;title_font.variation_embolden=1.4;title_font.spacing_glyph=3
- var title=_label("СЕВЕРНЫЙ\nАНКЛАВ",76,Color("#ced6d7"));title.name="GameTitle";title.position=Vector2(90,103);title.add_theme_font_override("font",title_font);title.add_theme_color_override("font_outline_color",Color("#151b20"));title.add_theme_constant_override("outline_size",4);title.add_theme_color_override("font_shadow_color",Color(0,0,0,.9));title.add_theme_constant_override("shadow_offset_y",5);menu_canvas.add_child(title)
- var labels=["ПРОДОЛЖИТЬ","CO-OP ИГРА","НОВАЯ ИГРА","ЗАГРУЗИТЬ ИГРУ","НАСТРОЙКИ","ВЫХОД"]
+ menu_canvas.theme=P.make_theme()
  var callbacks=[func():launch(func():continue_pressed.emit()),open_coop,request_new_game,func():launch(func():load_pressed.emit()),func():settings_pressed.emit(),func():open_confirmation("quit")]
- var glyphs=["play","coop","new","load","gear","exit"]
- for i in range(labels.size()):
-  var b=Button.new();b.name="MenuAction"+str(i);b.text=labels[i];b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.position=Vector2(90,310+i*70);b.size=Vector2(390,60);b.add_theme_font_size_override("font_size",22);P.button(b,i==0)
-  var normal=P.surface(16);normal.bg_color=Color(.035,.055,.065,.94);normal.border_color=Color("#4b5b62")
-  if i==0:normal.bg_color=Color(.18,.035,.03,.94);normal.border_color=Color("#9d4e43")
-  b.add_theme_stylebox_override("normal",normal);b.icon=load("res://assets/ui/bunker/icons/"+glyphs[i]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);b.add_theme_constant_override("h_separation",18);b.pressed.connect(callbacks[i]);menu_canvas.add_child(b)
-  if i==1:
-   b.text="CO-OP ИГРА"
-   var badge=_label("В РАЗРАБОТКЕ",12,P.MUTED);badge.position=Vector2(259,22);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(badge)
-  if i in [0,3] and not has_progress():b.disabled=true;b.tooltip_text="Сначала начните новую игру"
- var socials=HBoxContainer.new();socials.position=Vector2(26,24);socials.add_theme_constant_override("separation",10);menu_canvas.add_child(socials)
- for item in [["telegram","TELEGRAM","https://t.me/SevAnklav"],["tiktok","TIKTOK","https://www.tiktok.com/@sevanklav"]]:
-  var b=Button.new();b.icon=load("res://assets/ui/controls/"+item[0]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);b.custom_minimum_size=Vector2(48,48);b.tooltip_text=item[1];b.accessibility_name=item[1];P.button(b);var url:String=item[2];b.pressed.connect(func():OS.shell_open(url));socials.add_child(b)
- var code=_label("СЕКРЕТНЫЙ ОБЪЕКТ №742\nСЕВЕРНЫЙ АНКЛАВ\nБЛОК A-03",15,P.MUTED);code.position=Vector2(1260,30);menu_canvas.add_child(code)
- var quote=_label("НЕКОТОРЫЕ ДВЕРИ ЛУЧШЕ\nОСТАВИТЬ ЗАКРЫТЫМИ…",16,P.MUTED);quote.position=Vector2(1200,775);menu_canvas.add_child(quote)
- var version=_label("V-17  /  УРОВЕНЬ −2",13,P.MUTED);version.position=Vector2(28,826);menu_canvas.add_child(version)
+ for i in 6:
+  var control:Button=menu_canvas.get_node("MenuAction"+str(i))
+  control.pressed.connect(callbacks[i])
+  if i in [0,3]:
+   control.disabled=not has_progress();control.tooltip_text="Сначала начните новую игру" if control.disabled else ""
+ for item in [["Telegram","https://t.me/SevAnklav"],["TikTok","https://www.tiktok.com/@sevanklav"]]:
+  var control:Button=menu_canvas.get_node("SocialLinks/"+str(item[0]));var url:String=item[1]
+  control.pressed.connect(func():OS.shell_open(url))
  var snow=Snow.new();snow.size=Vector2(1536,864);snow.modulate.a=.35;snow.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(snow)
+ _fit_menu();get_viewport().size_changed.connect(_fit_menu)
  menu_canvas.modulate.a=0;create_tween().tween_property(menu_canvas,"modulate:a",1.0,0.45)
+ call_deferred("_ensure_game_owner")
+func _ensure_game_owner()->void:
+ # F6 / direct launch of the menu must still open a functional game controller.
+ if get_tree().current_scene==self and get_tree().get_nodes_in_group("main_root").is_empty():
+  get_tree().change_scene_to_file("res://scenes/main.tscn")
 func _label(text:String,px:int,color:Color)->Label:
  var l=Label.new();l.text=text;l.add_theme_font_size_override("font_size",px);l.add_theme_color_override("font_color",color);return l
 func _fit_menu()->void:
