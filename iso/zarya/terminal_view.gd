@@ -11,16 +11,21 @@ var tabs:Dictionary={}
 func build(owner,source:Dictionary,data:Dictionary,read_only:=false)->void:
  ui=owner;action=source;record=data;readonly=read_only
  var column=ui.window("ТЕРМИНАЛ / A-03");host=ui.modal;ui.terminal_view=self;host.set_meta("terminal",true)
- var bezel=BunkerSkin.surface(70);bezel.bg_color=Color("#0b181a");bezel.border_color=Color("#202b29");bezel.set_border_width_all(0);bezel.set_corner_radius_all(22);host.add_theme_stylebox_override("panel",bezel)
- var material=preload("res://scripts/ui/document_material.gd").new();material.kind="terminal";material.bleed=70;material.image=load("res://assets/ui/bunker/terminal_bezel.png");host.add_child(material);host.move_child(material,0)
- ui.label(column,"СЕВЕРНЫЙ АНКЛАВ   /   ОПЕРАТОР V-17   /   СЕТЬ ИЗОЛИРОВАНА",15)
+ var bezel=BunkerSkin.surface(32);bezel.bg_color=Color(.018,.061,.077,.64);bezel.border_color=Color(.36,.70,.76,.52);bezel.set_border_width_all(1);bezel.set_corner_radius_all(16);host.add_theme_stylebox_override("panel",bezel)
+ ui.shade.color=Color(.006,.018,.025,.14)
+ var glass=preload("res://scripts/ui/terminal_glass.gd").new();glass.name="TerminalGlass";host.add_child(glass);host.move_child(glass,0)
+ ui.label(column,"СЕВЕРНЫЙ АНКЛАВ   /   ОПЕРАТОР V-17   /   ОПТИЧЕСКИЙ КАНАЛ",15)
  var row=HBoxContainer.new();row.size_flags_vertical=Control.SIZE_EXPAND_FILL;row.add_theme_constant_override("separation",18);column.add_child(row)
  var nav=VBoxContainer.new();nav.custom_minimum_size.x=220;nav.add_theme_constant_override("separation",8);row.add_child(nav)
  for entry in [["home","Главная","home"],["messages","Сообщения","mail"],["logs","Журналы","logs"],["systems","Системы","gear"],["cameras","Камеры","camera"],["access","Доступ","lock"]]:
   var id:String=entry[0]
-  var b=ui.button(nav,entry[1],func():select_tab(id),220);b.name="TerminalTab_"+id;b.custom_minimum_size.y=64;b.toggle_mode=true;b.icon=load("res://assets/ui/bunker/icons/"+entry[2]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);tabs[id]=b
+  var b=ui.button(nav,entry[1],func():select_tab(id),220);b.name="TerminalTab_"+id;b.custom_minimum_size.y=72;b.toggle_mode=true;b.icon=load("res://assets/ui/bunker/icons/"+entry[2]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);tabs[id]=b
  ui.button(nav,"НАЗАД",ui.close_modal,220)
- var frame=PanelContainer.new();frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.add_theme_stylebox_override("panel",BunkerSkin.surface(22));row.add_child(frame)
+ for b in tabs.values():
+  var normal=BunkerSkin.surface(14);normal.bg_color=Color(.02,.09,.11,.24);normal.border_color=Color(.35,.65,.72,.35);b.add_theme_stylebox_override("normal",normal)
+  var pressed=normal.duplicate();pressed.bg_color=Color(.18,.42,.46,.44);pressed.border_color=Color(.5,.85,.88,.75);b.add_theme_stylebox_override("pressed",pressed)
+ var frame=PanelContainer.new();frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ var screen=BunkerSkin.surface(22);screen.bg_color=Color(.005,.025,.033,.25);screen.border_color=Color(.37,.70,.74,.30);frame.add_theme_stylebox_override("panel",screen);row.add_child(frame)
  content=VBoxContainer.new();content.name="TerminalContent";content.add_theme_constant_override("separation",14);frame.add_child(content)
  var save=ui.button(column,"ВЕРНУТЬСЯ К ИССЛЕДОВАНИЮ" if readonly else "ЗАГРУЗИТЬ ЗАПИСЬ / ВЫПОЛНИТЬ ДЕЙСТВИЕ",apply,520);save.name="TerminalApply";save.custom_minimum_size.y=60
  select_tab("messages" if readonly else "home")
@@ -55,7 +60,7 @@ func select_tab(id:String)->void:
  elif id=="access":
   ui.label(content,"КОНТРОЛЬ ДОСТУПА",23)
   var card:bool=ui.world.state.amount("card")>0
-  ui.label(content,"КАРТА ИНЖЕНЕРА: "+("ОБНАРУЖЕНА" if card else "НЕ ПРЕДЪЯВЛЕНА")+"\n\nВНЕШНИЙ ГРУЗОВОЙ ШЛЮЗ: ЗАБЛОКИРОВАН\nПОДТВЕРЖДЕНИЕ С ВЕРХНЕГО УРОВНЯ: НЕТ",22)
+  ui.label(content,"КАРТА ИНЖЕНЕРА: "+("ОБНАРУЖЕНА" if card else "НЕ ПРЕДЪЯВЛЕНА")+"\n\nВЫХОДНОЙ ЦИКЛ: "+("ГОТОВ" if ui.world.state.flag("pump_valve") else "ВОССТАНОВИТЕ K-2 И ДАВЛЕНИЕ")+"",22)
 func show_record(entry:Dictionary)->void:
  ui.label(content,str(entry.get("title","СЛУЖЕБНАЯ ЗАПИСЬ")),24)
  var text=RichTextLabel.new();text.name="EvidenceText";text.selection_enabled=true;text.size_flags_vertical=Control.SIZE_EXPAND_FILL;text.custom_minimum_size.y=160;text.add_theme_color_override("default_color",Color("#a9cecb"));text.add_theme_font_size_override("normal_font_size",int(ui.world.state.data.get("reader_font_size",24)));text.add_theme_constant_override("line_separation",5);text.text=str(entry.get("body","")).replace("\\n","\n");content.add_child(text)

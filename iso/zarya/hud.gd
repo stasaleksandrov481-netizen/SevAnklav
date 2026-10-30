@@ -652,6 +652,15 @@ func pause_menu() -> void:
 	button(column,"В ГЛАВНОЕ МЕНЮ",func():
 		var mains=get_tree().get_nodes_in_group("main_root")
 		if not mains.is_empty(): mains[0].to_main_menu(),400)
+func bunker_complete()->void:
+	var column=window("ВЫХОДНОЙ ШЛЮЗ / БУНКЕР ПРОЙДЕН")
+	modal.name="BunkerComplete";modal.set_meta("compact",true);modal.set_meta("preferred_size",Vector2(780,620));modal.size=Vector2(780,620);modal.position=(canvas_size-modal.size)/2
+	label(column,"РЕЗЕРВ K-2 — ВКЛЮЧЁН\nДАВЛЕНИЕ — СТАБИЛЬНО\nВЫХОДНОЙ ЦИКЛ — ПОДТВЕРЖДЁН",24)
+	label(column,"Вы добрались до выхода. Прогресс бункера сохранён. Поверхность будет следующей локацией; сейчас можно вернуться и собрать оставшиеся следы смены.",22)
+	button(column,"ПРОДОЛЖИТЬ ИССЛЕДОВАНИЕ БУНКЕРА",close_modal,600)
+	button(column,"СОХРАНИТЬ И ВЕРНУТЬСЯ В МЕНЮ",func():
+		world.save_state();var mains=get_tree().get_nodes_in_group("main_root")
+		if not mains.is_empty():mains[0].to_main_menu(),600)
 func open_bunker_graphics() -> void:
 	var column:=window("ГРАФИКА / БУНКЕР")
 	modal.set_meta("compact",true);modal.set_meta("preferred_size",Vector2(680,620));modal.size=Vector2(680,620);modal.position=(canvas_size-modal.size)/2

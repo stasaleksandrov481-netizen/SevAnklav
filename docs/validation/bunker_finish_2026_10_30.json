@@ -1,0 +1,81 @@
+[
+  {
+    "test": "verify_finish_pass",
+    "exit": 0,
+    "result": [
+      "FINISH PASS: 34 checks; ray occlusion, look/turn/enter memory, door thresholds, whole wall sections, reachable case, real repairs, final gate and reload"
+    ]
+  },
+  {
+    "test": "verify_furniture_arrangement",
+    "exit": 0,
+    "result": [
+      "AUTHORED 145 SKIPPED []",
+      "ARRANGEMENT PASS: 15 seats face desks; 10 attached clues/containers; no prop/wall overlaps; real valve; safe old-save recovery"
+    ]
+  },
+  {
+    "test": "verify_door_clearance",
+    "exit": 0,
+    "result": [
+      "AUDIT PASS free sweeps=48 sealed gate checks=2 unexpected obstacles=0",
+      "SERVER CORRIDOR PASS: approach and turn into server room"
+    ]
+  },
+  {
+    "test": "verify_menu_entry",
+    "exit": 0,
+    "result": [
+      "MENU ENTRY PASS: 106 checks; authored preview, project boot, new game, return, direct menu launch, four viewport sizes"
+    ]
+  },
+  {
+    "test": "verify_ui_shadows",
+    "exit": 0,
+    "result": [
+      "UI SHADOWS PASS: 73 checks; silhouette treatment, paper, real terminal tabs, three layouts, fixed light sources across capsule-room positions, slow movement [1.22779011726379, 1.80780279636383]"
+    ]
+  },
+  {
+    "test": "verify_global_flow",
+    "exit": 0,
+    "result": [
+      "GLOBAL FLOW PASS: 23 checks; real boot, menu, confirmation, saved intro choices, capsule, continue and new-game preferences"
+    ]
+  },
+  {
+    "test": "verify_journal_inventory",
+    "exit": 0,
+    "result": [
+      "JOURNAL INVENTORY PASS: 54 checks; progression, out-of-order clues, dropped fuse, touch moves, stack metadata, clothes, save, health, three layouts"
+    ]
+  },
+  {
+    "test": "verify_revision",
+    "exit": 0,
+    "result": [
+      "REVISION PASS: remembered interiors, physical field of view, shadow budget, 3 profiles, awakening, old awake save. Visual groups: 203"
+    ]
+  },
+  {
+    "test": "verify_live_settings_controls",
+    "exit": 0,
+    "result": [
+      "LIVE SETTINGS CONTROLS PASS: 43 checks; native back stack, three layouts, brightness, particles, real sprint, reload, save"
+    ]
+  },
+  {
+    "test": "verify_suspend_save",
+    "exit": 0,
+    "result": [
+      "SUSPEND SAVE PASS: pause, focus loss, close, disk reload, fresh spawn"
+    ]
+  },
+  {
+    "test": "verify_walkable_route",
+    "exit": 0,
+    "result": [
+      "WALKABLE ROUTE PASS: 6316 reachable cells; spawn to medical PC, Serov case, relay, pump and exit; every step sweeps the real player capsule"
+    ]
+  }
+]

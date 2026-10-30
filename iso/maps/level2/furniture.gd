@@ -16,17 +16,19 @@ const PALE = Color("#93aaa9")
 const DARK = Color("#17282f")
 const PAPER = Color("#c6c8b8")
 const RED = Color("#963c35")
-func material(c: Color) -> Material:
- var key = c.to_html()
+func material(c: Color, surface := -1) -> Material:
+ var key = c.to_html()+"|"+str(surface)
  if not materials.has(key):
   var m: Material
   if c.a<1:
    m=StandardMaterial3D.new();m.albedo_color=c;m.roughness=0.75;m.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
   else:
    m=ShaderMaterial.new();m.shader=preload("res://iso/maps/level2/furniture_visibility.gdshader");m.set_shader_parameter("color",c)
+   if surface>=0:
+    m.set_shader_parameter("surface_atlas",preload("res://iso/maps/level2/textures/storage_surfaces.png"));m.set_shader_parameter("surface_tile",surface)
   materials[key]=m
  return materials[key]
-func part(root: Node3D, mesh: Mesh, at: Vector3, color: Color, rotation := Vector3.ZERO) -> void:
+func part(root: Node3D, mesh: Mesh, at: Vector3, color: Color, rotation := Vector3.ZERO, surface := -1) -> void:
  var owner: String=str(root.get_meta("room_id",world.room_at(root.global_position)))
  if owner.is_empty():
   var ancestor=root
@@ -43,7 +45,7 @@ func part(root: Node3D, mesh: Mesh, at: Vector3, color: Color, rotation := Vecto
     var d=Geometry2D.get_closest_point_to_segment(Vector2(local.x,local.z),a,b).distance_squared_to(Vector2(local.x,local.z))
     if d<best:best=d;owner=entry.id
  root.set_meta("room_id",owner)
- var key = owner+"|"+color.to_html()
+ var key = owner+"|"+color.to_html()+"|"+str(surface)
  if not batches.has(key):
   var st=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES);batches[key]=st
  var basis=Basis.from_euler(rotation)
@@ -62,11 +64,12 @@ func soft(root: Node3D, size: Vector3, at: Vector3, c: Color) -> void:
  part(holder,mesh,Vector3.ZERO,c);holder.free()
 func collider(root: Node3D, size: Vector3, offset := Vector3.ZERO) -> void:
  var b=StaticBody3D.new();root.add_child(b)
+ if root.get_meta("furniture_kind","")=="glass":b.collision_layer=2
  var c=CollisionShape3D.new();var s=BoxShape3D.new();s.size=size;c.shape=s;c.position=offset+Vector3(0,size.y/2,0);b.add_child(c)
 func sign_at(text: String, at: Vector3, color := PALE) -> void:
  # Gameplay names are drawn in the HUD; no floating text through walls.
  pass
-func place(kind: String, x: float, z: float, angle := 0.0, base_y := 0.06, identity := "") -> Node3D:
+func place(kind: String, x: float, z: float, angle := 0.0, base_y := 0.06, identity := "", storage_style := "timber") -> Node3D:
  var p=Node3D.new();p.name=kind+str(count);count+=1;add_child(p);p.position=Vector3(x,base_y,z);p.rotation.y=deg_to_rad(angle)
  p.set_meta("furniture_id",identity);p.set_meta("furniture_kind",kind);p.set_meta("room_id","sector_0+sector_1" if kind=="glass" and x<-20 else world.room_at(p.global_position))
  match kind:
@@ -169,9 +172,7 @@ func place(kind: String, x: float, z: float, angle := 0.0, base_y := 0.06, ident
    soft(p,Vector3(0.6,0.006,0.28),Vector3(0,0.018,0),Color("#44262a"))
    for a in [0.4,0.7,1.0]:soft(p,Vector3(0.07,0.006,0.14),Vector3(a,0.019,a*0.3),Color("#44262a"))
   "crate":
-   box(p,Vector3(0.7,0.55,0.5),Vector3(0,0.28,0),Color("#6d725e"))
-   for a in [-0.25,0.25]:box(p,Vector3(0.05,0.58,0.53),Vector3(a,0.29,0),DARK)
-   collider(p,Vector3(0.72,0.58,0.53))
+   preload("res://iso/maps/level2/storage_props.gd").build(self,p,storage_style)
   "glass":
    box(p,Vector3(2.8,1.1,0.06),Vector3(0,1.45,0),Color(0.35,0.63,0.68,0.3))
    for a in [-1.43,1.43]:box(p,Vector3(0.06,2.1,0.09),Vector3(a,1.05,0),STEEL)
@@ -185,7 +186,7 @@ func place(kind: String, x: float, z: float, angle := 0.0, base_y := 0.06, ident
  return p
 func finish() -> void:
  for key in batches:
-  var node=MeshInstance3D.new();node.mesh=batches[key].commit();node.material_override=material(Color(key.get_slice("|",1)));node.set_meta("room_id",key.get_slice("|",0))
+  var node=MeshInstance3D.new();node.mesh=batches[key].commit();node.material_override=material(Color(key.get_slice("|",1)),int(key.get_slice("|",2)));node.set_meta("room_id",key.get_slice("|",0))
   node.name="Batch_"+key.replace("|","_");add_child(node)
   if Color(key.get_slice("|",1)).a>=1:preload("res://iso/maps/level2/opaque_shadow.gd").attach(node)
   else:node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -242,7 +243,7 @@ func build(level: Node3D) -> void:
    var direction: Vector3=authored[entry.faces].position-pos
    angle=rad_to_deg(atan2(direction.x,direction.z))+float(entry.get("facing_bias",0))
   var id: String=entry.get("id","")
-  var placed=place(entry.kind,entry.x,entry.z,angle,float(entry.get("base_y",.06)),id)
+  var placed=place(entry.kind,entry.x,entry.z,angle,float(entry.get("base_y",.06)),id,str(entry.get("storage_style","timber")))
   if not id.is_empty():authored[id]=placed
   if entry.has("faces"):placed.set_meta("faces",entry.faces)
  for entry in world.layout.rooms:
@@ -265,7 +266,7 @@ func build(level: Node3D) -> void:
    place("paper",at.x,at.z,angle,at.y-.012)
  var supplies=[
   ["med_supplies","Медицинский шкаф",Vector3(-31,0.5,-4),[["band",2],["water",1]],"med_supplies_cabinet",Vector3(0,1.05,.46)],
-  ["serov_tools","Ящик Серова",Vector3(18.2,0.5,8),[["fuse",1],["tool",1],["flashlight",1],["pistol",1],["ammo",8]],"serov_tools_box",Vector3(0,.64,.36)]]
+  ["serov_tools","Ящик Серова",Vector3(19.1,1.1,4.1),[["fuse",1],["tool",1],["flashlight",1],["pistol",1],["ammo",8]],"serov_tools_box",Vector3(0,.50,.30)]]
  for spec in supplies:
   if not authored.has(spec[4]):place("crate",spec[2].x,spec[2].z)
   var action=station(spec[0],spec[1],point_on(spec[4],spec[5],spec[2]),"loot");action["anchor"]=spec[4]

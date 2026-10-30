@@ -335,7 +335,7 @@ func nearest() -> Dictionary:
 		if d<distance and (not custom_layout or can_interact_from(action,player.global_position)): result=action; distance=d
 	for door in doors:
 		var d: float = player.global_position.distance_to(door.global_position)
-		var title: String="ШЛЮЗ ЗАБЛОКИРОВАН" if door.info.kind=="sealed" else ("ЗАКРЫТЬ ДВЕРЬ" if door.opened else "ОТКРЫТЬ ДВЕРЬ")
+		var title: String=("ЗАПУСТИТЬ ВЫХОДНОЙ ШЛЮЗ" if state.flag("pump_valve") else "ШЛЮЗ / НУЖЕН РЕЗЕРВ K-2") if door.info.kind=="sealed" else ("ЗАКРЫТЬ ДВЕРЬ" if door.opened else "ОТКРЫТЬ ДВЕРЬ")
 		var action={"kind":"door","node":door,"title":title}
 		if d<distance and (not custom_layout or can_interact_from(action,player.global_position)): result=action; distance=d
 	interaction_cache=result;interaction_cache_time=now
@@ -371,13 +371,14 @@ func interact(action: Dictionary = {}) -> void:
 func can_interact_from(action: Dictionary, from: Vector3, max_distance := 2.4) -> bool:
 	if custom_layout and visibility_controller!=null:
 		if action.kind=="door":
-			if visibility_controller.active not in action.node.adjacent:return false
-		elif action.get("room","")!=visibility_controller.active:return false
+			if not action.node.visible:return false
+		elif not visibility_controller.visible_rooms.has(action.get("room","")):return false
 	var target: Vector3=action.node.global_position
 	if from.distance_to(target)>max_distance: return false
 	target.y=maxf(target.y,ORIGIN.y+1.25)
 	var query:=PhysicsRayQueryParameters3D.create(from+Vector3.UP*0.35,target)
 	query.exclude=[player.get_rid()]
+	query.collision_mask=3
 	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.is_empty() or (action.kind=="door" and hit.collider==action.node.leaf)
 func begin_repair(action: Dictionary) -> void:
@@ -429,6 +430,9 @@ func objective() -> String:
 	for entry in [["staff","Осмотреть терминал персонала"],["armed","Найти оружие на контрольном посту"],["card","Найти карту инженера Серова"],["experiment","Изучить запись эксперимента"],["power","Восстановить питание / предохранитель в серверной"],["archive","Прочитать архив наблюдения"],["clearance","Снять карантинную блокировку"],["level_complete","Добраться до лестницы на уровень −1"]]:
 		if not state.flag(entry[0]): return entry[1]
 	return "Уровень −2 исследован. Ожидание доступа на −1."
+func finish_bunker()->void:
+	if not custom_layout or not state.flag("relay_k2") or not state.flag("pump_valve"):return
+	state.mark("bunker_complete");save_state();hud.bunker_complete()
 func _furnish(room: Node3D, entry: Dictionary) -> void:
 	var sign := Label3D.new()
 	sign.text = entry.title

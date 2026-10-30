@@ -21,6 +21,9 @@ func _ready() -> void:
 		collision_layer=0
 		call_deferred("_corpse")
 func refresh_visibility() -> void:
+	if world.custom_layout and world.visibility_controller!=null:
+		visible=world.visibility_controller.can_see(global_position)
+		return
 	var room: String=world.room_at(global_position)
 	visible=world.room_visible.has(room) and world.sees(world.player.global_position+Vector3.UP*0.3,global_position+Vector3.UP*0.3,[get_rid(),world.player.get_rid()])
 func hear(at: Vector3, radius: float) -> void:

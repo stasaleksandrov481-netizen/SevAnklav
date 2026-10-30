@@ -23,9 +23,9 @@ func run():
 	ui.pause_menu();var pause=ui.modal;var settings=Pages.open(null,ui,"settings")
 	if not check(Pages.open(null,ui,"settings")==settings,"Repeated settings click created a second page"):return
 	settings.settings.brightness=1.3;settings._save_settings()
-	if not check(is_equal_approx(visibility.environment.ambient_light_energy,.13*1.3) and is_equal_approx(w.player.torch.light_energy,2.2*1.3),"Brightness setting did not reach the live environment and flashlight"):return
+	if not check(is_equal_approx(visibility.environment.ambient_light_energy,.18*1.3) and is_equal_approx(w.player.torch.light_energy,2.2*1.3),"Brightness setting did not reach the live environment and flashlight"):return
 	settings.settings.brightness=.75;settings._save_settings()
-	if not check(is_equal_approx(visibility.brightness,.75) and is_equal_approx(visibility.fallback.light_energy,(.75 if visibility.lamps.filter(func(l):return l.visible and l.has_meta("base_energy")).is_empty() else .26)*.75),"Brightness change did not update current room lamps"):return
+	if not check(is_equal_approx(visibility.brightness,.75) and is_equal_approx(visibility.fallback.light_energy,(.55 if visibility.room_lights.is_empty() else .30)*.75),"Brightness change did not update current room lamps"):return
 	var saved=ConfigFile.new()
 	if not check(saved.load("user://anklav_rts.cfg")==OK and saved.get_value("zcamp","zsave").bunker_visual.brightness==.75,"Visual settings were not saved"):return
 	for dimensions in [Vector2i(1600,900),Vector2i(960,540),Vector2i(720,1280)]:

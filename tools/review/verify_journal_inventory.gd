@@ -52,6 +52,8 @@ func run():
 	w.state.take("fuse");w.state.mark("relay_k2")
 	if not check(Journal.next_step(w).id=="pump_valve","Repair objective did not advance"):return
 	w.state.data.records.archive_chat={"title":"Архив / переписка","body":"Проверка записи"};w.state.mark("pump_valve")
+	if not check(Journal.next_step(w).id=="exit","Restored reserve does not offer the bunker exit"):return
+	w.state.mark("bunker_complete")
 	if not check(Journal.next_step(w).id=="lab_observation","Journal did not skip a previously found clue"):return
 	ui.close_modal();ui.root.get_node("Tasks/OpenJournal").pressed.emit()
 	if not check(ui.modal.get_meta("journal",false) and w.paused and ui.modal.find_child("JournalObjective",true,false).text==w.objective(),"HUD journal button did not open the current objective"):return

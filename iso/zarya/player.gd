@@ -18,6 +18,7 @@ var waking := false
 @onready var world = get_parent()
 @onready var rig = $Visual
 func _ready() -> void:
+	safe_margin=.025;floor_snap_length=.18;max_slides=8;collision_mask=3
 	rig.gait_rate_scale=.58
 	torch=SpotLight3D.new()
 	torch.spot_range=13
@@ -57,7 +58,9 @@ func _physics_process(delta: float) -> void:
 			var hit:=ray+vector*((global_position.y-ray.y)/vector.y)
 			aim_direction=(hit-global_position).normalized()
 	elif direction.length()>0.1: aim_direction=direction.normalized()
+	var old_yaw=rig.rotation.y
 	rig.rotation.y=lerp_angle(rig.rotation.y,atan2(aim_direction.x,aim_direction.z),minf(1,delta*13))
+	rig.turn_rate=angle_difference(old_yaw,rig.rotation.y)/maxf(delta,.001)
 	var armed: bool=not world.state.weapon().is_empty()
 	rig.weapon.visible=armed
 	var left: String=world.state.data.slots.get("left",{}).get("id","")
