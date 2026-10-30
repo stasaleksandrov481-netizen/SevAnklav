@@ -37,12 +37,28 @@ func register_visual(node:Node3D,id:String)->void:
  if id.is_empty():id=room_for(node.global_position)
  if not visuals.has(id):visuals[id]=[]
  visuals[id].append(node);node.visible=false
+ # Remembered interiors use opaque native materials, independently of the
+ # per-fragment discovery mask. The mask is only needed for a doorway preview.
+ var meshes=[]
+ if node is MeshInstance3D:meshes.append(node)
+ meshes.append_array(node.find_children("*","MeshInstance3D",true,false))
+ var furniture=world.get_node("LevelMinusTwo/Furnishings")
+ var masked=[]
+ for mesh in meshes:
+  var m=mesh.material_override
+  if not m is ShaderMaterial or m.shader!=preload("res://iso/maps/level2/furniture_visibility.gdshader"):continue
+  mesh.set_meta("preview_material",m)
+  mesh.set_meta("known_material",furniture.native_material(m.get_shader_parameter("color"),int(m.get_shader_parameter("surface_tile"))))
+  mesh.set_meta("remembered_material",furniture.native_material(m.get_shader_parameter("color"),int(m.get_shader_parameter("surface_tile")),true))
+  masked.append(mesh)
+ node.set_meta("masked_meshes",masked)
 func add_material(material:ShaderMaterial)->void:
  material.set_shader_parameter("room_ids",room_texture);material.set_shader_parameter("origin",world.ORIGIN)
  material.set_shader_parameter("known_rooms",known_texture);material.set_shader_parameter("visibility_map",sight.texture)
  shader_materials.append(material)
 func build(level:Node3D)->void:
  world=level;sight.setup(world)
+ if room_for(world.player.global_position)=="sector_0":world.state.data.visited["sector_0"]=true
  known_image=Image.create(64,1,false,Image.FORMAT_RGBA8);known_image.fill(Color.BLACK);known_texture=ImageTexture.create_from_image(known_image)
  var map=world.get_node("LevelMinusTwo")
  for n in map.get_node("Furnishings").get_children():
@@ -95,10 +111,15 @@ func refresh_sight()->void:
   for id in owner.split("+"):
    if visible_rooms.has(id):show=true
   var known=false
+  var current=false
   for id in owner.split("+"):
    if int(id.trim_prefix("sector_"))<=16 and world.state.data.visited.get(id,false):known=true
+   if id==active:current=true
   for node in visuals[owner]:
-   var clipped=node is MeshInstance3D and node.material_override is ShaderMaterial
+   for mesh in node.get_meta("masked_meshes",[]):
+    var m=mesh.get_meta("known_material" if current else "remembered_material") if known else mesh.get_meta("preview_material")
+    if mesh.material_override!=m:mesh.material_override=m
+   var clipped=node is MeshInstance3D and node.has_meta("preview_material")
    node.visible=show and (known or clipped or sight.visible_at(node.global_position))
  for door in world.doors:
   door.visible=sight.visible_at(door.global_position)

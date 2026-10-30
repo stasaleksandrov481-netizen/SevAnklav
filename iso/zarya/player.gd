@@ -15,6 +15,10 @@ var reload_weapon: Dictionary={}
 var torch: SpotLight3D
 var aim_direction := Vector3.FORWARD
 var waking := false
+const WAKE_SECONDS := 4.6
+var wake_elapsed := 0.0
+var wake_shell: Node3D
+var wake_origin := Vector3.ZERO
 @onready var world = get_parent()
 @onready var rig = $Visual
 func _ready() -> void:
@@ -31,7 +35,7 @@ func _ready() -> void:
 	torch.visible=false
 	add_child(torch)
 func _physics_process(delta: float) -> void:
-	if locked or world.paused or float(world.state.data.health)<=0:
+	if locked or world.paused or not bool(world.state.data.awake) or float(world.state.data.health)<=0:
 		velocity=Vector3.ZERO
 		rig.moving=0
 		return
@@ -133,30 +137,55 @@ func check_ammo() -> void:
 	busy=0.8; checking=true; rig.perform("check")
 func awaken() -> void:
 	if waking or world.state.data.awake:return
-	waking=true
-	locked=true
-	var capsule=world.capsule_node()
-	global_position=capsule.global_position+Vector3(0,1.1,0)
-	rig.rotation.z=PI/2
-	rig.perform("wake")
-	var tween:=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(self,"wake_light",1.0,1.8)
-	await tween.finished
-	var shell=capsule.get_node("Generated").find_child("Glass shell",false,false)
-	if shell:
-		tween=create_tween(); tween.tween_property(shell,"position:z",-1.3,1.2); await tween.finished
-	tween=create_tween().set_parallel().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(rig,"rotation:z",0.0,1.4)
-	tween.tween_property(self,"global_position",capsule.global_position+Vector3(0,0.95,1.5),1.4)
-	await tween.finished
-	rig.perform("balance")
-	await get_tree().create_timer(0.6).timeout
-	world.state.data.awake=true
+	restore_capsule_pose()
+	waking=true;locked=true;wake_elapsed=0.0
+	wake_origin=global_position
+	rig.perform("wake");clear_controls()
+	world.state.data["wakeup_started"]=true
 	world.save_state()
-	locked=false
-	waking=false
+func restore_capsule_pose() -> void:
+	wake_shell=world.capsule_node().get_node("Generated").find_child("Glass shell",false,false)
+	if bool(world.state.data.awake):
+		if is_instance_valid(wake_shell):wake_shell.position.z=-1.3
+		return
+	global_position=world.capsule_node().to_global(Vector3(0,1.1,0))
+	rig.rotation.z=PI/2;locked=true
+	if is_instance_valid(wake_shell):wake_shell.position.z=0.0
+func request_wake() -> void:
+	if bool(world.state.data.awake):return
+	if is_instance_valid(world.hud) and is_instance_valid(world.hud.modal):world.hud.close_modal()
+	world.paused=false
+	if waking:_finish_wake()
+	else:awaken()
+func _process(delta: float) -> void:
+	if not waking:return
+	# No signal/tween chain can strand the movement lock. A real overlay pauses
+	# the sequence; a retired overlay must not leave the world paused forever.
+	if world.paused:
+		if is_instance_valid(world.hud) and is_instance_valid(world.hud.modal):return
+		world.paused=false
+	wake_elapsed+=delta
+	wake_light=smoothstep(0.0,1.5,wake_elapsed)
+	if is_instance_valid(wake_shell):wake_shell.position.z=-1.3*smoothstep(1.5,2.6,wake_elapsed)
+	var rise:=smoothstep(2.6,4.0,wake_elapsed)
+	rig.rotation.z=(PI/2)*(1.0-rise)
+	global_position=wake_origin.lerp(world.player_start,rise)
+	if wake_elapsed>=WAKE_SECONDS:_finish_wake()
+func _finish_wake() -> void:
+	if bool(world.state.data.awake):return
+	global_position=world.player_start;rig.rotation.z=0.0;wake_light=1.0
+	if is_instance_valid(wake_shell):wake_shell.position.z=-1.3
+	rig.perform("balance");clear_controls()
+	world.state.data.awake=true;world.state.data.erase("wakeup_started")
+	waking=false;locked=false
+	world.spawn_recovery_pending=true
+	world.state.changed.emit();world.save_state()
 	world.notify("Волков… Это я? Что со мной сделали?")
 func _unhandled_input(event: InputEvent) -> void:
+	if not bool(world.state.data.awake) and event is InputEventKey and event.pressed and not event.echo:
+		if world.hud!=null and world.hud.modal==null and event.keycode in [KEY_E,KEY_ENTER,KEY_SPACE]:
+			request_wake();get_viewport().set_input_as_handled()
+		return
 	if not can_act():return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode==KEY_E: world.interact()

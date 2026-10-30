@@ -112,6 +112,8 @@ func _fit_canvas() -> void:
 			var ratio:=viewport_size/window_pixels
 			safe=Rect2(Vector2(pixels.position)*ratio,Vector2(pixels.size)*ratio).intersection(safe)
 	var factor:=minf(1.0,minf(safe.size.x/1600.0,safe.size.y/900.0))
+	# Enlarge the playing controls without crowding the inventory/reader layouts.
+	if not is_instance_valid(modal):factor*=1.10
 	root.scale=Vector2.ONE*factor; root.position=safe.position; root.size=safe.size/factor
 	canvas_size=root.size
 	_layout_hud()
@@ -119,13 +121,14 @@ func _layout_hud() -> void:
 	if not root.has_node("Tasks"): return
 	var w:=canvas_size.x; var h:=canvas_size.y
 	var rects: Dictionary={
-		"Tasks":Rect2(24,24,300,118),"Vitals":Rect2(w/2-170,24,340,76),
+		"Tasks":Rect2(24,24,300,118),"Vitals":Rect2((348+w-624-340)/2,24,340,76),
 		"Tools":Rect2(18,h-80,198,60),"Condition":Rect2(24,158,112,142),
 		"Map":Rect2(w-244,24,220,178),"Belt":Rect2(w/2-321,h-142,642,124),
 		"Check":Rect2(w/2-450,h-126,90,96),"MoveStick":Rect2(22,h-395,245,245),
-		"AimStick":Rect2(w-267,h-395,245,245),"Interact":Rect2(w-340,h-193,64,64),
+		"AimStick":Rect2(w-267,h-395,245,245),"Interact":Rect2(w-350,h-310,72,72),
 		"Weapon":Rect2(w-600,24,330,76),"Utilities":Rect2(w-226,h-80,208,60),
-		"InteractionHint":Rect2(w-640,h-260,340,60),
+		"InteractionHint":Rect2(w-730,h-306,360,80),
+		"CapsuleWake":Rect2(w/2-190,h-235,380,64),
 		"Notice":Rect2(w/2-350,114,700,64)}
 	for key in rects:
 		var n=root.get_node_or_null(NodePath(key))
@@ -150,7 +153,9 @@ func _ready() -> void:
 	column.add_child(HSeparator.new())
 	objective=label(column,"",18)
 	objective.add_theme_color_override("font_color",Color("#e0e4e3"))
-	var journal_hit:=Button.new();journal_hit.name="OpenJournal";journal_hit.flat=true;journal_hit.tooltip_text="Журнал бункера / текущий шаг и найденные следы";journal_hit.accessibility_name="Открыть журнал бункера";task.add_child(journal_hit);journal_hit.pressed.connect(open_journal)
+	var journal_hit:=Button.new();journal_hit.name="OpenJournal";journal_hit.flat=true;journal_hit.tooltip_text="Журнал бункера / текущий шаг и найденные следы";journal_hit.accessibility_name="Открыть журнал бункера";task.add_child(journal_hit);journal_hit.pressed.connect(func():
+		if not bool(world.state.data.awake):world.player.request_wake()
+		else:open_journal())
 	var status:=panel(root,Vector2(566,18),Vector2(320,72)); status.name="Vitals"
 	var stack:=VBoxContainer.new(); stack.add_theme_constant_override("separation",10); status.add_child(stack)
 	for entry in [["health","ЗДОРОВЬЕ",Color("#d66660")],["water","ВОДА",Color("#74b4cf")]]:
@@ -186,7 +191,10 @@ func _ready() -> void:
 		place(stick,Rect2(55 if side==0 else 1285,510,245,245))
 		stick.name="MoveStick" if side==0 else "AimStick"
 		if side==1:stick.double_tapped.connect(world.player.reload)
-	var interact:=icon_button(root,"hand","Взаимодействовать",func(): world.interact()); interact.name="Interact"
+	var interact:=icon_button(root,"hand","Взаимодействовать",func():
+		if not bool(world.state.data.awake):world.player.request_wake()
+		else:world.interact()); interact.name="Interact"
+	var wake_button:=button(root,"ОТКРЫТЬ КАПСУЛУ",world.player.request_wake,380);wake_button.name="CapsuleWake";wake_button.hide()
 	interaction_hint=label(root,"",18); interaction_hint.name="InteractionHint"
 	interaction_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	interaction_hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -308,6 +316,10 @@ func activate_shortcut(key: String) -> void:
 	open_inventory()
 	if entry.is_empty():notify("ПЕРЕТАЩИТЕ ПРЕДМЕТ В ЭТУ ЯЧЕЙКУ БЫСТРОГО ДОСТУПА" if key.begins_with("quick") else "ВЫБЕРИТЕ ПРЕДМЕТ ДЛЯ ЭТОЙ РУКИ")
 func _process(delta: float) -> void:
+	if not is_instance_valid(modal) and is_instance_valid(shade):close_modal()
+	var wake_button:Button=root.get_node("CapsuleWake")
+	wake_button.visible=not bool(world.state.data.awake) and not is_instance_valid(modal)
+	wake_button.text="ВСТАТЬ ИЗ КАПСУЛЫ" if world.player.waking else "ОТКРЫТЬ КАПСУЛУ"
 	# Containers can briefly measure wrapped text before their width is assigned.
 	# Reconcile the live window after that deferred minimum-size pass has settled.
 	if is_instance_valid(modal):
@@ -374,6 +386,7 @@ func close_modal() -> void:
 	if message_in_modal:
 		timer=0;notice_panel.hide();message_in_modal=false
 	if is_instance_valid(shade): shade.queue_free()
+	shade=null
 	if is_instance_valid(modal): modal.queue_free()
 	for child in root.get_children():
 		if child!=modal and child!=shade and child.has_meta("overlay_alpha"):
@@ -402,6 +415,7 @@ func window(title: String) -> VBoxContainer:
 	modal.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	var surface:=style(); surface.set_content_margin_all(20); surface.border_width_top=1; surface.border_color=Polar.ICE
 	modal.add_theme_stylebox_override("panel",surface); root.add_child(modal)
+	_fit_canvas()
 	var grain=preload("res://scripts/ui/document_material.gd").new();grain.name="WindowGrain";modal.add_child(grain)
 	world.paused=true
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",10); modal.add_child(column)
@@ -676,7 +690,7 @@ func prologue() -> void:
 	var column:=window("СЕВЕРНЫЙ АНКЛАВ / АЛЕКСЕЙ ВОЛКОВ")
 	modal.set_meta("prologue",true);modal.find_child("WindowClose",true,false).hide()
 	label(column,"Последнее, что вы помните, — холод.\n\nТеперь кто-то называет вас пациентом V-17. За стеклом работает незнакомое оборудование. Голос системы произносит вашу фамилию.\n\nВы — Алексей Волков. Вы не знаете, сколько времени прошло.",24)
-	button(column,"ОТКРЫТЬ ГЛАЗА",func(): close_modal(); world.player.awaken(),400)
+	button(column,"ОТКРЫТЬ ГЛАЗА",world.player.request_wake,400)
 func _unhandled_input(event: InputEvent) -> void:
 	if not world.state.data.awake and world.player.locked:return
 	if float(world.state.data.health)<=0:return
@@ -712,6 +726,10 @@ func _update_interaction() -> void:
 	if modal!=null:return
 	var target: Dictionary=world.nearest()
 	var action_button: Button=root.get_node("Interact")
+	if not bool(world.state.data.awake):
+		action_button.disabled=false;action_button.icon=interaction_icons.hand;action_button.modulate=Color("#ffe1a9")
+		action_button.tooltip_text="Встать из капсулы";interaction_hint.text="ОТКРЫВАЕТСЯ КАПСУЛА / КОСНИТЕСЬ, ЧТОБЫ ВСТАТЬ" if world.player.waking else "ОТКРЫТЬ КАПСУЛУ"
+		return
 	action_button.disabled=target.is_empty() or world.player.locked
 	var icon_id: String={"door":"door","terminal":"terminal","record":"terminal","evidence":"search","loot":"search","locked":"search","container":"search"}.get(str(target.get("kind","")),"hand")
 	action_button.icon=interaction_icons[icon_id]

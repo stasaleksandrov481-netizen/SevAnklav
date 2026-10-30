@@ -2,6 +2,7 @@ extends Node3D
 # Shared-material mesh batches keep detailed furniture affordable on mobile.
 var batches := {}
 var materials := {}
+var native_materials := {}
 var world
 var count := 0
 var decorated_count := 0
@@ -23,11 +24,22 @@ func material(c: Color, surface := -1) -> Material:
   if c.a<1:
    m=StandardMaterial3D.new();m.albedo_color=c;m.roughness=0.75;m.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
   else:
-   m=ShaderMaterial.new();m.shader=preload("res://iso/maps/level2/furniture_visibility.gdshader");m.set_shader_parameter("color",c)
+   m=ShaderMaterial.new();m.shader=preload("res://iso/maps/level2/furniture_visibility.gdshader");m.set_shader_parameter("color",c);m.set_shader_parameter("surface_tile",surface)
    if surface>=0:
     m.set_shader_parameter("surface_atlas",preload("res://iso/maps/level2/textures/storage_surfaces.png"));m.set_shader_parameter("surface_tile",surface)
   materials[key]=m
  return materials[key]
+func native_material(c:Color,surface:int,dim:bool=false)->StandardMaterial3D:
+ var key=c.to_html()+"|"+str(surface)+"|"+str(dim)
+ if not native_materials.has(key):
+  var m=StandardMaterial3D.new();var weight=.65 if dim else 1.0
+  m.albedo_color=Color(c.r*weight,c.g*weight,c.b*weight,c.a);m.roughness=.85
+  m.emission_enabled=true;m.emission=m.albedo_color;m.emission_energy_multiplier=.025
+  if surface>=0:
+   m.albedo_texture=preload("res://iso/maps/level2/textures/storage_surfaces.png")
+   m.uv1_scale=Vector3(.484,.484,1);m.uv1_offset=Vector3((surface%2)*.5+.008,floorf(surface/2.0)*.5+.008,0)
+  native_materials[key]=m
+ return native_materials[key]
 func part(root: Node3D, mesh: Mesh, at: Vector3, color: Color, rotation := Vector3.ZERO, surface := -1) -> void:
  var owner: String=str(root.get_meta("room_id",world.room_at(root.global_position)))
  if owner.is_empty():
