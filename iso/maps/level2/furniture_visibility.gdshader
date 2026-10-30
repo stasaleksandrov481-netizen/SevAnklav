@@ -5,7 +5,7 @@ uniform vec4 color : source_color = vec4(0.5,0.6,0.6,1.0);
 uniform sampler2D surface_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform int surface_tile = -1;
 varying vec3 world_position;
-void vertex(){world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
+void vertex(){world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz-origin;}
 void fragment(){
  float visible=bunker_visibility(world_position);
  if(visible<0.005){discard;}

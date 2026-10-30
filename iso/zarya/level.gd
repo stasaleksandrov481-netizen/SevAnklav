@@ -45,7 +45,7 @@ func _ready() -> void:
 	var pos: Array = state.data.position
 	player.position = ORIGIN+Vector3(pos[0],pos[1],pos[2])
 	if (custom_layout or not story_enabled) and room_at(player.global_position).is_empty(): player.global_position=player_start
-	if not state.data.awake: player.global_position = capsule_node().global_position+Vector3(0,1.1,0)
+	player.restore_capsule_pose()
 	$Camera.position=player.position+$Camera._offset
 	if custom_layout:
 		visibility_controller=preload("res://iso/maps/level2/room_visibility.gd").new()
@@ -102,7 +102,7 @@ func _start() -> void:
 	if hud == null: add_child(preload("res://iso/zarya/hud.gd").new())
 	if not state.data.awake:
 		player.locked = true
-		if bool(get_node("/root/G").zsave.get("seen_prologue",false)):
+		if bool(state.data.get("wakeup_started",false)) or bool(get_node("/root/G").zsave.get("seen_prologue",false)):
 			player.awaken()
 		elif hud != null: hud.prologue()
 func mat(color: Color, texture := false) -> StandardMaterial3D:

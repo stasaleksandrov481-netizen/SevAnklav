@@ -7,13 +7,13 @@ uniform bool textured = true;
 uniform bool floor_surface = false;
 varying vec3 world_position;
 varying vec3 world_normal;
-void vertex(){world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);}
+void vertex(){world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz-origin;world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);}
 void fragment(){
  float visible=bunker_visibility(world_position);
  if(visible<0.005){discard;}
  vec3 color=tint;
  if(textured){
-  vec3 p=(world_position-origin)*vec3(0.22,0.36,0.22);
+  vec3 p=world_position*vec3(0.22,0.36,0.22);
   vec3 w=pow(abs(world_normal),vec3(8.0));w/=max(w.x+w.y+w.z,0.001);
   color*=texture(concrete,p.zy).rgb*w.x+texture(concrete,p.xz).rgb*w.y+texture(concrete,p.xy).rgb*w.z;
  }

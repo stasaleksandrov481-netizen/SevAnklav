@@ -1,0 +1,153 @@
+{
+  "engine": "4.7.stable.official.5b4e0cb0f",
+  "simulation": "headless --fixed-fps 60",
+  "physical_android_tested": false,
+  "suites": [
+    {
+      "suite": "verify_capsule_recovery",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "CAPSULE RECOVERY PASS: 97 checks; GUI wake, interrupted animation, movement, retained furniture/walls, HUD, interrupted save, low FPS and raised interaction"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_revision",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "REVISION PASS: remembered interiors, physical field of view, shadow budget, 3 profiles, awakening, old awake save. Visual groups: 203"
+      ],
+      "errors": [],
+      "warnings": [
+        "WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` for details)."
+      ]
+    },
+    {
+      "suite": "verify_finish_pass",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "FINISH PASS: 34 checks; ray occlusion, look/turn/enter memory, door thresholds, whole wall sections, reachable case, real repairs, final gate and reload"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_ui_shadows",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "UI SHADOWS PASS: 73 checks; silhouette treatment, paper, real terminal tabs, three layouts, fixed light sources across capsule-room positions, slow movement [1.22779011726379, 1.80780279636383]"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_global_flow",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "GLOBAL FLOW PASS: 23 checks; real boot, menu, confirmation, saved intro choices, capsule, continue and new-game preferences"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_furniture_arrangement",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "ARRANGEMENT PASS: 15 seats face desks; 10 attached clues/containers; no prop/wall overlaps; real valve; safe old-save recovery"
+      ],
+      "errors": [],
+      "warnings": [
+        "WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` for details)."
+      ]
+    },
+    {
+      "suite": "verify_door_clearance",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "AUDIT PASS free sweeps=48 sealed gate checks=2 unexpected obstacles=0",
+        "SERVER CORRIDOR PASS: approach and turn into server room"
+      ],
+      "errors": [],
+      "warnings": [
+        "WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` for details)."
+      ]
+    },
+    {
+      "suite": "verify_walkable_route",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "WALKABLE ROUTE PASS: 6316 reachable cells; spawn to medical PC, Serov case, relay, pump and exit; every step sweeps the real player capsule"
+      ],
+      "errors": [],
+      "warnings": [
+        "WARNING: 10 ObjectDB instances were leaked at exit (run with `--verbose` for details)."
+      ]
+    },
+    {
+      "suite": "verify_live_settings_controls",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "LIVE SETTINGS CONTROLS PASS: 43 checks; native back stack, three layouts, brightness, particles, real sprint, reload, save"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_journal_inventory",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "JOURNAL INVENTORY PASS: 54 checks; progression, out-of-order clues, dropped fuse, touch moves, stack metadata, clothes, save, health, three layouts"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_suspend_save",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "SUSPEND SAVE PASS: pause, focus loss, close, disk reload, fresh spawn"
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "suite": "verify_menu_entry",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "MENU ENTRY PASS: 106 checks; authored preview, project boot, new game, return, direct menu launch, four viewport sizes"
+      ],
+      "errors": [],
+      "warnings": [
+        "WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details)."
+      ]
+    }
+  ],
+  "render": {
+    "driver": "OpenGL ES 3.0; llvmpipe software renderer",
+    "window": [
+      1536,
+      691
+    ],
+    "script": "tools/review/capture_capsule_recovery.gd",
+    "passed": true,
+    "actual_menu_intro_and_touch": true,
+    "awake_forced": false,
+    "movement_metres": 2.53917336463928,
+    "authored_furniture": 145,
+    "items_built_including_extra_clues": 153,
+    "physical_android_tested": false
+  }
+}

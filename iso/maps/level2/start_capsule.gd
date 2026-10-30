@@ -8,7 +8,7 @@ func _rebuild() -> void:
   var rib=MeshInstance3D.new();var ring=TorusMesh.new();ring.inner_radius=.48;ring.outer_radius=.57;ring.rings=20;ring.ring_segments=8;rib.mesh=ring;rib.rotation.z=PI/2;rib.position=Vector3(x,1.03,0);rib.material_override=steel;generated.add_child(rib)
   _box(generated,"Foot",Vector3(.24,.2,1.38),Vector3(x,.10,0),steel)
  for z in [-.49,.49]:_box(generated,"Support rail",Vector3(2.2,.1,.08),Vector3(0,.68,z),steel)
- var lid=MeshInstance3D.new();lid.name="Glass shell";var shell=SphereMesh.new();shell.radius=1;shell.height=2;shell.radial_segments=20;shell.rings=10;lid.mesh=shell;lid.scale=Vector3(.98,.46,.52);lid.position=Vector3(0,1.12,0);lid.material_override=glass;generated.add_child(lid)
+ var lid=MeshInstance3D.new();lid.name="Glass shell";var shell=SphereMesh.new();shell.radius=1;shell.height=2;shell.radial_segments=20;shell.rings=10;lid.mesh=shell;lid.scale=Vector3(.98,.46,.52);lid.position=Vector3(0,1.12,0);lid.material_override=glass;lid.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;generated.add_child(lid)
  _box(generated,"Control housing",Vector3(.42,.24,.12),Vector3(.7,.74,.65),steel)
  _box(generated,"Status screen",Vector3(.3,.1,.012),Vector3(.7,.78,.717),_mat(Color("#669daa")))
  var plate=Label3D.new();plate.text="V-17";plate.font_size=64;plate.pixel_size=.002;plate.position=Vector3(-.45,.44,.617);plate.modulate=Color("#aebdc1");generated.add_child(plate)
