@@ -35,7 +35,7 @@ func _ready() -> void:
 	torch.visible=false
 	add_child(torch)
 func _physics_process(delta: float) -> void:
-	if locked or world.paused or not bool(world.state.data.awake) or float(world.state.data.health)<=0:
+	if not world.startup_ready or locked or world.paused or not bool(world.state.data.awake) or float(world.state.data.health)<=0:
 		velocity=Vector3.ZERO
 		rig.moving=0
 		return
@@ -98,7 +98,7 @@ func world_trigger_pressed() -> bool:
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and is_instance_valid(world.hud):return not world.hud.pointer_blocks_world()
 	return true
 func can_act() -> bool:
-	return not locked and not world.paused and bool(world.state.data.awake) and float(world.state.data.health)>0
+	return world.startup_ready and not locked and not world.paused and bool(world.state.data.awake) and float(world.state.data.health)>0
 func clear_controls() -> void:
 	move_vector=Vector2.ZERO;aim_vector=Vector2.ZERO;fire=false;sprinting=false;velocity=Vector3.ZERO
 func toggle_flashlight() -> void:
@@ -136,7 +136,7 @@ func check_ammo() -> void:
 	if not can_act() or busy>0 or world.state.weapon().is_empty(): return
 	busy=0.8; checking=true; rig.perform("check")
 func awaken() -> void:
-	if waking or world.state.data.awake:return
+	if not world.startup_ready or not is_instance_valid(world.capsule_node()) or waking or world.state.data.awake:return
 	restore_capsule_pose()
 	waking=true;locked=true;wake_elapsed=0.0
 	wake_origin=global_position
@@ -144,7 +144,11 @@ func awaken() -> void:
 	world.state.data["wakeup_started"]=true
 	world.save_state()
 func restore_capsule_pose() -> void:
-	wake_shell=world.capsule_node().get_node("Generated").find_child("Glass shell",false,false)
+	var capsule=world.capsule_node()
+	if not is_instance_valid(capsule):return
+	var generated=capsule.get_node_or_null("Generated")
+	if generated==null:return
+	wake_shell=generated.find_child("Glass shell",false,false)
 	if bool(world.state.data.awake):
 		if is_instance_valid(wake_shell):wake_shell.position.z=-1.3
 		return
@@ -152,13 +156,14 @@ func restore_capsule_pose() -> void:
 	rig.rotation.z=PI/2;locked=true
 	if is_instance_valid(wake_shell):wake_shell.position.z=0.0
 func request_wake() -> void:
+	if not world.startup_ready:return
 	if bool(world.state.data.awake):return
 	if is_instance_valid(world.hud) and is_instance_valid(world.hud.modal):world.hud.close_modal()
 	world.paused=false
 	if waking:_finish_wake()
 	else:awaken()
 func _process(delta: float) -> void:
-	if not waking:return
+	if not world.startup_ready or not waking:return
 	# No signal/tween chain can strand the movement lock. A real overlay pauses
 	# the sequence; a retired overlay must not leave the world paused forever.
 	if world.paused:
@@ -172,7 +177,7 @@ func _process(delta: float) -> void:
 	global_position=wake_origin.lerp(world.player_start,rise)
 	if wake_elapsed>=WAKE_SECONDS:_finish_wake()
 func _finish_wake() -> void:
-	if bool(world.state.data.awake):return
+	if not world.startup_ready or bool(world.state.data.awake):return
 	global_position=world.player_start;rig.rotation.z=0.0;wake_light=1.0
 	if is_instance_valid(wake_shell):wake_shell.position.z=-1.3
 	rig.perform("balance");clear_controls()

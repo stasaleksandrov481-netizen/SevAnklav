@@ -1,14 +1,28 @@
 extends RefCounted
 const Region=preload("res://iso/maps/level2/region.gd")
 const Door=preload("res://iso/maps/level2/door.gd")
-static func build(world:Node3D)->void:
- var map=preload("res://iso/maps/level2/Zarya_Level_Minus_2.tscn").instantiate()
+static func build(world:Node3D)->bool:
+ # A cosmetic mask must never make the script fail to compile and leave the
+ # independently created HUD running over an empty legacy world.
+ var path="res://iso/maps/level2/Zarya_Level_Minus_2.tscn"
+ if not ResourceLoader.exists(path,"PackedScene"):
+  world.startup_error="Не найден файл сцены бункера.";return false
+ var scene=load(path) as PackedScene
+ if scene==null:world.startup_error="Не удалось прочитать сцену бункера.";return false
+ var regions_path="res://iso/maps/level2/regions.json"
+ if not FileAccess.file_exists(regions_path):
+  world.startup_error="Не найден план помещений: regions.json.";return false
+ for data_path in ["res://iso/maps/level2/furnishing.json","res://iso/maps/level2/wall_sections.json"]:
+  if not FileAccess.file_exists(data_path):world.startup_error="Не найден файл данных бункера: "+data_path.get_file();return false
+ var specs=JSON.parse_string(FileAccess.get_file_as_string(regions_path))
+ if not specs is Array or specs.is_empty():
+  world.startup_error="Не удалось прочитать план помещений бункера.";return false
+ var map=scene.instantiate()
  map.name="LevelMinusTwo";map.position=world.ORIGIN;world.add_child(map)
  world.custom_layout=true;world.story_enabled=true;world.state_key="zarya_layout3"
  world.state=world.State.new(world.get_node("/root/G").zsave,world.state_key)
  world.state.data.flags["power"]=true
  world.layout={"rooms":[],"links":[],"actions":[]}
- var specs=JSON.parse_string(FileAccess.get_file_as_string("res://iso/maps/level2/regions.json"))
  for entry in specs:
   var region=Region.new();region.room_id=entry.id;region.title=entry.title;region.name=entry.id
   region.position=Vector3(entry.x,0,entry.z);region.width=entry.width;region.depth=entry.depth
@@ -27,17 +41,27 @@ static func build(world:Node3D)->void:
   var transform=source.global_transform;map.add_child(door);door.global_transform=transform
   door.configure(source);world.doors.append(door)
  var cut_materials=[]
+ var section_map:Texture2D
+ var section_path="res://iso/maps/level2/wall_section_ids.png"
+ if ResourceLoader.exists(section_path,"Texture2D"):section_map=load(section_path) as Texture2D
+ world.set_meta("wall_section_map_fallback",section_map==null)
  for name in ["WallMesh","SkirtMesh","CapMesh"]:
   var material=ShaderMaterial.new();material.shader=preload("res://iso/maps/level2/wall_sections.gdshader")
   material.set_shader_parameter("concrete",preload("res://iso/maps/level2/textures/concrete_panels.png"))
-  material.set_shader_parameter("section_ids",preload("res://iso/maps/level2/wall_section_ids.png"))
+  material.set_shader_parameter("use_section_map",section_map!=null)
+  if section_map!=null:material.set_shader_parameter("section_ids",section_map)
   material.set_shader_parameter("origin",world.ORIGIN)
   material.set_shader_parameter("textured",name=="WallMesh")
   material.set_shader_parameter("boundary_padding",.55)
   material.set_shader_parameter("tint",Vector3(0.64,0.70,0.72) if name=="WallMesh" else Vector3(0.2,0.27,0.31))
   map.get_node(name).mesh=load("res://iso/maps/level2/"+name+"Sections.res")
   map.get_node(name).material_override=material;cut_materials.append(material)
-  preload("res://iso/maps/level2/opaque_shadow.gd").attach(map.get_node(name),.18)
+  # Keep the existing one-argument call compatible with an editor that still
+  # holds the pre-update helper. Apply contact height to the native node here.
+  var wall=map.get_node(name)
+  preload("res://iso/maps/level2/opaque_shadow.gd").attach(wall)
+  var shadow=wall.get_node_or_null("OpaqueShadow")
+  if shadow!=null and wall.mesh.get_aabb().end.y>.18:shadow.scale.y=.18/wall.mesh.get_aabb().end.y
  var floor_material=ShaderMaterial.new();floor_material.shader=preload("res://iso/maps/level2/cutaway.gdshader")
  floor_material.set_shader_parameter("concrete",preload("res://iso/maps/level2/textures/floor.png"));floor_material.set_shader_parameter("floor_surface",true);floor_material.set_shader_parameter("tint",Vector3(0.6,0.67,0.69))
  map.get_node("FloorMesh").material_override=floor_material;cut_materials.append(floor_material)
@@ -57,7 +81,10 @@ static func build(world:Node3D)->void:
   floor_patch.material_override=floor_material
  var furnishings=preload("res://iso/maps/level2/furniture.gd").new()
  furnishings.name="Furnishings";map.add_child(furnishings);furnishings.build(world)
+ if furnishings.authored.size()<145 or world.stations.is_empty():
+  world.startup_error="Не удалось загрузить обстановку и объекты бункера.";return false
  var atmosphere=preload("res://iso/maps/level2/atmosphere.gd").new()
  atmosphere.name="Atmosphere";map.add_child(atmosphere);atmosphere.build(world)
  var investigation=preload("res://iso/maps/level2/investigation.gd").new()
  investigation.name="Investigation";map.add_child(investigation);investigation.build(world)
+ return map.has_node("V17Capsule/Generated") and world.rooms.size()==specs.size()

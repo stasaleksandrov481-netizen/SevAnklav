@@ -5,14 +5,19 @@ const Door = preload("res://iso/zarya/door.gd")
 const Prop = preload("res://iso/prop.gd")
 const ORIGIN := Vector3(3540,0,2900)
 var state
-var state_key := "zarya2"
-var custom_layout := false
+var state_key := "zarya_layout3"
+var custom_layout := true
+var startup_ready := false
+var startup_error := ""
+var startup_snapshot:Dictionary={}
 var visibility_controller
 var spawn_recovery_pending := false
 var interaction_cache := {}
 var interaction_cache_time := -1
 func capsule_node() -> Node3D:
-	return get_node("LevelMinusTwo/V17Capsule") if custom_layout else rooms.capsule.get_node("V17Capsule")
+	if custom_layout:return get_node_or_null("LevelMinusTwo/V17Capsule")
+	var room=rooms.get("capsule")
+	return room.get_node_or_null("V17Capsule") if is_instance_valid(room) else null
 var story_enabled := true
 var player_start := Vector3.ZERO
 var layout: Dictionary
@@ -28,7 +33,7 @@ var enemies: Array = []
 var room_visible := {}
 var current := ""
 var hud
-var paused := false
+var paused := true
 var clock := 0.0
 var save_clock := 0.0
 var materials := {}
@@ -38,18 +43,27 @@ var repair_elapsed := 0.0
 const REPAIR_SECONDS := 2.4
 @onready var player: CharacterBody3D = $Volkov
 func _ready() -> void:
-	state = State.new(get_node("/root/G").zsave)
-	layout = JSON.parse_string(FileAccess.get_file_as_string("res://iso/zarya/layout.json"))
+	startup_snapshot=get_node("/root/G").zsave.duplicate(true)
+	state = State.new(get_node("/root/G").zsave,state_key)
+	layout={"rooms":[],"links":[],"actions":[]}
 	$TouchControls.visible = false
-	_build()
+	player.locked=true
+	if not _build():_startup_failed();return
+	if not is_instance_valid(capsule_node()) or rooms.is_empty() or player_start==Vector3.ZERO:
+		startup_error="Не удалось создать капсулу и точку выхода.";_startup_failed();return
 	var pos: Array = state.data.position
 	player.position = ORIGIN+Vector3(pos[0],pos[1],pos[2])
 	if (custom_layout or not story_enabled) and room_at(player.global_position).is_empty(): player.global_position=player_start
 	player.restore_capsule_pose()
 	$Camera.position=player.position+$Camera._offset
 	if custom_layout:
-		visibility_controller=preload("res://iso/maps/level2/room_visibility.gd").new()
+		var script=ResourceLoader.load("res://iso/maps/level2/room_visibility.gd","Script",ResourceLoader.CACHE_MODE_IGNORE)
+		if script==null or not script.can_instantiate():
+			startup_error="Не удалось загрузить отображение бункера.";_startup_failed();return
+		visibility_controller=script.new()
 		visibility_controller.name="RoomVisibility";get_node("LevelMinusTwo").add_child(visibility_controller);visibility_controller.build(self)
+		if not visibility_controller.ready_complete:
+			startup_error="Не удалось подготовить видимость помещений.";_startup_failed();return
 	var environment := WorldEnvironment.new()
 	environment.environment = Environment.new()
 	environment.environment.background_mode = Environment.BG_COLOR
@@ -61,10 +75,36 @@ func _ready() -> void:
 	else: environment.free()
 	for drop in state.data.drops: create_drop(drop)
 	clear_empty_drops()
+	startup_ready=true;startup_snapshot={};paused=false;player.locked=not bool(state.data.awake)
 	if not get_meta("authoring_export",false):
 		call_deferred("_start")
 		if custom_layout:spawn_recovery_pending=bool(state.data.awake)
+func _startup_failed() -> void:
+	startup_ready=false;paused=true;player.locked=true;player.waking=false;player.clear_controls()
+	if startup_error.is_empty():startup_error="Не удалось полностью загрузить сцену бункера."
+	# A failed scene must neither advance awakening nor overwrite a real save
+	# with its partial room list / origin position.
+	get_node("/root/G").zsave=startup_snapshot
+	state=State.new(get_node("/root/G").zsave,state_key)
+	var map=get_node_or_null("LevelMinusTwo")
+	if map!=null:map.process_mode=Node.PROCESS_MODE_DISABLED;map.hide()
+	player.process_mode=Node.PROCESS_MODE_DISABLED
+	var log=FileAccess.open("user://bunker_startup.log",FileAccess.WRITE)
+	if log!=null:
+		log.store_line("Engine: "+str(Engine.get_version_info().get("string",""))+" / "+OS.get_name())
+		log.store_line(startup_error)
+	printerr("BUNKER STARTUP: ",startup_error)
+	if not get_meta("authoring_export",false):call_deferred("_start")
+func retry_startup() -> void:
+	var mains=get_tree().get_nodes_in_group("main_root")
+	if not mains.is_empty():mains[0].call_deferred("_enter_iso_world")
+	elif get_tree().current_scene==self:get_tree().call_deferred("reload_current_scene")
+func return_to_menu() -> void:
+	var mains=get_tree().get_nodes_in_group("main_root")
+	if not mains.is_empty():mains[0].call_deferred("to_main_menu")
+	else:get_tree().call_deferred("change_scene_to_file","res://scenes/main.tscn")
 func _physics_process(_delta: float) -> void:
+	if not startup_ready:return
 	if spawn_recovery_pending:
 		spawn_recovery_pending=false
 		_restore_clear_spawn()
@@ -99,7 +139,12 @@ func _restore_clear_spawn() -> void:
 			visibility_controller.switch_room(room);set_meta("spawn_recovered",true);save_state()
 			return
 func _start() -> void:
-	if hud == null: add_child(preload("res://iso/zarya/hud.gd").new())
+	if hud==null or not hud.has_method("startup_failure"):
+		if is_instance_valid(hud):hud.queue_free()
+		var script=ResourceLoader.load("res://iso/zarya/hud.gd","Script",ResourceLoader.CACHE_MODE_IGNORE)
+		add_child(script.new())
+	if not startup_ready:
+		hud.startup_failure();return
 	if not state.data.awake:
 		player.locked = true
 		if bool(state.data.get("wakeup_started",false)) or bool(get_node("/root/G").zsave.get("seen_prologue",false)):
@@ -144,9 +189,13 @@ func cylinder(parent: Node3D, at: Vector3, radius: float, height: float, color: 
 	visual.position = at
 	visual.material_override = mat(color)
 	parent.add_child(visual)
-func _build() -> void:
-	preload("res://iso/maps/level2/runtime.gd").build(self)
-	return
+func _build() -> bool:
+	# Read the current script after an in-place update. A cached failed script
+	# must not keep the editor running the old half-initialized world.
+	var script=ResourceLoader.load("res://iso/maps/level2/runtime.gd","Script",ResourceLoader.CACHE_MODE_IGNORE)
+	if script==null or not script.can_instantiate():
+		startup_error="Не удалось загрузить сборку бункера.";return false
+	return script.build(self)==true
 func _build_legacy() -> void:
 	var path: String=get_meta("map_path",ProjectSettings.get_setting("anklav/active_map","res://iso/maps/zarya_bunker.tscn"))
 	if ResourceLoader.exists(path) and not get_meta("authoring_export",false):
@@ -242,7 +291,7 @@ func sees(from: Vector3, to: Vector3, exclude: Array = []) -> bool:
 	q.exclude = exclusions
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 func _process(delta: float) -> void:
-	if paused: return
+	if not startup_ready or paused: return
 	if not repair_action.is_empty(): _advance_repair(delta)
 	if custom_layout:
 		save_clock+=delta;clock+=delta
@@ -307,7 +356,7 @@ func _process(delta: float) -> void:
 		state.data.water = maxf(0,float(state.data.water)-step*0.014)
 		for wound in state.data.wounds.values(): state.data.health=maxf(0,float(state.data.health)-float(wound.bleeding)*step*0.07)
 func save_state() -> void:
-	if not is_instance_valid(player): return
+	if not startup_ready or not is_instance_valid(player): return
 	var local := player.position-ORIGIN
 	state.data.position = [local.x,local.y,local.z]
 	for enemy in enemies: enemy.store()
@@ -315,7 +364,7 @@ func save_state() -> void:
 func _notification(what: int) -> void:
 	# Save the latest position before mobile suspension or window closure.
 	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
-		if state != null and is_instance_valid(player):
+		if startup_ready and state != null and is_instance_valid(player):
 			cancel_repair()
 			player.clear_controls()
 			if is_instance_valid(hud):
@@ -424,6 +473,7 @@ func activate(id: String) -> bool:
 	save_state()
 	return true
 func objective() -> String:
+	if not startup_ready:return "Не удалось загрузить бункер" if not startup_error.is_empty() else "Загрузка бункера…"
 	if custom_layout:
 		return preload("res://iso/zarya/journal.gd").next_step(self).title
 	if not story_enabled: return "Исследовать локацию"

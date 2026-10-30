@@ -21,6 +21,19 @@ var shader_point := Vector3.INF
 var shader_camera := Vector3.INF
 var shader_reveal := -1.0
 var wall_controller
+var ready_complete := false
+var native_materials := {}
+func native_material(c:Color,surface:int,dim:bool=false)->StandardMaterial3D:
+ var key=c.to_html()+"|"+str(surface)+"|"+str(dim)
+ if not native_materials.has(key):
+  var m=StandardMaterial3D.new();var weight=.65 if dim else 1.0
+  m.albedo_color=Color(c.r*weight,c.g*weight,c.b*weight,c.a);m.roughness=.85
+  m.emission_enabled=true;m.emission=m.albedo_color;m.emission_energy_multiplier=.025
+  if surface>=0:
+   m.albedo_texture=preload("res://iso/maps/level2/textures/storage_surfaces.png")
+   m.uv1_scale=Vector3(.484,.484,1);m.uv1_offset=Vector3((surface%2)*.5+.008,floorf(surface/2.0)*.5+.008,0)
+  native_materials[key]=m
+ return native_materials[key]
 func room_for(point:Vector3)->String:
  var id:String=world.room_at(point)
  if not id.is_empty():return id
@@ -42,14 +55,14 @@ func register_visual(node:Node3D,id:String)->void:
  var meshes=[]
  if node is MeshInstance3D:meshes.append(node)
  meshes.append_array(node.find_children("*","MeshInstance3D",true,false))
- var furniture=world.get_node("LevelMinusTwo/Furnishings")
  var masked=[]
  for mesh in meshes:
   var m=mesh.material_override
   if not m is ShaderMaterial or m.shader!=preload("res://iso/maps/level2/furniture_visibility.gdshader"):continue
   mesh.set_meta("preview_material",m)
-  mesh.set_meta("known_material",furniture.native_material(m.get_shader_parameter("color"),int(m.get_shader_parameter("surface_tile"))))
-  mesh.set_meta("remembered_material",furniture.native_material(m.get_shader_parameter("color"),int(m.get_shader_parameter("surface_tile")),true))
+  var tile=m.get_shader_parameter("surface_tile");var surface=-1 if tile==null else int(tile)
+  mesh.set_meta("known_material",native_material(m.get_shader_parameter("color"),surface))
+  mesh.set_meta("remembered_material",native_material(m.get_shader_parameter("color"),surface,true))
   masked.append(mesh)
  node.set_meta("masked_meshes",masked)
 func add_material(material:ShaderMaterial)->void:
@@ -84,6 +97,7 @@ func build(level:Node3D)->void:
  for material in shader_materials:
   if material.shader==preload("res://iso/maps/level2/wall_sections.gdshader"):material.set_shader_parameter("wall_states",wall_controller.texture)
  set_profile(str(world.state.data.get("graphics_profile","balanced")));apply_preferences();switch_room(room_for(world.player.global_position))
+ ready_complete=true
 func remember_room(id:String)->void:
  if int(id.trim_prefix("sector_"))>16:return
  # A threshold is a connection, not a new empty room. Enter fully before the
@@ -165,7 +179,7 @@ func refresh_lights()->void:
    light.light_energy=float(light.get_meta("base_energy"))*brightness*(1.05 if own else .65)
  fallback.visible=not active.is_empty();fallback.light_energy=(.55 if room_lights.is_empty() else .30)*brightness
 func _process(delta:float)->void:
- if world==null or world.paused:return
+ if not ready_complete or world==null or world.paused:return
  elapsed+=delta
  if elapsed>=({"low":.18,"balanced":.125,"quality":.10}[profile]):
   elapsed=0;switch_room(room_for(world.player.global_position))

@@ -316,6 +316,10 @@ func activate_shortcut(key: String) -> void:
 	open_inventory()
 	if entry.is_empty():notify("ПЕРЕТАЩИТЕ ПРЕДМЕТ В ЭТУ ЯЧЕЙКУ БЫСТРОГО ДОСТУПА" if key.begins_with("quick") else "ВЫБЕРИТЕ ПРЕДМЕТ ДЛЯ ЭТОЙ РУКИ")
 func _process(delta: float) -> void:
+	if not world.startup_ready:
+		if not is_instance_valid(modal):startup_failure()
+		root.get_node("CapsuleWake").hide()
+		return
 	if not is_instance_valid(modal) and is_instance_valid(shade):close_modal()
 	var wake_button:Button=root.get_node("CapsuleWake")
 	wake_button.visible=not bool(world.state.data.awake) and not is_instance_valid(modal)
@@ -699,12 +703,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode==KEY_M: open_pda()
 		if event.keycode==KEY_ESCAPE:Back.request(get_tree());get_viewport().set_input_as_handled()
 func handle_back() -> void:
+	if not world.startup_ready:world.return_to_menu();return
 	if world.is_queued_for_deletion() or not world.state.data.awake or float(world.state.data.health)<=0:return
 	if not world.repair_action.is_empty():world.cancel_repair();return
 	if modal!=null:close_modal()
 	else:pause_menu()
 func _exit_tree() -> void:
 	Back.remove(self)
+func startup_failure() -> void:
+	if is_instance_valid(modal) and modal.get_meta("startup_failure",false):return
+	var column=window("БУНКЕР НЕ ЗАГРУЗИЛСЯ")
+	modal.name="StartupFailure";modal.set_meta("startup_failure",true)
+	modal.find_child("WindowClose",true,false).hide()
+	label(column,"Не удалось подготовить локацию. Прогресс не перезаписан.\n\n"+world.startup_error,24)
+	var retry=button(column,"ПОВТОРИТЬ ЗАГРУЗКУ",world.retry_startup,460);retry.name="RetryStartup"
+	var menu=button(column,"ГЛАВНОЕ МЕНЮ",world.return_to_menu,460);menu.name="StartupMenu"
+	root.get_node("CapsuleWake").hide()
 
 func restart_level() -> void:
 	var game=get_node("/root/G")
