@@ -1,10 +1,13 @@
 extends CanvasLayer
-const Polar=preload("res://scripts/ui/polar/theme.gd")
+const Polar=preload("res://scripts/ui/bunker_skin.gd")
+const BunkerIcons=preload("res://scripts/ui/bunker_icons.gd")
 const State=preload("res://iso/zarya/state.gd")
 const Journal=preload("res://iso/zarya/journal.gd")
 const Back=preload("res://scripts/ui/native_back.gd")
 const Icons=preload("res://scripts/ui/equipment_icons.gd")
 var world
+var inventory_view
+var terminal_view
 var root: Control
 var objective: Label
 var notice: Label
@@ -77,7 +80,7 @@ func button(parent: Node, text: String, callback: Callable, width := 110) -> But
 	var focus:=style(); focus.bg_color=Color.TRANSPARENT; focus.border_color=Color("#dfbc82"); focus.set_border_width_all(2)
 	b.add_theme_stylebox_override("focus",focus)
 	b.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	b.add_theme_font_size_override("font_size",14)
+	b.add_theme_font_size_override("font_size",18)
 	b.add_theme_color_override("font_color",Color("#b8d1dc"))
 	Polar.button(b)
 	b.pressed.connect(callback)
@@ -117,12 +120,12 @@ func _layout_hud() -> void:
 	var w:=canvas_size.x; var h:=canvas_size.y
 	var rects: Dictionary={
 		"Tasks":Rect2(24,24,300,118),"Vitals":Rect2(w/2-170,24,340,76),
-		"Tools":Rect2(w-452,18,198,60),"Condition":Rect2(24,158,112,142),
+		"Tools":Rect2(18,h-80,198,60),"Condition":Rect2(24,158,112,142),
 		"Map":Rect2(w-244,24,220,178),"Belt":Rect2(w/2-321,h-142,642,124),
 		"Check":Rect2(w/2-450,h-126,90,96),"MoveStick":Rect2(22,h-395,245,245),
 		"AimStick":Rect2(w-267,h-395,245,245),"Interact":Rect2(w-340,h-193,64,64),
-		"Weapon":Rect2(w-397,h-92,379,72),"Utilities":Rect2(18,h-80,238,60),
-		"InteractionHint":Rect2(w-486,h-245,340,60),
+		"Weapon":Rect2(w-600,24,330,76),"Utilities":Rect2(w-226,h-80,208,60),
+		"InteractionHint":Rect2(w-640,h-260,340,60),
 		"Notice":Rect2(w/2-350,114,700,64)}
 	for key in rects:
 		var n=root.get_node_or_null(NodePath(key))
@@ -130,8 +133,10 @@ func _layout_hud() -> void:
 	if is_instance_valid(shade): shade.size=canvas_size
 	if is_instance_valid(repair_panel): repair_panel.position=Vector2(canvas_size.x/2-240,canvas_size.y-295)
 	if is_instance_valid(modal):
-		if modal.get_meta("compact",false):
-			modal.size=Vector2(640,610); modal.position=(canvas_size-modal.size)/2
+		if modal.get_meta("paper",false):
+			modal.size=Vector2(990,800);modal.position=(canvas_size-modal.size)/2
+		elif modal.get_meta("compact",false):
+			modal.size=modal.get_meta("preferred_size",Vector2(640,610)); modal.position=(canvas_size-modal.size)/2
 		else: modal.position=Vector2(24,36); modal.size=canvas_size-Vector2(48,72)
 func _ready() -> void:
 	world=get_parent(); world.hud=self
@@ -140,7 +145,7 @@ func _ready() -> void:
 	_fit_canvas(); get_viewport().size_changed.connect(_fit_canvas)
 	var task:=panel(root,Vector2(20,24),Vector2(300,130)); task.name="Tasks"
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",14); task.add_child(column)
-	var task_heading:=label(column,"ЗАДАЧА / ОТКРЫТЬ ЖУРНАЛ",13)
+	var task_heading:=label(column,"ЗАДАЧА",13)
 	task_heading.add_theme_color_override("font_color",Color("#80bbb9"))
 	column.add_child(HSeparator.new())
 	objective=label(column,"",18)
@@ -148,7 +153,7 @@ func _ready() -> void:
 	var journal_hit:=Button.new();journal_hit.name="OpenJournal";journal_hit.flat=true;journal_hit.tooltip_text="Журнал бункера / текущий шаг и найденные следы";journal_hit.accessibility_name="Открыть журнал бункера";task.add_child(journal_hit);journal_hit.pressed.connect(open_journal)
 	var status:=panel(root,Vector2(566,18),Vector2(320,72)); status.name="Vitals"
 	var stack:=VBoxContainer.new(); stack.add_theme_constant_override("separation",10); status.add_child(stack)
-	for entry in [["food","ПИТАНИЕ",Color("#dbb567")],["water","ВОДА",Color("#74b4cf")]]:
+	for entry in [["health","ЗДОРОВЬЕ",Color("#d66660")],["water","ВОДА",Color("#74b4cf")]]:
 		var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",16); stack.add_child(row)
 		var title:=label(row,entry[1],13); title.custom_minimum_size.x=78
 		var bar:=preload("res://iso/zarya/meter.gd").new(); bar.tint=entry[2]; bar.custom_minimum_size=Vector2(180,19)
@@ -199,7 +204,7 @@ func _ready() -> void:
 	interaction_marker_icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	interaction_marker_icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	interaction_marker.add_child(interaction_marker_icon); interaction_marker.hide()
-	var gun_panel:=panel(root,Vector2(1150,816),Vector2(379,72)); gun_panel.name="Weapon"
+	var gun_panel:=panel(root,Vector2(1000,24),Vector2(330,76)); gun_panel.name="Weapon"
 	var gun_row:=HBoxContainer.new(); gun_panel.add_child(gun_row)
 	weapon_status=label(gun_row,"",14); weapon_status.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	icon_button(gun_row,"reload","Перезарядить",world.player.reload)
@@ -215,6 +220,8 @@ func _ready() -> void:
 	refresh_slots()
 	call_deferred("_fit_canvas")
 func icon_for(id: String) -> Texture2D:
+	var modern:Texture2D=BunkerIcons.get_icon(id)
+	if modern!=null:return modern
 	if icon_cache.has(id): return icon_cache[id]
 	var custom_path: String="res://assets/ui/zarya/"+id+".svg"
 	if ResourceLoader.exists(custom_path):
@@ -245,6 +252,7 @@ func make_slot(parent: Node, key: String, shortcut := false) -> Button:
 	parent.add_child(cell); slots.append(cell)
 	return cell
 func refresh_slots() -> void:
+	if inventory_view!=null:inventory_view.refresh_summary()
 	var kept: Array=[]
 	for cell in slots:
 		if not is_instance_valid(cell): continue
@@ -257,6 +265,7 @@ func refresh_slots() -> void:
 		if cell.get_meta("hud_shortcut",false):cell.tooltip_text+=" / коснитесь для действия" if not item.is_empty() else " / настроить в инвентаре"
 	slots=kept
 func select_slot(key: String) -> void:
+	if inventory_view!=null:inventory_view.show_right("item")
 	if not moving_from.is_empty():
 		if key==moving_from:cancel_move();notify("ПЕРЕНОС ОТМЕНЁН");return
 		move_item(moving_from,key);return
@@ -299,6 +308,13 @@ func activate_shortcut(key: String) -> void:
 	open_inventory()
 	if entry.is_empty():notify("ПЕРЕТАЩИТЕ ПРЕДМЕТ В ЭТУ ЯЧЕЙКУ БЫСТРОГО ДОСТУПА" if key.begins_with("quick") else "ВЫБЕРИТЕ ПРЕДМЕТ ДЛЯ ЭТОЙ РУКИ")
 func _process(delta: float) -> void:
+	# Containers can briefly measure wrapped text before their width is assigned.
+	# Reconcile the live window after that deferred minimum-size pass has settled.
+	if is_instance_valid(modal):
+		var desired:Vector2=Vector2(990,800) if modal.get_meta("paper",false) else (modal.get_meta("preferred_size",Vector2(640,610)) if modal.get_meta("compact",false) else canvas_size-Vector2(48,72))
+		if modal.size!=desired:
+			modal.size=desired
+			modal.position=(canvas_size-modal.size)/2 if modal.get_meta("paper",false) or modal.get_meta("compact",false) else Vector2(24,36)
 	_update_world_marker()
 	var controls_active: bool=modal==null and world.player.can_act()
 	for key in ["MoveStick","AimStick"]:root.get_node(key).set_input_enabled(controls_active)
@@ -334,6 +350,7 @@ func _process(delta: float) -> void:
 	else:
 		notice_panel.hide()
 		if is_instance_valid(modal_feedback):modal_feedback.hide()
+	if modal!=null:notice_panel.hide()
 func notify(text: String) -> void:
 	if text.is_empty(): return
 	notice.text=text; timer=7; notice_panel.modulate.a=1;notice_panel.show()
@@ -352,6 +369,7 @@ func pointer_blocks_world() -> bool:
 		if stick._pointer!=-1 or stick._mouse_down:return true
 	return false
 func close_modal() -> void:
+	inventory_view=null;terminal_view=null
 	moving_from=""
 	if message_in_modal:
 		timer=0;notice_panel.hide();message_in_modal=false
@@ -382,10 +400,11 @@ func window(title: String) -> VBoxContainer:
 	modal=PanelContainer.new(); modal.set_anchors_preset(Control.PRESET_CENTER)
 	modal.position=Vector2(24,36); modal.size=canvas_size-Vector2(48,72)
 	modal.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	var surface:=style(); surface.bg_color=Color("#101d26"); surface.set_content_margin_all(28); surface.border_width_top=3; surface.border_color=Polar.ICE
+	var surface:=style(); surface.set_content_margin_all(20); surface.border_width_top=1; surface.border_color=Polar.ICE
 	modal.add_theme_stylebox_override("panel",surface); root.add_child(modal)
+	var grain=preload("res://scripts/ui/document_material.gd").new();grain.name="WindowGrain";modal.add_child(grain)
 	world.paused=true
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",16); modal.add_child(column)
+	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",10); modal.add_child(column)
 	var header:=HBoxContainer.new(); column.add_child(header)
 	var text:=label(header,title,24); text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var close_button:=icon_button(header,"close","Закрыть",close_modal);close_button.name="WindowClose"
@@ -425,43 +444,7 @@ func update_details() -> void:
 	var hint: String="Коснитесь подсвеченной ячейки. Совместимые стопки объединятся." if not moving_from.is_empty() else "Перетащите предмет в ячейку или выберите действие."
 	detail_description.text=("КОЛИЧЕСТВО  %s    /    СОСТОЯНИЕ  %s%%\n\n" % [item.get("count",1),item.get("condition",100)]+hint) if not item.is_empty() else "Снаряжение, карманы и быстрые слоты.\nВыберите предмет для осмотра."
 func open_inventory() -> void:
-	var column:=window("СНАРЯЖЕНИЕ / АЛЕКСЕЙ ВОЛКОВ")
-	var tabs:=HBoxContainer.new(); tabs.add_theme_constant_override("separation",12); column.add_child(tabs)
-	button(tabs,"ИНВЕНТАРЬ",open_inventory,180); button(tabs,"ОРГАНИЗМ",open_medical,180); button(tabs,"КПК",open_pda,180);button(tabs,"ЖУРНАЛ",open_journal,180)
-	var row:=HBoxContainer.new(); row.size_flags_vertical=Control.SIZE_EXPAND_FILL; row.add_theme_constant_override("separation",24); column.add_child(row)
-	var equipment:=VBoxContainer.new(); equipment.custom_minimum_size.x=234; row.add_child(equipment)
-	label(equipment,"ЭКИПИРОВКА / V-17",13)
-	var silhouette_area:=Control.new(); silhouette_area.custom_minimum_size=Vector2(230,270); equipment.add_child(silhouette_area)
-	var silhouette=preload("res://iso/zarya/body.gd").new(); silhouette.ui=self; silhouette.scale=Vector2.ONE*0.64; silhouette.position.x=6; silhouette_area.add_child(silhouette)
-	var hands:=HBoxContainer.new(); equipment.add_child(hands)
-	for key in ["left","right"]:
-		var cell:=make_slot(hands,key); cell.custom_minimum_size=Vector2(110,100)
-	label(equipment,"ОДЕЖДА / КАРМАНЫ",12)
-	var pockets:=HBoxContainer.new(); equipment.add_child(pockets)
-	for key in ["clothes","pocket0","pocket1"]:
-		var cell:=make_slot(pockets,key); cell.custom_minimum_size=Vector2(72,76)
-	var center:=VBoxContainer.new(); center.size_flags_horizontal=Control.SIZE_EXPAND_FILL; center.custom_minimum_size.x=552; center.add_theme_constant_override("separation",14); row.add_child(center)
-	label(center,"РЮКЗАК / 18 ЯЧЕЕК",14)
-	var grid:=GridContainer.new(); grid.columns=6; grid.add_theme_constant_override("h_separation",6); grid.add_theme_constant_override("v_separation",6); center.add_child(grid)
-	for i in range(18):
-		var cell:=make_slot(grid,"bag"+str(i)); cell.custom_minimum_size=Vector2(86,94)
-	label(center,"БЫСТРЫЙ ДОСТУП",13)
-	var quick:=HBoxContainer.new(); quick.add_theme_constant_override("separation",6); center.add_child(quick)
-	for key in ["quick0","quick1","quick2","quick3"]: make_slot(quick,key)
-	var side:=VBoxContainer.new(); side.custom_minimum_size.x=360; side.size_flags_horizontal=Control.SIZE_EXPAND_FILL; side.add_theme_constant_override("separation",16); row.add_child(side)
-	detail_title=label(side,"",24)
-	detail_image=TextureRect.new(); detail_image.custom_minimum_size=Vector2(330,210); detail_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; detail_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; side.add_child(detail_image)
-	detail_description=label(side,"",16)
-	var actions:=HBoxContainer.new(); actions.add_theme_constant_override("separation",12); side.add_child(actions)
-	item_actions["hand"]=icon_button(actions,"hand","Экипировать в свободную руку / надеть форму",equip_selected)
-	item_actions["use"]=icon_button(actions,"use","Использовать паёк или воду",consume)
-	icon_button(actions,"medical","Открыть лечение",open_medical)
-	item_actions["trash"]=icon_button(actions,"trash","Выложить предмет на пол",drop_selected)
-	label(side,"Экипировать · Использовать · Лечение · Выложить",12)
-	var transfers:=HBoxContainer.new();transfers.add_theme_constant_override("separation",12);side.add_child(transfers)
-	item_actions["move"]=button(transfers,"ПЕРЕМЕСТИТЬ В ЯЧЕЙКУ",begin_move,280)
-	item_actions["split"]=button(transfers,"ОТДЕЛИТЬ 1 ПРЕДМЕТ",split_selected,200)
-	refresh_slots(); update_details()
+	preload("res://iso/zarya/inventory_view.gd").new().build(self)
 func equip_selected() -> void:
 	var target: String=world.state.equip_target(selected)
 	if target.is_empty():notify("НЕТ ПОДХОДЯЩЕЙ СВОБОДНОЙ РУКИ / ИСПОЛЬЗУЙТЕ ПЕРЕНОС В ЯЧЕЙКУ");return
@@ -491,20 +474,7 @@ func drop_selected() -> void:
 	world.create_drop(world.state.data.drops.back())
 	world.state.changed.emit();refresh_slots(); update_details();world.save_state()
 func open_loot(action: Dictionary) -> void:
-	var column:=window("ОБЫСК / "+str(action.title))
-	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",28); column.add_child(row)
-	var left:=VBoxContainer.new(); row.add_child(left); label(left,"ИНВЕНТАРЬ ВОЛКОВА",18); bag(left)
-	var right:=VBoxContainer.new(); right.custom_minimum_size.x=420; row.add_child(right)
-	label(right,action.title,22)
-	label(right,"СОДЕРЖИМОЕ ОБЪЕКТА / ПЕРЕНОС В РЮКЗАК",12)
-	right.add_theme_constant_override("separation",12)
-	var list: Array=world.state.data.containers.get(action.id,[])
-	if list.is_empty(): label(right,"ПУСТО / ПРЕДМЕТЫ УЖЕ ЗАБРАНЫ",16)
-	for i in range(list.size()):
-		var item: Dictionary=list[i]
-		var b:=button(right,State.ITEMS[item.id].name+"   × "+str(item.count)+"\nСОСТОЯНИЕ "+str(item.get("condition",100))+"%",func(): transfer(action,i),380)
-		b.icon=icon_for(item.id); b.expand_icon=true; b.add_theme_constant_override("icon_max_width",64); b.custom_minimum_size.y=82
-	var take_button:=button(right,"ВЗЯТЬ ВСЁ",func():take_all(action),380);take_button.name="LootTakeAll";take_button.disabled=list.is_empty()
+	preload("res://iso/zarya/inventory_view.gd").new().build(self,action)
 func take_all(action: Dictionary) -> void:
 	var count: int=world.state.loot_all(action.id)
 	var remaining: bool=not world.state.data.containers.get(action.id,[]).is_empty()
@@ -527,25 +497,39 @@ func loot_flags() -> void:
 	world.save_state()
 func reader_tools(parent: Node, text: RichTextLabel) -> void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
-	var caption:=label(row,"РАЗМЕР ТЕКСТА",12);caption.name="ReaderFontCaption";caption.autowrap_mode=TextServer.AUTOWRAP_OFF;caption.custom_minimum_size.x=150;caption.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	var caption:=label(row,"РАЗМЕР ТЕКСТА",16);caption.name="ReaderFontCaption";caption.autowrap_mode=TextServer.AUTOWRAP_OFF;caption.custom_minimum_size.x=150;caption.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	var value:=label(row,str(world.state.data.get("reader_font_size",24)),16);value.name="ReaderFontValue";value.custom_minimum_size.x=34;value.autowrap_mode=TextServer.AUTOWRAP_OFF;value.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	for step in [-2,2]:
 		var control:=button(row,"А−" if step<0 else "А+",func():
 			var px:=clampi(int(world.state.data.get("reader_font_size",24))+step,20,34)
 			world.state.data["reader_font_size"]=px;text.add_theme_font_size_override("normal_font_size",px);value.text=str(px);world.save_state(),70)
+		control.add_theme_font_size_override("font_size",20)
 		control.name="ReaderDecrease" if step<0 else "ReaderIncrease"
+func evidence_medium(action:Dictionary)->String:
+	if action.has("medium"):return str(action.medium)
+	var title:String=str(action.get("title","")).to_lower()
+	return "terminal" if title.contains("переписк") or title.contains("терминал") or str(action.get("id","")) in ["identity_v17","guard_log","archive_chat","lab_observation"] else "paper"
 func open_evidence(action: Dictionary) -> void:
-	var column:=window("НАЙДЕНО / "+str(action.title))
-	label(column,"ЗАПИСЬ СОХРАНЕНА В КПК",14)
-	var reading_tools:=VBoxContainer.new();column.add_child(reading_tools)
-	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.custom_minimum_size.y=350;column.add_child(scroll)
-	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	var text:=RichTextLabel.new();text.name="EvidenceText";text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.fit_content=true;text.scroll_active=false;text.add_theme_font_size_override("normal_font_size",int(world.state.data.get("reader_font_size",24)));text.text=str(action.body);scroll.add_child(text)
-	reader_tools(reading_tools,text)
-	button(column,"ВЕРНУТЬСЯ К ИССЛЕДОВАНИЮ",close_modal,400)
+	if evidence_medium(action)=="terminal":
+		preload("res://iso/zarya/terminal_view.gd").new().build(self,action,action,true);return
+	var column:=window("СЛУЖЕБНАЯ ЗАПИСКА")
+	modal.set_meta("paper",true);modal.size=Vector2(990,800);modal.position=(canvas_size-modal.size)/2
+	var sheet:=StyleBoxEmpty.new();sheet.set_content_margin_all(54);modal.add_theme_stylebox_override("panel",sheet)
+	var grain=modal.get_node("WindowGrain");grain.kind="paper";grain.bleed=54;grain.image=load("res://assets/ui/bunker/paper.png");grain.queue_redraw()
+	# The sheet is the window background, behind the live text and controls.
+	grain.set_meta("full_paper",true)
+	for child in column.get_children():
+		if child is HBoxContainer:
+			for item in child.get_children():
+				if item is Label:item.add_theme_color_override("font_color",Color("#6f4037"))
+	label(column,str(action.title),28).add_theme_color_override("font_color",Color("#2d302b"))
+	var text:=RichTextLabel.new();text.name="EvidenceText";text.selection_enabled=true;text.size_flags_vertical=Control.SIZE_EXPAND_FILL;text.custom_minimum_size.y=250;text.add_theme_color_override("default_color",Color("#292d28"));text.add_theme_font_size_override("normal_font_size",int(world.state.data.get("reader_font_size",24)));text.add_theme_constant_override("line_separation",6);text.text=str(action.body).replace("\\n","\n");column.add_child(text)
+	var tools:=VBoxContainer.new();column.add_child(tools);reader_tools(tools,text)
+	for node in tools.find_children("*","Label",true,false):node.add_theme_color_override("font_color",Color("#55533f"))
+	label(column,"КОПИЯ СОХРАНЕНА В КПК  /  V-17",14).add_theme_color_override("font_color",Color("#765346"))
+	button(column,"УБРАТЬ ЗАПИСКУ",close_modal,320)
+	for node in modal.find_children("*","Button",true,false):Polar.paper_button(node)
 func open_terminal(action: Dictionary) -> void:
-	var column:=window("ЗАРЯ / ЛОКАЛЬНЫЙ УЗЕЛ / "+str(action.title))
-	label(column,"ОПЕРАТОР V-17   •   УРОВЕНЬ −2   •   СЕТЬ ИЗОЛИРОВАНА",14)
 	var records: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://iso/bunker_records.json"))
 	var record: Dictionary=records.get(action.record,{"title":"СЛУЖЕБНАЯ ЗАПИСЬ / СЕРОВ","body":"Резервный предохранитель оставлен в серверной. Карту заберите с моего рабочего места. После восстановления питания проверьте карантинную блокировку. Верхний уровень не отвечает."})
 	record=record.duplicate(true)
@@ -553,42 +537,28 @@ func open_terminal(action: Dictionary) -> void:
 	if action.id in ["power","generator","pump"]:
 		record.body="Предохранитель установлен. Резервная цепь научно-технического уровня −2 готова к работе.\nПроверьте карантинную блокировку перед доступом к вертикальному узлу."
 	if action.id=="archive": record.body=str(record.body)+"\n\nСИСТЕМА: грузовой шлюз требует подтверждения с верхнего уровня. Следуйте к лестничному узлу −1."
-	label(column,record.title,22)
-	var text:=RichTextLabel.new(); text.custom_minimum_size=Vector2(1050,350); text.text=str(record.body).replace("\\n","\n"); column.add_child(text)
-	button(column,"ЗАГРУЗИТЬ ЗАПИСЬ / ВЫПОЛНИТЬ ДЕЙСТВИЕ",func():
-		if world.activate(action.id):
-			world.state.data.records[action.id]=record
-			notify("ДАННЫЕ СОХРАНЕНЫ В КПК")
-			world.save_state(),480)
+	preload("res://iso/zarya/terminal_view.gd").new().build(self,action,record)
 func open_medical() -> void:
-	var column:=window("МЕДИЦИНСКИЙ МОНИТОРИНГ / V-17")
-	modal.set_meta("medical",true);medical_zones={};medical_actions={}
-	var row:=HBoxContainer.new(); column.add_child(row)
-	medical_body=preload("res://iso/zarya/body.gd").new(); medical_body.ui=self; medical_body.name="MedicalBody";medical_body.custom_minimum_size=Vector2(340,410); row.add_child(medical_body)
-	var side:=VBoxContainer.new(); side.custom_minimum_size.x=650; row.add_child(side)
-	medical_heading=label(side,"",24);medical_heading.name="MedicalSelection"
-	medical_readings=label(side,"",18);medical_readings.name="MedicalReadings";medical_readings.custom_minimum_size.y=72
-	for zone in State.ZONES:
-		var zone_button:=button(side,zone,func():select_zone(zone),550);zone_button.toggle_mode=true;zone_button.name="MedicalZone"+str(State.ZONES.find(zone));medical_zones[zone]=zone_button
-	var actions:=HBoxContainer.new(); column.add_child(actions)
-	for entry in [["band","ПЕРЕВЯЗАТЬ"],["medkit","ОБРАБОТАТЬ"],["morph","ОБЕЗБОЛИТЬ"]]:
-		var medicine: String=entry[0]
-		var action:=button(actions,entry[1],func():treat_selected(medicine),260);action.custom_minimum_size.y=64;action.name="Treat_"+medicine;action.set_meta("caption",entry[1]);medical_actions[medicine]=action
+	if inventory_view==null:open_inventory()
+	inventory_view.show_right("medical")
 	refresh_medical()
 func select_zone(zone: String) -> void:
 	if zone not in State.ZONES:return
 	selected_zone=zone
 	if modal==null or not modal.get_meta("medical",false):open_medical()
-	else:refresh_medical()
+	else:
+		if inventory_view!=null:inventory_view.show_right("medical")
+		refresh_medical()
 func refresh_medical() -> void:
 	if modal==null or not modal.get_meta("medical",false):return
 	if selected_zone not in State.ZONES:selected_zone="Торс"
 	var wound: Dictionary=world.state.data.wounds[selected_zone]
 	medical_heading.text="ВЫБРАНО / "+selected_zone
-	medical_readings.text="ПОВРЕЖДЕНИЕ  %d    ·    КРОВОТЕЧЕНИЕ  %.2f\nБОЛЬ  %d    ·    ЗДОРОВЬЕ  %d%%" % [int(wound.damage),float(wound.bleeding),int(wound.pain),int(world.state.data.health)]
+	medical_readings.text="ПОВРЕЖДЕНИЕ  %d    ·    КРОВОТЕЧЕНИЕ  %.2f\nБОЛЬ  %d    ·    ЗДОРОВЬЕ  %d%%" % [int(wound.damage),float(wound.bleeding),int(wound.pain),roundi(float(world.state.data.health))]
 	for zone in medical_zones:
 		var entry: Dictionary=world.state.data.wounds[zone]
-		medical_zones[zone].text=zone+(" / без повреждений" if float(entry.damage)<=0 and float(entry.bleeding)<=0 and float(entry.pain)<=0 else " / повреждение %d · кровотечение %.2f" % [int(entry.damage),float(entry.bleeding)])
+		medical_zones[zone].text=zone+(" •" if float(entry.damage)>0 or float(entry.bleeding)>0 or float(entry.pain)>0 else "")
+		medical_zones[zone].tooltip_text="Повреждение %d / кровотечение %.2f / боль %d" % [int(entry.damage),float(entry.bleeding),int(entry.pain)]
 		medical_zones[zone].button_pressed=zone==selected_zone
 	for medicine in medical_actions:
 		var action: Button=medical_actions[medicine]
@@ -597,6 +567,7 @@ func refresh_medical() -> void:
 		action.disabled=not world.state.can_treat(selected_zone,medicine)
 		action.tooltip_text="Лечение этой области не требуется" if not world.state.needs_treatment(selected_zone,medicine) else ("Нет препарата в снаряжении" if count==0 else "Применить к выбранной области")
 	medical_body.queue_redraw();hud_body.queue_redraw()
+	if inventory_view!=null:inventory_view.refresh_summary()
 func treat_selected(medicine: String) -> void:
 	if not world.state.treat(selected_zone,medicine):
 		notify("НЕТ ПРЕПАРАТА В СНАРЯЖЕНИИ" if world.state.amount(medicine)==0 else "ЛЕЧЕНИЕ ЭТОЙ ОБЛАСТИ НЕ ТРЕБУЕТСЯ");return
@@ -665,7 +636,8 @@ func open_journal() -> void:
 		var title: String=("✓  "+clue.title if known else "Неосмотренный след")+"\n"+clue.location
 		var item:=button(entries,title,func():
 			var record: Dictionary=world.state.data.records.get(action.id,{"title":action.title,"body":action.get("observation","")})
-			open_evidence(record),600)
+			var presentation:Dictionary=record.duplicate(true);presentation["id"]=action.id;presentation["medium"]=evidence_medium(action)
+			open_evidence(presentation),600)
 		item.name="JournalClue_"+clue.id;item.disabled=not known;item.custom_minimum_size.y=72;item.add_theme_font_size_override("font_size",18)
 	button(column,"ОТКРЫТЬ КПК",open_pda,300)
 func pause_menu() -> void:
@@ -682,7 +654,7 @@ func pause_menu() -> void:
 		if not mains.is_empty(): mains[0].to_main_menu(),400)
 func open_bunker_graphics() -> void:
 	var column:=window("ГРАФИКА / БУНКЕР")
-	modal.set_meta("compact",true);modal.size=Vector2(680,620);modal.position=(canvas_size-modal.size)/2
+	modal.set_meta("compact",true);modal.set_meta("preferred_size",Vector2(680,620));modal.size=Vector2(680,620);modal.position=(canvas_size-modal.size)/2
 	label(column,"Меняется только качество 3D. Размер интерфейса сохраняется.",21)
 	var names={"low":"ЭКОНОМНЫЙ — БЕЗ ДИНАМИЧЕСКИХ ТЕНЕЙ","balanced":"СБАЛАНСИРОВАННЫЙ — ОДНА ТЕНЬ","quality":"КАЧЕСТВО — ДВЕ ТЕНИ"}
 	for id in ["low","balanced","quality"]:
@@ -728,6 +700,7 @@ func interaction_text(target: Dictionary) -> String:
 	if target.kind=="repair" and world.state.flag(target.id):return "ГОТОВО / "+title
 	return title
 func _update_interaction() -> void:
+	if modal!=null:return
 	var target: Dictionary=world.nearest()
 	var action_button: Button=root.get_node("Interact")
 	action_button.disabled=target.is_empty() or world.player.locked

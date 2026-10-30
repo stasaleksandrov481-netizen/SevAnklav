@@ -7,7 +7,7 @@ signal help_pressed
 signal quit_pressed
 signal continue_pressed
 signal load_pressed
-const P=preload("res://scripts/ui/polar/theme.gd")
+const P=preload("res://scripts/ui/bunker_skin.gd")
 const Back=preload("res://scripts/ui/native_back.gd")
 var menu_root:Control
 var menu_canvas:Control
@@ -21,23 +21,28 @@ func _ready()->void:
  menu_root=Control.new();add_child(menu_root)
  menu_canvas=Control.new();menu_canvas.size=Vector2(1536,864);menu_canvas.theme=P.make_theme();menu_root.add_child(menu_canvas)
  _fit_menu();get_viewport().size_changed.connect(_fit_menu)
- var bg=TextureRect.new();bg.texture=preload("res://assets/menu/north.jpg");bg.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;bg.stretch_mode=TextureRect.STRETCH_SCALE;bg.size=Vector2(1536,864);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(bg)
- # An opaque console covers every baked-in menu label; all six new controls share a style.
- var backing=ColorRect.new();backing.position=Vector2(557,341);backing.size=Vector2(421,417);backing.color=Color("#101d26");backing.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(backing)
- var plate=Panel.new();plate.position=Vector2(557,341);plate.size=Vector2(421,417);plate.add_theme_stylebox_override("panel",P.surface(0));menu_canvas.add_child(plate)
- var heading=_label("ГЛАВНЫЙ ТЕРМИНАЛ   /   A–03",12,P.MUTED);heading.position=Vector2(580,353);menu_canvas.add_child(heading)
+ var bg=TextureRect.new();bg.texture=preload("res://assets/ui/bunker/menu_background.png");bg.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;bg.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;bg.size=Vector2(1536,864);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(bg)
+ var title_font=FontVariation.new();title_font.base_font=P.FONT;title_font.variation_embolden=1.4;title_font.spacing_glyph=3
+ var title=_label("СЕВЕРНЫЙ\nАНКЛАВ",76,Color("#ced6d7"));title.name="GameTitle";title.position=Vector2(90,103);title.add_theme_font_override("font",title_font);title.add_theme_color_override("font_outline_color",Color("#151b20"));title.add_theme_constant_override("outline_size",4);title.add_theme_color_override("font_shadow_color",Color(0,0,0,.9));title.add_theme_constant_override("shadow_offset_y",5);menu_canvas.add_child(title)
  var labels=["ПРОДОЛЖИТЬ","CO-OP ИГРА","НОВАЯ ИГРА","ЗАГРУЗИТЬ ИГРУ","НАСТРОЙКИ","ВЫХОД"]
  var callbacks=[func():launch(func():continue_pressed.emit()),open_coop,request_new_game,func():launch(func():load_pressed.emit()),func():settings_pressed.emit(),func():open_confirmation("quit")]
+ var glyphs=["play","coop","new","load","gear","exit"]
  for i in range(labels.size()):
-  var b=Button.new();b.name="MenuAction"+str(i);b.text=labels[i];b.position=Vector2(577,379+i*59);b.size=Vector2(381,49);b.add_theme_font_size_override("font_size",17);P.button(b,i==0);b.pressed.connect(callbacks[i]);menu_canvas.add_child(b)
-  var number=_label("0"+str(i+1),11,P.MUTED);number.position=Vector2(13,16);number.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(number)
-  var arrow=_label("›",23,P.ICE);arrow.position=Vector2(352,7);arrow.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(arrow)
+  var b=Button.new();b.name="MenuAction"+str(i);b.text=labels[i];b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.position=Vector2(90,310+i*70);b.size=Vector2(390,60);b.add_theme_font_size_override("font_size",22);P.button(b,i==0)
+  var normal=P.surface(16);normal.bg_color=Color(.035,.055,.065,.94);normal.border_color=Color("#4b5b62")
+  if i==0:normal.bg_color=Color(.18,.035,.03,.94);normal.border_color=Color("#9d4e43")
+  b.add_theme_stylebox_override("normal",normal);b.icon=load("res://assets/ui/bunker/icons/"+glyphs[i]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);b.add_theme_constant_override("h_separation",18);b.pressed.connect(callbacks[i]);menu_canvas.add_child(b)
+  if i==1:
+   b.text="CO-OP ИГРА"
+   var badge=_label("В РАЗРАБОТКЕ",12,P.MUTED);badge.position=Vector2(259,22);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(badge)
   if i in [0,3] and not has_progress():b.disabled=true;b.tooltip_text="Сначала начните новую игру"
- var socials=HBoxContainer.new();socials.position=Vector2(32,106);socials.add_theme_constant_override("separation",10);menu_canvas.add_child(socials)
+ var socials=HBoxContainer.new();socials.position=Vector2(26,24);socials.add_theme_constant_override("separation",10);menu_canvas.add_child(socials)
  for item in [["telegram","TELEGRAM","https://t.me/SevAnklav"],["tiktok","TIKTOK","https://www.tiktok.com/@sevanklav"]]:
-  var b=Button.new();b.text=item[1];b.icon=load("res://assets/ui/controls/"+item[0]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",22);b.custom_minimum_size=Vector2(145,44);b.add_theme_font_size_override("font_size",12);b.tooltip_text=item[2];P.button(b);var url:String=item[2];b.pressed.connect(func():OS.shell_open(url));socials.add_child(b)
- var footer=_label("СЛЕДИ ЗА СИГНАЛОМ   /   @SEVANKLAV",11,P.MUTED);footer.position=Vector2(33,158);menu_canvas.add_child(footer)
- var snow=Snow.new();snow.size=Vector2(1536,864);snow.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(snow)
+  var b=Button.new();b.icon=load("res://assets/ui/controls/"+item[0]+".svg");b.expand_icon=true;b.add_theme_constant_override("icon_max_width",25);b.custom_minimum_size=Vector2(48,48);b.tooltip_text=item[1];b.accessibility_name=item[1];P.button(b);var url:String=item[2];b.pressed.connect(func():OS.shell_open(url));socials.add_child(b)
+ var code=_label("СЕКРЕТНЫЙ ОБЪЕКТ №742\nСЕВЕРНЫЙ АНКЛАВ\nБЛОК A-03",15,P.MUTED);code.position=Vector2(1260,30);menu_canvas.add_child(code)
+ var quote=_label("НЕКОТОРЫЕ ДВЕРИ ЛУЧШЕ\nОСТАВИТЬ ЗАКРЫТЫМИ…",16,P.MUTED);quote.position=Vector2(1200,775);menu_canvas.add_child(quote)
+ var version=_label("V-17  /  УРОВЕНЬ −2",13,P.MUTED);version.position=Vector2(28,826);menu_canvas.add_child(version)
+ var snow=Snow.new();snow.size=Vector2(1536,864);snow.modulate.a=.35;snow.mouse_filter=Control.MOUSE_FILTER_IGNORE;menu_canvas.add_child(snow)
  menu_canvas.modulate.a=0;create_tween().tween_property(menu_canvas,"modulate:a",1.0,0.45)
 func _label(text:String,px:int,color:Color)->Label:
  var l=Label.new();l.text=text;l.add_theme_font_size_override("font_size",px);l.add_theme_color_override("font_color",color);return l

@@ -1,4 +1,7 @@
 extends CharacterBody3D
+const WALK_SPEED := 1.65
+const RUN_SPEED := 2.65
+const ACCELERATION := 5.5
 var locked := false
 var wake_light := 0.0
 var move_vector := Vector2.ZERO
@@ -15,12 +18,15 @@ var waking := false
 @onready var world = get_parent()
 @onready var rig = $Visual
 func _ready() -> void:
+	rig.gait_rate_scale=.58
 	torch=SpotLight3D.new()
 	torch.spot_range=13
 	torch.spot_angle=27
 	torch.light_energy=2.2
 	torch.light_color=Color("#dbe2cc")
 	torch.shadow_enabled=true
+	torch.shadow_bias=.025
+	torch.shadow_normal_bias=.25
 	torch.visible=false
 	add_child(torch)
 func _physics_process(delta: float) -> void:
@@ -34,12 +40,12 @@ func _physics_process(delta: float) -> void:
 	var right:=camera.global_basis.x; right.y=0
 	var forward:=-camera.global_basis.z; forward.y=0
 	var direction:=right.normalized()*input.x-forward.normalized()*input.y
-	var speed:=6.0 if Input.is_action_pressed("run") or sprinting else 3.7
-	velocity.x=move_toward(velocity.x,direction.x*speed,delta*16)
-	velocity.z=move_toward(velocity.z,direction.z*speed,delta*16)
+	var speed:=RUN_SPEED if Input.is_action_pressed("run") or sprinting else WALK_SPEED
+	velocity.x=move_toward(velocity.x,direction.x*speed,delta*ACCELERATION)
+	velocity.z=move_toward(velocity.z,direction.z*speed,delta*ACCELERATION)
 	velocity.y=-2
 	move_and_slide()
-	rig.moving=Vector2(velocity.x,velocity.z).length()/3.7
+	rig.moving=Vector2(velocity.x,velocity.z).length()/WALK_SPEED
 	var aim:=aim_vector
 	if aim.length()>0.1:
 		aim_direction=(right.normalized()*aim.x-forward.normalized()*aim.y).normalized()

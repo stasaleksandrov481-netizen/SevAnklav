@@ -16,6 +16,7 @@ var shader_camera := Vector3.INF
 var shader_reveal := -1.0
 var brightness:=1.0
 var environment: Environment
+var room_lights: Array=[]
 func room_for(point: Vector3) -> String:
  var id: String=world.room_at(point)
  if not id.is_empty():return id
@@ -79,14 +80,17 @@ func set_profile(value: String) -> void:
  var viewport=world.get_viewport()
  viewport.msaa_3d=Viewport.MSAA_DISABLED if profile!="quality" else Viewport.MSAA_2X
  viewport.scaling_3d_scale={"low":0.65,"balanced":0.85,"quality":1.0}[profile]
- world.player.torch.shadow_enabled=profile!="low"
+ world.player.torch.shadow_enabled=profile=="quality"
+ viewport.positional_shadow_atlas_size=1024 if profile=="low" else (4096 if profile=="quality" else 2048)
  world.state.data["graphics_profile"]=profile
  elapsed=1
+ refresh_lights()
  world.get_node("LevelMinusTwo/Atmosphere").sync_vapor()
 func switch_room(id: String) -> void:
  if id.is_empty() or id==active:return
  active=id;world.current=id;world.room_visible={id:true};world.state.data.visited[id]=true
  reveal=0.12
+ _select_room_lights()
  for owner in visuals:
   for n in visuals[owner]:n.visible=active in owner.split("+")
  for m in shader_materials:m.set_shader_parameter("active_room",float(id.trim_prefix("sector_").to_int()+1))
@@ -95,20 +99,32 @@ func switch_room(id: String) -> void:
  for door in world.doors:door.visible=active in door.adjacent
  refresh_lights()
  world.get_node("LevelMinusTwo/Atmosphere").sync_vapor()
+func _select_room_lights() -> void:
+ # Fixed room coordinates, never the moving player: no source swaps mid-room.
+ var center: Vector3=world.rooms[active].global_position
+ room_lights=lamps.filter(func(light):return str(light.get_meta("room_id",""))==active and light.has_meta("base_energy"))
+ room_lights.sort_custom(func(a,b):
+  var a_red: bool=a.light_color.r>a.light_color.b*1.35
+  var b_red: bool=b.light_color.r>b.light_color.b*1.35
+  if a_red!=b_red:return not a_red
+  var da: float=a.global_position.distance_squared_to(center)
+  var db: float=b.global_position.distance_squared_to(center)
+  return str(a.name)<str(b.name) if is_equal_approx(da,db) else da<db)
+ for light in room_lights:
+  light.shadow_bias=.025;light.shadow_normal_bias=.25
+ fallback.global_position=center+Vector3(0,1.65,0)
 func refresh_lights() -> void:
- var candidates=[]
+ var remaining: int=maxi(0,budget-int(world.player.torch.visible and world.player.torch.shadow_enabled))
  for light in lamps:
-  light.visible=str(light.get_meta("room_id",""))==active
-  light.shadow_enabled=false
-  if light.visible and light.has_meta("base_energy"):candidates.append(light)
- candidates.sort_custom(func(a,b):return a.global_position.distance_squared_to(world.player.global_position)<b.global_position.distance_squared_to(world.player.global_position))
- for i in range(candidates.size()):
-  var light=candidates[i]
-  light.visible=i<3
-  light.shadow_enabled=i<maxi(0,budget-int(world.player.torch.visible and world.player.torch.shadow_enabled))
-  light.light_color=Color("#ba493c") if light.light_color.r>light.light_color.b*1.35 else Color("#a2c0d0")
-  light.light_energy=float(light.get_meta("base_energy"))*1.05*brightness
- fallback.visible=true;fallback.light_energy=(0.75 if candidates.is_empty() else 0.26)*brightness;fallback.global_position=world.player.global_position+Vector3(0,1.5,0)
+  var index: int=room_lights.find(light)
+  var in_room: bool=str(light.get_meta("room_id",""))==active
+  light.visible=in_room and (index<3 if light.has_meta("base_energy") else true)
+  var casts: bool=light.visible and index>=0 and index<remaining
+  if light.shadow_enabled!=casts:light.shadow_enabled=casts
+  if index>=0:
+   light.light_color=Color("#ba493c") if light.light_color.r>light.light_color.b*1.35 else Color("#a2c0d0")
+   light.light_energy=float(light.get_meta("base_energy"))*1.05*brightness
+ fallback.visible=true;fallback.light_energy=(0.75 if room_lights.is_empty() else 0.26)*brightness
 func _process(delta: float) -> void:
  if world==null or world.paused:return
  elapsed+=delta

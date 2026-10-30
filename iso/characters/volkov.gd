@@ -2,6 +2,7 @@ extends Node3D
 # Articulated, smooth anatomical surfaces. World scale and gameplay collision stay unchanged.
 var skeleton: Skeleton3D
 var moving := 0.0
+var gait_rate_scale := 1.0
 var aiming := false
 var lying := 0.0
 var phase := 0.0
@@ -140,7 +141,7 @@ func _process(delta: float) -> void:
 	if not is_visible_in_tree(): return
 	var blend:=1.0-exp(-delta*14)
 	speed_blend=lerpf(speed_blend,moving,blend); aim_blend=lerpf(aim_blend,1.0 if aiming else 0.0,blend)
-	phase+=delta*lerpf(13.6,18.0,clampf(speed_blend-1,0,1)); action_time+=delta
+	phase+=delta*gait_rate_scale*lerpf(13.6,18.0,clampf(speed_blend-1,0,1)); action_time+=delta
 	var stride:=minf(speed_blend,1.6); var run:=clampf(speed_blend-1,0,1)
 	var breath:=sin(Time.get_ticks_msec()*.0018)*.008
 	skeleton.set_bone_pose_position(indices.hips,Vector3(0,-.02+absf(sin(phase))*.025*stride,0))
