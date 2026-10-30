@@ -4,327 +4,327 @@
       "kind": "bed",
       "x": -29.5,
       "z": -9.8,
-      "angle": 0,
+      "angle": 0.0,
       "id": "med_bed"
     },
     {
       "kind": "pc",
-      "x": -31.8,
-      "z": -9.4,
-      "angle": 90,
+      "x": -32.9048339605331,
+      "z": -9.39999995170617,
+      "angle": 90.0,
       "id": "med_nurse"
     },
     {
       "kind": "pc",
-      "x": -23,
-      "z": -10.1,
-      "angle": 0,
+      "x": -23.0,
+      "z": -10.6450195074081,
+      "angle": 0.0,
       "id": "med_diagnostics"
     },
     {
       "kind": "pc",
       "x": 0.6,
-      "z": -12.2,
-      "angle": 0,
+      "z": -12.8050781011581,
+      "angle": 0.0,
       "id": "lab1_terminal_a"
     },
     {
       "kind": "pc",
       "x": 4.3,
-      "z": -12.2,
-      "angle": 0,
+      "z": -12.8050781011581,
+      "angle": 0.0,
       "id": "lab1_terminal_b"
     },
     {
       "kind": "pc",
       "x": 11.3,
-      "z": -12.2,
-      "angle": 0,
+      "z": -12.8050781011581,
+      "angle": 0.0,
       "id": "lab2_terminal_a"
     },
     {
       "kind": "pc",
       "x": 16.4,
-      "z": -12.2,
-      "angle": 0,
+      "z": -12.8050781011581,
+      "angle": 0.0,
       "id": "lab2_terminal_b"
     },
     {
       "kind": "pc",
       "x": -12.2,
-      "z": -2.6,
-      "angle": 0,
+      "z": -3.03979492783546,
+      "angle": 0.0,
       "id": "staff_terminal"
     },
     {
       "kind": "pc",
-      "x": 2,
-      "z": -3.2,
-      "angle": 0,
+      "x": 2.0,
+      "z": -3.88002927303314,
+      "angle": 0.0,
       "id": "control_terminal_a"
     },
     {
       "kind": "pc",
       "x": 7.3,
       "z": -3.2,
-      "angle": 0,
+      "angle": 0.0,
       "id": "control_terminal_b"
     },
     {
       "kind": "cart",
       "x": -30.5,
       "z": -3.7,
-      "angle": 20,
+      "angle": 20.0,
       "id": "med_cart"
     },
     {
       "kind": "cart",
       "x": -31.7,
-      "z": 1,
-      "angle": 90,
+      "z": 1.0,
+      "angle": 90.0,
       "id": "observation_cart"
     },
     {
       "kind": "cart",
       "x": 7.3,
       "z": -11.8,
-      "angle": 90,
+      "angle": 90.0,
       "id": "lab1_trolley_a"
     },
     {
       "kind": "cart",
       "x": 18.7,
       "z": -8.5,
-      "angle": 90,
+      "angle": 90.0,
       "id": "lab2_trolley"
     },
     {
       "kind": "cart",
       "x": 28.5,
-      "z": -12,
-      "angle": 0,
+      "z": -12.0,
+      "angle": 0.0,
       "id": "isolation_a_cart"
     },
     {
       "kind": "cart",
       "x": 32.1,
       "z": -2.8,
-      "angle": 90,
+      "angle": 90.0,
       "id": "isolation_b_cart"
     },
     {
       "kind": "locker",
       "x": -32.3,
-      "z": -6,
-      "angle": 90,
+      "z": -6.0,
+      "angle": 90.0,
       "id": "med_locker_a"
     },
     {
       "kind": "locker",
       "x": -32.3,
       "z": -7.3,
-      "angle": 90,
+      "angle": 90.0,
       "id": "med_locker_b"
     },
     {
       "kind": "locker",
       "x": -32.1,
       "z": 4.7,
-      "angle": 90,
+      "angle": 90.0,
       "id": "observation_locker"
     },
     {
       "kind": "panel",
       "x": -22.3,
       "z": 4.8,
-      "angle": -90,
+      "angle": -90.0,
       "id": "observation_panel"
     },
     {
       "kind": "locker",
       "x": 26.3,
       "z": -12.4,
-      "angle": 90,
+      "angle": 90.0,
       "id": "isolation_a_locker_a"
     },
     {
       "kind": "locker",
       "x": 32.5,
       "z": -4.9,
-      "angle": -90,
+      "angle": -90.0,
       "id": "isolation_b_locker"
     },
     {
       "kind": "locker",
       "x": -19.25,
       "z": 4.3,
-      "angle": 90,
+      "angle": 90.0,
       "id": "server_cabinet_a"
     },
     {
       "kind": "locker",
       "x": -19.25,
       "z": 5.7,
-      "angle": 90,
+      "angle": 90.0,
       "id": "server_cabinet_b"
     },
     {
       "kind": "locker",
       "x": 17.2,
       "z": 10.3,
-      "angle": 180,
+      "angle": 180.0,
       "id": "workshop_locker_a"
     },
     {
       "kind": "locker",
       "x": 18.4,
       "z": 10.3,
-      "angle": 180,
+      "angle": 180.0,
       "id": "workshop_locker_b"
     },
     {
       "kind": "pc",
-      "x": -28.4,
-      "z": 0.7,
-      "angle": -35,
+      "x": -28.1411586642265,
+      "z": 0.330336254835129,
+      "angle": -35.0,
       "id": "observation_left"
     },
     {
       "kind": "shelf",
       "x": -32.1,
       "z": 2.9,
-      "angle": 90,
+      "angle": 90.0,
       "id": "observation_files"
     },
     {
       "kind": "bed",
-      "x": 30,
-      "z": -12,
-      "angle": -90,
+      "x": 30.0,
+      "z": -12.0,
+      "angle": -90.0,
       "id": "isolation_a_bed"
     },
     {
       "kind": "bed",
       "x": 30.5,
       "z": -2.8,
-      "angle": -90,
+      "angle": -90.0,
       "id": "isolation_b_bed"
     },
     {
       "kind": "pc",
       "x": -22.95,
-      "z": 1.15,
-      "angle": 0,
+      "z": 0.595214867591858,
+      "angle": 0.0,
       "id": "observation_right"
     },
     {
       "kind": "desk",
-      "x": -14.4,
-      "z": -0.1,
-      "angle": 90,
+      "x": -15.1950195074081,
+      "z": -0.0999999652485947,
+      "angle": 90.0,
       "id": "staff_desk"
     },
     {
       "kind": "desk",
       "x": -8.2,
       "z": -8.25,
-      "angle": 0,
+      "angle": 0.0,
       "id": "archive_desk"
     },
     {
       "kind": "lab",
       "x": 3.4,
       "z": -8.9,
-      "angle": 0,
+      "angle": 0.0,
       "id": "lab1_island"
     },
     {
       "kind": "lab",
       "x": 11.4,
       "z": -8.1,
-      "angle": 0,
+      "angle": 0.0,
       "id": "lab2_island_a"
     },
     {
       "kind": "desk",
-      "x": 21.9,
-      "z": 9.9,
-      "angle": 180,
+      "x": 21.9000000651487,
+      "z": 10.6452148199081,
+      "angle": 180.0,
       "id": "workshop_desk"
     },
     {
       "kind": "bench",
-      "x": 17,
-      "z": 4.1,
-      "angle": 0,
+      "x": 17.0,
+      "z": 3.60991210341454,
+      "angle": 0.0,
       "id": "workshop_bench_a"
     },
     {
       "kind": "bench",
       "x": 19.1,
-      "z": 4.1,
-      "angle": 0,
+      "z": 3.70488280653954,
+      "angle": 0.0,
       "id": "workshop_bench_b"
     },
     {
       "kind": "bench",
-      "x": 20.0,
-      "z": 9.9,
-      "angle": 180,
+      "x": 20.0000000651487,
+      "z": 10.6452148199081,
+      "angle": 180.0,
       "id": "workshop_bench_c"
     },
     {
       "kind": "cart",
       "x": -30.8,
       "z": -7.9,
-      "angle": 0,
+      "angle": 0.0,
       "id": "med_trolley"
     },
     {
       "kind": "chair",
-      "x": -23,
-      "z": -9.1,
-      "angle": 180,
+      "x": -23.0,
+      "z": -9.64501950740814,
+      "angle": 180.0,
       "id": "med_seat",
       "faces": "med_diagnostics"
     },
     {
       "kind": "chair",
       "x": 0.6,
-      "z": -11.2,
-      "angle": 180,
+      "z": -11.8050781011581,
+      "angle": 180.0,
       "id": "lab1_seat_a",
       "faces": "lab1_terminal_a"
     },
     {
       "kind": "chair",
       "x": 4.3,
-      "z": -11.2,
-      "angle": 180,
+      "z": -11.8050781011581,
+      "angle": 180.0,
       "id": "lab1_seat_b",
       "faces": "lab1_terminal_b"
     },
     {
       "kind": "chair",
       "x": 11.3,
-      "z": -11.2,
-      "angle": 180,
+      "z": -11.8050781011581,
+      "angle": 180.0,
       "id": "lab2_seat_a",
       "faces": "lab2_terminal_a"
     },
     {
       "kind": "chair",
       "x": 16.4,
-      "z": -11.2,
-      "angle": 180,
+      "z": -11.8050781011581,
+      "angle": 180.0,
       "id": "lab2_seat_b",
       "faces": "lab2_terminal_b"
     },
     {
       "kind": "chair",
-      "x": 2,
-      "z": -2.15,
-      "angle": 180,
+      "x": 2.0,
+      "z": -2.83002927303314,
+      "angle": 180.0,
       "id": "control_seat_a",
       "faces": "control_terminal_a"
     },
@@ -332,656 +332,665 @@
       "kind": "chair",
       "x": 7.3,
       "z": -2.15,
-      "angle": 180,
+      "angle": 180.0,
       "id": "control_seat_b",
       "faces": "control_terminal_b"
     },
     {
       "kind": "chair",
       "x": -12.2,
-      "z": -1.55,
-      "angle": 180,
+      "z": -1.98979492783546,
+      "angle": 180.0,
       "id": "staff_seat",
       "faces": "staff_terminal"
     },
     {
       "kind": "chair",
-      "x": 17,
-      "z": 5.1,
-      "angle": 180,
+      "x": 17.0,
+      "z": 4.60991210341454,
+      "angle": 180.0,
       "id": "workshop_seat",
       "faces": "workshop_bench_a"
     },
     {
       "kind": "chair",
       "x": -23.05,
-      "z": 2.35,
-      "angle": 170,
+      "z": 1.79521486759186,
+      "angle": 170.0,
       "id": "observation_pulled_seat",
       "faces": "observation_right",
-      "facing_bias": -10
+      "facing_bias": -10.0
     },
     {
       "kind": "fallen_chair",
-      "x": 5,
+      "x": 5.0,
       "z": -2.3,
-      "angle": 25,
+      "angle": 25.0,
       "id": "control_fallen_seat"
     },
     {
       "kind": "fallen_chair",
       "x": 15.7,
       "z": -9.8,
-      "angle": -80,
+      "angle": -80.0,
       "id": "lab2_fallen_seat"
     },
     {
       "kind": "chair",
-      "x": -5.2,
-      "z": -10,
-      "angle": 90,
+      "x": -4.68012697696686,
+      "z": -9.99999997727563,
+      "angle": 90.0,
       "id": "archive_seat",
       "faces": "archive_terminal"
     },
     {
       "kind": "shelf",
-      "x": -12,
+      "x": -12.0,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_53"
     },
     {
       "kind": "shelf",
       "x": -10.7,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_54"
     },
     {
       "kind": "shelf",
       "x": -9.4,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_55"
     },
     {
       "kind": "shelf",
       "x": -8.1,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_56"
     },
     {
       "kind": "shelf",
       "x": -6.8,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_57"
     },
     {
       "kind": "shelf",
       "x": -5.5,
       "z": -12.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_58"
     },
     {
       "kind": "shelf",
       "x": -12.5,
       "z": -10.9,
-      "angle": 90,
+      "angle": 90.0,
       "id": "authored_59"
     },
     {
       "kind": "shelf",
       "x": -12.5,
       "z": -9.65,
-      "angle": 90,
+      "angle": 90.0,
       "id": "authored_60"
     },
     {
       "kind": "shelf",
       "x": -12.5,
       "z": -8.4,
-      "angle": 90,
+      "angle": 90.0,
       "id": "authored_61"
     },
     {
       "kind": "shelf",
       "x": -9.5,
       "z": -10.7,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_62"
     },
     {
       "kind": "shelf",
       "x": -8.2,
       "z": -10.7,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_63"
     },
     {
       "kind": "shelf",
-      "x": 24,
+      "x": 24.0,
       "z": 9.4,
-      "angle": -90,
+      "angle": -90.0,
       "id": "workshop_shelf_a"
     },
     {
       "kind": "shelf",
-      "x": 24,
+      "x": 24.0,
       "z": 10.6,
-      "angle": -90,
+      "angle": -90.0,
       "id": "workshop_shelf_b"
     },
     {
       "kind": "server",
       "x": -17.6,
       "z": 9.6,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_66"
     },
     {
       "kind": "server",
       "x": -16.4,
       "z": 9.6,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_67"
     },
     {
       "kind": "server",
       "x": -15.2,
       "z": 9.6,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_68"
     },
     {
       "kind": "server",
-      "x": -14,
+      "x": -14.0,
       "z": 9.6,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_69"
     },
     {
       "kind": "server",
       "x": -17.6,
       "z": 4.6,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_70"
     },
     {
       "kind": "server",
       "x": -16.4,
       "z": 4.6,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_71"
     },
     {
       "kind": "server",
       "x": -15.2,
       "z": 4.6,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_72"
     },
     {
       "kind": "server",
-      "x": -14,
+      "x": -14.0,
       "z": 4.6,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_73"
     },
     {
       "kind": "panel",
       "x": -8.9,
       "z": 10.5,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_74"
     },
     {
       "kind": "panel",
       "x": -7.8,
       "z": 10.5,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_75"
     },
     {
       "kind": "panel",
       "x": -6.7,
       "z": 10.5,
-      "angle": 180,
+      "angle": 180.0,
       "id": "electrical_relay"
     },
     {
       "kind": "panel",
       "x": -5.6,
       "z": 10.5,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_77"
     },
     {
       "kind": "panel",
       "x": -3.6,
       "z": 10.5,
-      "angle": 180,
+      "angle": 180.0,
       "id": "authored_78"
     },
     {
       "kind": "panel",
-      "x": 1,
+      "x": 1.0,
       "z": 10.3,
-      "angle": 180,
+      "angle": 180.0,
       "id": "generator_panel_a"
     },
     {
       "kind": "panel",
       "x": 6.8,
       "z": 10.3,
-      "angle": 180,
+      "angle": 180.0,
       "id": "generator_panel_b"
     },
     {
       "kind": "generator",
-      "x": 2,
+      "x": 2.0,
       "z": 4.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "generator_a"
     },
     {
       "kind": "generator",
       "x": 5.8,
       "z": 4.75,
-      "angle": 0,
+      "angle": 0.0,
       "id": "generator_b"
     },
     {
       "kind": "pump",
       "x": 10.5,
-      "z": 6,
-      "angle": 0,
+      "z": 6.0,
+      "angle": 0.0,
       "id": "pump_primary"
     },
     {
       "kind": "pump",
       "x": 13.8,
       "z": 9.7,
-      "angle": 90,
+      "angle": 90.0,
       "id": "pump_secondary"
     },
     {
       "kind": "tank",
       "x": 10.4,
       "z": 9.9,
-      "angle": 0,
+      "angle": 0.0,
       "id": "pump_reservoir_a"
     },
     {
       "kind": "tank",
-      "x": 14,
-      "z": 6,
-      "angle": 0,
+      "x": 14.0,
+      "z": 6.0,
+      "angle": 0.0,
       "id": "pump_reservoir_b"
     },
     {
       "kind": "tank",
-      "x": 19,
-      "z": -12,
-      "angle": 0,
+      "x": 19.0,
+      "z": -12.0,
+      "angle": 0.0,
       "id": "lab2_tank"
     },
     {
       "kind": "glass",
       "x": -22.95,
       "z": -0.28,
-      "angle": 0,
+      "angle": 0.0,
       "id": "authored_88"
     },
     {
       "kind": "glass",
       "x": 31.3,
       "z": -11.7,
-      "angle": 90,
+      "angle": 90.0,
       "id": "isolation_a_screen"
     },
     {
       "kind": "crate",
-      "x": 27,
+      "x": 26.95,
       "z": 4.65,
-      "angle": 0,
+      "angle": 0.0,
       "id": "cargo_case_a",
-      "base_y": 0.18
+      "base_y": 0.18,
+      "storage_style": "timber"
     },
     {
       "kind": "crate",
       "x": 27.85,
       "z": 4.65,
-      "angle": 0,
+      "angle": 0.0,
       "id": "cargo_case_b",
-      "base_y": 0.18
+      "base_y": 0.18,
+      "storage_style": "steel"
     },
     {
       "kind": "crate",
-      "x": 28.7,
+      "x": 28.75,
       "z": 4.65,
-      "angle": 0,
+      "angle": 0.0,
       "id": "cargo_case_c",
-      "base_y": 0.18
+      "base_y": 0.18,
+      "storage_style": "canvas"
     },
     {
       "kind": "crate",
       "x": 32.2,
       "z": 10.3,
-      "angle": 0,
+      "angle": 0.0,
       "id": "cargo_case_d",
-      "base_y": 0.18
+      "base_y": 0.18,
+      "storage_style": "timber"
     },
     {
       "kind": "crate",
-      "x": 31.35,
+      "x": 31.3,
       "z": 10.3,
-      "angle": 0,
+      "angle": 0.0,
       "id": "cargo_case_e",
-      "base_y": 0.18
+      "base_y": 0.18,
+      "storage_style": "steel"
     },
     {
       "kind": "crate",
       "x": 27.1,
       "z": 10.3,
-      "angle": 0,
-      "id": "cargo_case_f"
+      "angle": 90.0,
+      "id": "cargo_case_f",
+      "storage_style": "canvas"
     },
     {
       "kind": "crate",
-      "x": 17.0,
-      "z": 8.8,
-      "angle": 0,
-      "id": "workshop_stock"
+      "x": 16.65,
+      "z": 9.25,
+      "angle": 90.0,
+      "id": "workshop_stock",
+      "storage_style": "canvas"
     },
     {
       "kind": "crate",
-      "x": -2,
-      "z": 4.3,
-      "angle": 0,
-      "id": "electrical_spares"
+      "x": -2.1,
+      "z": 3.8,
+      "angle": 0.0,
+      "id": "electrical_spares",
+      "storage_style": "steel"
     },
     {
       "kind": "paper",
       "x": -23.6,
       "z": 2.9,
-      "angle": 38,
+      "angle": 38.0,
       "id": "observation_paper"
     },
     {
       "kind": "paper",
       "x": -11.7,
-      "z": -8,
-      "angle": 13,
+      "z": -8.0,
+      "angle": 13.0,
       "id": "archive_scatter_a"
     },
     {
       "kind": "paper",
       "x": -11.4,
       "z": -8.2,
-      "angle": -8,
+      "angle": -8.0,
       "id": "archive_scatter_b"
     },
     {
       "kind": "paper",
       "x": -11.2,
-      "z": -8,
-      "angle": 41,
+      "z": -8.0,
+      "angle": 41.0,
       "id": "archive_scatter_c"
     },
     {
       "kind": "paper",
       "x": 4.6,
       "z": -1.9,
-      "angle": -11,
+      "angle": -11.0,
       "id": "control_sheet"
     },
     {
       "kind": "paper",
       "x": 15.3,
-      "z": -10,
-      "angle": 25,
+      "z": -10.0,
+      "angle": 25.0,
       "id": "lab2_scatter_a"
     },
     {
       "kind": "paper",
       "x": 15.5,
       "z": -9.3,
-      "angle": -12,
+      "angle": -12.0,
       "id": "lab2_scatter_b"
     },
     {
       "kind": "paper",
       "x": 30.2,
       "z": -4.6,
-      "angle": -10,
+      "angle": -10.0,
       "id": "isolation_b_sheet"
     },
     {
       "kind": "paper",
       "x": 18.2,
       "z": 5.35,
-      "angle": 6,
+      "angle": 6.0,
       "id": "workshop_sheet"
     },
     {
       "kind": "paper",
-      "x": -16,
-      "z": 7,
-      "angle": 20,
+      "x": -16.0,
+      "z": 7.0,
+      "angle": 20.0,
       "id": "authored_112"
     },
     {
       "kind": "paper",
       "x": -7.5,
       "z": 9.2,
-      "angle": -15,
+      "angle": -15.0,
       "id": "electrical_sheet"
     },
     {
       "kind": "paper",
-      "x": 30,
-      "z": 9,
-      "angle": 20,
+      "x": 30.0,
+      "z": 9.0,
+      "angle": 20.0,
       "id": "authored_114"
     },
     {
       "kind": "lab",
-      "x": 16,
-      "z": -4,
-      "angle": 0,
+      "x": 16.0,
+      "z": -4.0,
+      "angle": 0.0,
       "id": "quarantine_prep"
     },
     {
       "kind": "desk",
-      "x": 19,
-      "z": -4,
-      "angle": 0,
+      "x": 19.0,
+      "z": -4.29990234971046,
+      "angle": 0.0,
       "id": "quarantine_desk"
     },
     {
       "kind": "locker",
-      "x": 24,
+      "x": 24.0,
       "z": -3.9,
-      "angle": -90,
+      "angle": -90.0,
       "id": "quarantine_locker"
     },
     {
       "kind": "cart",
       "x": 23.9,
       "z": 1.5,
-      "angle": -90,
+      "angle": -90.0,
       "id": "quarantine_trolley"
     },
     {
       "kind": "fallen_chair",
       "x": 20.5,
       "z": -0.3,
-      "angle": -25,
+      "angle": -25.0,
       "id": "quarantine_fallen_seat"
     },
     {
       "kind": "paper",
       "x": 19.8,
-      "z": -1,
-      "angle": 11,
+      "z": -1.0,
+      "angle": 11.0,
       "id": "quarantine_scatter_a"
     },
     {
       "kind": "locker",
       "x": 32.3,
       "z": -7.4,
-      "angle": -90,
+      "angle": -90.0,
       "id": "isolation_a_locker_b"
     },
     {
       "kind": "stool",
       "x": 30.5,
       "z": -4.5,
-      "angle": 0,
+      "angle": 0.0,
       "id": "isolation_b_stool"
     },
     {
       "kind": "shelf",
-      "x": 33,
+      "x": 33.0,
       "z": 5.4,
-      "angle": -90,
+      "angle": -90.0,
       "id": "cargo_shelf"
     },
     {
       "kind": "panel",
       "x": -20.65,
       "z": -9.3,
-      "angle": -90,
+      "angle": -90.0,
       "id": "med_monitor_panel"
     },
     {
       "kind": "chair",
-      "x": -28.974,
-      "z": 1.519,
-      "angle": 145,
+      "x": -28.7151586642265,
+      "z": 1.14933625483513,
+      "angle": 145.0,
       "id": "observation_seat",
       "faces": "observation_left"
     },
     {
       "kind": "cart",
       "x": -21.2,
-      "z": -7,
-      "angle": 0,
+      "z": -7.0,
+      "angle": 0.0,
       "id": "med_diagnostic_cart"
     },
     {
       "kind": "fallen_chair",
       "x": -23.4,
       "z": -7.9,
-      "angle": -30,
+      "angle": -30.0,
       "id": "med_fallen_seat"
     },
     {
       "kind": "paper",
       "x": -24.4,
       "z": -8.4,
-      "angle": 22,
+      "angle": 22.0,
       "id": "med_scatter_a"
     },
     {
       "kind": "paper",
       "x": -24.1,
       "z": -8.3,
-      "angle": -18,
+      "angle": -18.0,
       "id": "med_scatter_b"
     },
     {
       "kind": "paper",
-      "x": -24,
+      "x": -24.0,
       "z": -7.9,
-      "angle": 68,
+      "angle": 68.0,
       "id": "med_scatter_c"
     },
     {
       "kind": "pc",
-      "x": -4.2,
-      "z": -10,
-      "angle": -90,
+      "x": -3.68012697696686,
+      "z": -9.99999997727563,
+      "angle": -90.0,
       "id": "archive_terminal"
     },
     {
       "kind": "pc",
-      "x": 28,
-      "z": -5.1,
-      "angle": 0,
+      "x": 28.0,
+      "z": -5.50000000596046,
+      "angle": 0.0,
       "id": "isolation_b_terminal"
     },
     {
       "kind": "panel",
-      "x": 24,
+      "x": 24.0,
       "z": -0.9,
-      "angle": -90,
+      "angle": -90.0,
       "id": "quarantine_panel"
     },
     {
       "kind": "shelf",
       "x": -1.55,
       "z": -10.9,
-      "angle": 90,
+      "angle": 90.0,
       "id": "lab1_storage"
     },
     {
       "kind": "tank",
       "x": -0.9,
       "z": -7.5,
-      "angle": 0,
+      "angle": 0.0,
       "id": "lab1_tank"
     },
     {
       "kind": "cart",
       "x": 5.6,
       "z": -8.95,
-      "angle": 0,
+      "angle": 0.0,
       "id": "lab1_trolley_b"
     },
     {
       "kind": "lab",
       "x": 14.3,
       "z": -8.1,
-      "angle": 0,
+      "angle": 0.0,
       "id": "lab2_island_b"
     },
     {
       "kind": "paper",
-      "x": 21,
+      "x": 21.0,
       "z": -1.3,
-      "angle": -32,
+      "angle": -32.0,
       "id": "quarantine_scatter_b"
     },
     {
       "kind": "crate",
       "x": 31.8,
       "z": 4.65,
-      "angle": 0,
-      "id": "cargo_case_g"
+      "angle": 90.0,
+      "id": "cargo_case_g",
+      "storage_style": "toolcase"
     },
     {
       "kind": "trace",
-      "x": 20,
+      "x": 20.0,
       "z": -0.8,
-      "angle": 20,
+      "angle": 20.0,
       "id": "quarantine_trace"
     },
     {
       "kind": "trace",
-      "x": 28,
-      "z": -4,
-      "angle": 20,
+      "x": 28.0,
+      "z": -4.0,
+      "angle": 20.0,
       "id": "authored_143"
     },
     {
       "kind": "trace",
-      "x": -25,
-      "z": 2,
-      "angle": 20,
+      "x": -25.0,
+      "z": 2.0,
+      "angle": 20.0,
       "id": "authored_144"
     },
     {
@@ -989,23 +998,23 @@
       "kind": "chair",
       "x": -8.2,
       "z": -7.2,
-      "angle": 180,
+      "angle": 180.0,
       "faces": "archive_desk"
     },
     {
       "id": "isolation_b_seat",
       "kind": "chair",
-      "x": 28,
-      "z": -4.05,
-      "angle": 180,
+      "x": 28.0,
+      "z": -4.45000000596046,
+      "angle": 180.0,
       "faces": "isolation_b_terminal"
     },
     {
       "id": "quarantine_seat",
       "kind": "chair",
-      "x": 19,
-      "z": -2.95,
-      "angle": 180,
+      "x": 19.0,
+      "z": -3.24990234971046,
+      "angle": 180.0,
       "faces": "quarantine_desk"
     },
     {
@@ -1013,34 +1022,36 @@
       "kind": "locker",
       "x": -32.1,
       "z": -4.4,
-      "angle": 90
+      "angle": 90.0
     },
     {
       "id": "serov_tools_box",
       "kind": "crate",
-      "x": 18.2,
-      "z": 8,
-      "angle": 0
+      "x": 19.1,
+      "z": 3.70488280653954,
+      "angle": 0.0,
+      "base_y": 0.92,
+      "storage_style": "toolcase"
     },
     {
       "id": "cargo_pallet_a",
       "kind": "pallet",
       "x": 27.85,
       "z": 4.65,
-      "angle": 0
+      "angle": 0.0
     },
     {
       "id": "cargo_pallet_b",
       "kind": "pallet",
       "x": 31.8,
       "z": 10.3,
-      "angle": 0
+      "angle": 0.0
     }
   ],
   "notes": [
     {
       "id": "shift",
-      "room": 13,
+      "room": 13.0,
       "x": -27.9453,
       "z": 0.7132,
       "title": "Сменный лист / Марина Белова",
@@ -1055,14 +1066,14 @@
     },
     {
       "id": "identity_v17",
-      "room": 12,
+      "room": 12.0,
       "x": -23.0,
       "z": -9.88,
       "title": "Медицинская система / V-17",
       "body": "ПАЦИЕНТ: ВОЛКОВ АЛЕКСЕЙ СЕРГЕЕВИЧ\nВОЗРАСТ: 34\nСТАТУС ДО ПОСТУПЛЕНИЯ: КЛИНИЧЕСКАЯ СМЕРТЬ / ПОДТВЕРЖДЕНА\nПРОЕКТ: ЭКСПЕРИМЕНТ №12\nУСТОЙЧИВОСТЬ ПАМЯТИ: НИЗКАЯ\nОПЕРАТОР: НЕТ СОЕДИНЕНИЯ",
       "on": "med_diagnostics",
       "offset": [
-        0,
+        0.0,
         1.0,
         0.22
       ],
@@ -1070,14 +1081,14 @@
     },
     {
       "id": "guard_log",
-      "room": 26,
+      "room": 26.0,
       "x": 2.0,
       "z": -2.98,
       "title": "Контрольный пост / журнал событий",
       "body": "03:41 — Запрос экстренной изоляции лабораторного крыла.\n03:44 — Несанкционированное открытие внутренних дверей.\n03:47 — Прервано питание экспериментального контура.\n03:49 — Обнаружено движение в пустом карантинном боксе.\n03:52 — Не удалось установить связь с начальником смены.\n04:05 — Протокол эвакуации: ОТМЕНЁН.\n04:12 — Биометрический сигнал V-17: АКТИВЕН.",
       "on": "control_terminal_a",
       "offset": [
-        0,
+        0.0,
         1.0,
         0.22
       ],
@@ -1085,15 +1096,15 @@
     },
     {
       "id": "gromov",
-      "room": 26,
-      "x": 5,
+      "room": 26.0,
+      "x": 5.0,
       "z": -1.1,
       "title": "Не стреляйте по своим / Илья Громов",
       "body": "На инструктаже нам сказали, что угрозой может быть только проникновение извне. Сегодня приказали держать оружие направленным на лабораторный коридор. Кто именно там находится — не сказали. Медики называют их пациентами. Если это пациенты, почему их нельзя подпускать к медблоку? И почему начальник охраны запросил приказ на уничтожение записей с камер?"
     },
     {
       "id": "technician",
-      "room": 22,
+      "room": 22.0,
       "x": 19.52,
       "z": 9.71,
       "title": "Инструкция дежурному технику",
@@ -1108,7 +1119,7 @@
     },
     {
       "id": "transfer",
-      "room": 14,
+      "room": 14.0,
       "x": -14.28,
       "z": -0.4,
       "title": "Объявление о переводе персонала",
@@ -1123,7 +1134,7 @@
     },
     {
       "id": "archive_chat",
-      "room": 15,
+      "room": 15.0,
       "x": -3.95,
       "z": -9.62,
       "title": "Архив / служебная переписка",
@@ -1138,7 +1149,7 @@
     },
     {
       "id": "lab_observation",
-      "room": 16,
+      "room": 16.0,
       "x": 0.98,
       "z": -12.45,
       "title": "Лаборатория / незавершённое наблюдение",
@@ -1153,7 +1164,7 @@
     },
     {
       "id": "quarantine_note",
-      "room": 23,
+      "room": 23.0,
       "x": 19.3,
       "z": -3.88,
       "title": "Записка у карантинного поста",
@@ -1168,9 +1179,9 @@
     },
     {
       "id": "pump_note",
-      "room": 21,
-      "x": 12,
-      "z": 5,
+      "room": 21.0,
+      "x": 12.0,
+      "z": 5.0,
       "title": "Насосная / лист обслуживания",
       "body": "Контур K-2: плавкая вставка — электрощитовая. Резерв — в ящике Серова. После замены вручную открыть резервный клапан в насосной. Карантинную автоматику не переключать.\n\nВ графе приёмки подписи нет."
     }

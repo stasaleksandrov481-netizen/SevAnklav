@@ -28,11 +28,13 @@ static func build(world:Node3D)->void:
   door.configure(source);world.doors.append(door)
  var cut_materials=[]
  for name in ["WallMesh","SkirtMesh","CapMesh"]:
-  var material=ShaderMaterial.new();material.shader=preload("res://iso/maps/level2/cutaway.gdshader")
+  var material=ShaderMaterial.new();material.shader=preload("res://iso/maps/level2/wall_sections.gdshader")
   material.set_shader_parameter("concrete",preload("res://iso/maps/level2/textures/concrete_panels.png"))
   material.set_shader_parameter("origin",world.ORIGIN)
   material.set_shader_parameter("textured",name=="WallMesh")
+  material.set_shader_parameter("boundary_padding",.55)
   material.set_shader_parameter("tint",Vector3(0.64,0.70,0.72) if name=="WallMesh" else Vector3(0.2,0.27,0.31))
+  map.get_node(name).mesh=load("res://iso/maps/level2/"+name+"Sections.res")
   map.get_node(name).material_override=material;cut_materials.append(material)
   preload("res://iso/maps/level2/opaque_shadow.gd").attach(map.get_node(name))
  var floor_material=ShaderMaterial.new();floor_material.shader=preload("res://iso/maps/level2/cutaway.gdshader")
@@ -43,13 +45,13 @@ static func build(world:Node3D)->void:
  var threshold_builder=SurfaceTool.new();threshold_builder.begin(Mesh.PRIMITIVE_TRIANGLES)
  for door in world.doors:
   var threshold=BoxMesh.new();threshold.size=Vector3(door.leaf.size.x-.02,.12,.8)
-  var at:Transform3D=map.global_transform.affine_inverse()*door.global_transform;at.origin.y=0
+  var at:Transform3D=map.global_transform.affine_inverse()*door.global_transform;at.origin.y=-.06
   threshold_builder.append_from(threshold,0,at)
  var thresholds=MeshInstance3D.new();thresholds.name="DoorThresholds";thresholds.mesh=threshold_builder.commit();thresholds.material_override=floor_material
  map.add_child(thresholds);thresholds.create_trimesh_collision()
  # The original floor follows the former wall footprint. Fill the widened strip
  # and the server doorway so neither the visible floor nor collision has a gap.
- for spec in [[Vector3(5.47,0.12,1.77),Vector3(-13.915,0,1.715)],[Vector3(1.52,0.12,1.4),Vector3(-11.94,0,2.9)]]:
+ for spec in [[Vector3(5.47,0.12,1.77),Vector3(-13.915,-.06,1.715)],[Vector3(1.52,0.12,1.4),Vector3(-11.94,-.06,2.9)]]:
   var floor_patch=world.box(map,spec[0],spec[1],Color("#626969"),true)
   floor_patch.material_override=floor_material
  var furnishings=preload("res://iso/maps/level2/furniture.gd").new()

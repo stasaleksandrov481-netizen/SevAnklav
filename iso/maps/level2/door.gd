@@ -8,6 +8,9 @@ var hinge:Node3D
 var adjacent:Array=[]
 var obstructed:=false
 var sweep_shape:BoxShape3D
+var guide_glow:MeshInstance3D
+var guide_state := ""
+var sight_seal:CollisionShape3D
 func configure(source:CSGBox3D)->void:
  leaf=source
  for dz in [-1.2,1.2]:
@@ -27,8 +30,17 @@ func configure(source:CSGBox3D)->void:
   opened=false;progress=0;world.state.data.doors[info.id]=false;world.state.data.door_progress[info.id]=0.0
  hinge.rotation.y=-progress*PI/2
  sweep_shape=BoxShape3D.new();sweep_shape.size=leaf.size+Vector3(.18,.04,.18)
+ # Close sub-player-width gaps between the authored jamb and the leaf for
+ # eye rays. Layer 4 affects sight, not player movement or interaction rays.
+ var seal=StaticBody3D.new();seal.name="SightSeal";seal.collision_layer=4;seal.collision_mask=0;add_child(seal)
+ sight_seal=CollisionShape3D.new();var aperture=BoxShape3D.new();aperture.size=Vector3(width+.40,2.65,.62);sight_seal.shape=aperture;seal.add_child(sight_seal);sight_seal.disabled=progress>=.45
+ preload("res://iso/maps/level2/door_readability.gd").build(self)
+ preload("res://iso/maps/level2/door_readability.gd").sync(self)
 func request()->String:
- if info.kind=="sealed":return "ГРУЗОВОЙ ШЛЮЗ ЗАБЛОКИРОВАН / НЕТ РАЗРЕШЕНИЯ НА ВЫХОД"
+ if info.kind=="sealed":
+  if not world.state.flag("relay_k2"):return "ШЛЮЗ БЕЗ ПИТАНИЯ / ВСТАВКА K-2 В МАСТЕРСКОЙ, УСТАНОВКА В ЭЛЕКТРОЩИТОВОЙ / 19"
+  if not world.state.flag("pump_valve"):return "НЕТ ДАВЛЕНИЯ / ОТКРОЙТЕ РЕЗЕРВНЫЙ КЛАПАН В НАСОСНОЙ / 21"
+  world.finish_bunker();return ""
  opened=not opened;obstructed=false;world.state.data.doors[info.id]=opened;world.save_state();return ""
 func occupied(next_progress:float)->bool:
  var predicted=Transform3D(Basis(Vector3.UP,-next_progress*PI/2),hinge.position)
@@ -44,5 +56,9 @@ func _process(delta:float)->void:
   if not obstructed:world.notify("ДВЕРЬ ОСТАНОВЛЕНА / ОСВОБОДИТЕ ПРОХОД")
   obstructed=true;return
  obstructed=false;progress=next
+ if sight_seal.disabled!=(progress>=.45):sight_seal.set_deferred("disabled",progress>=.45)
  if hinge:hinge.rotation.y=-progress*PI/2
  world.state.data.door_progress[info.id]=progress
+ preload("res://iso/maps/level2/door_readability.gd").sync(self)
+func _exit_tree()->void:
+ if guide_glow!=null:preload("res://iso/maps/level2/door_readability.gd").release()

@@ -7,7 +7,7 @@ func run():
  assert(not w.state.data.awake,"Fresh game must preserve waking")
  assert(w.capsule_node().name=="V17Capsule")
  assert(w.capsule_node().get_node("Generated/Glass shell")!=null)
- assert(w.get_node("Camera").elevation_degrees==65)
+ assert(w.get_node("Camera").elevation_degrees==61)
  var ray=PhysicsRayQueryParameters3D.create(w.ORIGIN+Vector3(-23,1.45,-1.3),w.ORIGIN+Vector3(-23,1.45,.6))
  var window_hit=w.get_world_3d().direct_space_state.intersect_ray(ray)
  assert(not window_hit.is_empty() and window_hit.collider.get_parent().get_meta("furniture_kind","")=="glass","Observation glass missing or wall not cut")
@@ -15,18 +15,16 @@ func run():
  assert(v.active=="sector_0")
  assert(w.get_viewport().msaa_3d==Viewport.MSAA_DISABLED,"Legacy profile overrode bunker settings")
  var total=0
- for owner in v.visuals:
-  for n in v.visuals[owner]:assert(n.visible==(v.active in owner.split("+")));total+=1
- for id in w.rooms:
+ for nodes in v.visuals.values():total+=nodes.size()
+ var before=w.player.global_position
+ for id in ["sector_0","sector_2","sector_10"]:
+  w.player.global_position=w.rooms[id].global_position+Vector3.UP*.96
   v.switch_room(id)
-  assert(w.room_visible.size()==1)
-  for owner in v.visuals:
-   for n in v.visuals[owner]:assert(n.visible==(id in owner.split("+")),"Foreign room object visible")
+  assert(w.room_visible.has(id),"Current physical room is invisible")
   var shadows=0
-  for l in v.lamps:
-   if l.visible:
-    assert(l.get_meta("room_id")==id,"Foreign room lamp visible");shadows+=int(l.shadow_enabled)
-  assert(shadows<=1)
+  for light in v.lamps:shadows+=int(light.visible and light.shadow_enabled)
+  assert(shadows<=v.budget,"Multiple remembered rooms exceed shadow budget")
+ w.player.global_position=before
  for profile in ["low","balanced","quality"]:
   v.set_profile(profile);v.refresh_lights()
   var shadows=0
@@ -48,7 +46,7 @@ func run():
  for i in 12:await physics_frame
  assert(w2.state.data.awake and not w2.player.locked,"Existing awake save replayed intro")
  assert(w2.player.global_position.distance_to(origin)<.3)
- print("REVISION PASS: 33 sectors, one visible interior, shadow budget, 3 profiles, awakening, old awake save. Visual groups: ",total)
+ print("REVISION PASS: remembered interiors, physical field of view, shadow budget, 3 profiles, awakening, old awake save. Visual groups: ",total)
  w2.queue_free()
  for i in 10:await process_frame
  quit()

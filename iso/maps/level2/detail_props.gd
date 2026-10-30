@@ -76,9 +76,6 @@ static func decorate(f,p,kind:String,index:int)->void:
    f.box(p,Vector3(.25,.035,.18),Vector3(.13,.85,.03),BLUE)
    f.box(p,Vector3(.22,.008,.15),Vector3(.13,.875,.03),WARM)
    for i in range(3):f.tube(p,.025,.1,Vector3(-.17+i*.08,.88,.12),f.PALE)
-  "crate":
-   f.box(p,Vector3(.24,.12,.008),Vector3(0,.35,.255),WARM)
-   for x in [-.19,.19]:f.box(p,Vector3(.12,.025,.025),Vector3(x,.46,.27),f.DARK)
 static func wall_unit(f,kind:String,at:Vector3,angle:float)->void:
  var p=Node3D.new();f.add_child(p);p.position=at;p.rotation.y=deg_to_rad(angle)
  match kind:
