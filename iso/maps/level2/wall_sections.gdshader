@@ -4,18 +4,24 @@ render_mode blend_mix, depth_prepass_alpha, cull_back, specular_disabled;
 uniform sampler2D concrete : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D wall_states : filter_nearest, repeat_disable;
 uniform sampler2D section_ids : filter_nearest, repeat_disable;
+uniform bool use_section_map = false;
 uniform vec3 tint : source_color = vec3(.64,.70,.72);
 uniform bool textured = true;
 varying vec3 world_position;
 varying vec3 world_normal;
+varying float vertex_section;
 void vertex(){
  world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz-origin;world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);
+ vertex_section=floor(COLOR.r*255.0+.5)*256.0+floor(COLOR.g*255.0+.5);
 }
 void fragment(){
  float visible=bunker_visibility(world_position);
  if(visible<.005){discard;}
- vec2 ids=texture(section_ids,(world_position.xz+vec2(35.0,15.0))/vec2(70.0,30.0)).rg;
- float section=floor(ids.r*255.0+.5)*256.0+floor(ids.g*255.0+.5);
+ float section=vertex_section;
+ if(use_section_map){
+  vec2 ids=texture(section_ids,(world_position.xz+vec2(35.0,15.0))/vec2(70.0,30.0)).rg;
+  section=floor(ids.r*255.0+.5)*256.0+floor(ids.g*255.0+.5);
+ }
  float faded=texture(wall_states,vec2((section+.5)/512.0,.5)).r;
  vec3 color=tint;
  if(textured){
