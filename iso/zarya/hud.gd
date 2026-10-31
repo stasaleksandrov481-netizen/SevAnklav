@@ -716,6 +716,7 @@ func startup_failure() -> void:
 	modal.name="StartupFailure";modal.set_meta("startup_failure",true)
 	modal.find_child("WindowClose",true,false).hide()
 	label(column,"Не удалось подготовить локацию. Прогресс не перезаписан.\n\n"+world.startup_error,24)
+	label(column,"A-03.3 / "+world.startup_stage,16)
 	var retry=button(column,"ПОВТОРИТЬ ЗАГРУЗКУ",world.retry_startup,460);retry.name="RetryStartup"
 	var menu=button(column,"ГЛАВНОЕ МЕНЮ",world.return_to_menu,460);menu.name="StartupMenu"
 	root.get_node("CapsuleWake").hide()

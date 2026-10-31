@@ -22,6 +22,12 @@ func snapshot(name:String)->void:
  DirAccess.make_dir_recursive_absolute(out)
  await RenderingServer.frame_post_draw
  root.get_texture().get_image().save_png(out+"/"+name+".png")
+func triangles(mesh:Mesh,attribute:int)->Array:
+ var values=[]
+ for surface in mesh.get_surface_count():
+  var arrays=mesh.surface_get_arrays(surface);var order:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
+  for i in (order.size() if not order.is_empty() else arrays[Mesh.ARRAY_VERTEX].size()):values.append(arrays[attribute][order[i] if not order.is_empty() else i])
+ return values
 func warm_cache()->void:
  var pairs=JSON.parse_string(OS.get_environment("SEVANKLAV_RESTORE_FILES"))
  if not pairs is Dictionary:return
@@ -39,25 +45,46 @@ func run():
  var main=load("res://scenes/main.tscn").instantiate();root.add_child(main);await frames(110)
  main._enter_iso_world();await frames(20)
  var w=main.current_screen
- if mode=="critical_missing":
+ if mode in ["critical_missing","malformed_furnishing","invalid_wall_sections","duplicate_regions","missing_spawn","builder_failure"]:
   if not check(not w.startup_ready and not w.startup_error.is_empty() and w.state_key=="zarya_layout3","Missing layout enters an empty legacy campaign"):return
   if not check(w.hud.modal!=null and w.hud.modal.name=="StartupFailure" and not w.hud.root.get_node("CapsuleWake").visible,"Failed scene still presents fake wake controls"):return
   w.player.request_wake();w.player._finish_wake();w.save_state();w.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
   if not check(g.zsave.zarya_layout3==before and not w.player.can_act() and not w.player.waking,"Failed startup advances/writes the real save"):return
   var cfg=ConfigFile.new();cfg.load("user://anklav_rts.cfg")
   if not check(cfg.get_value("zcamp","zsave").zarya_layout3==before,"Failed startup corrupted the saved position/items on disk"):return
+  var expected={"critical_missing":"regions.json","malformed_furnishing":"furnishing.json","invalid_wall_sections":"wall_sections.json","duplicate_regions":"regions.json","missing_spawn":"PlayerSpawn","builder_failure":"Создание геометрии"}[mode]
+  if not check(w.startup_error.contains(expected) and not w.startup_error.contains("полностью загрузить сцену"),"Recovery hides the failed file/stage behind the old generic message"):return
+  var log=FileAccess.get_file_as_string("user://bunker_startup.log")
+  if not check(log.contains(expected) and log.contains("A-03.3") and log.contains(w.startup_stage),"Failure log omits the actual build/stage"):return
   await snapshot("startup_recovery")
   await tap(w.hud.modal.find_child("StartupMenu",true,false));await frames(45)
   if not check(main.current_screen.get_script()==load("res://scripts/ui/main_menu.gd"),"Recovery screen cannot return to menu by touch"):return
   main._enter_iso_world();await frames(15);w=main.current_screen
-  var file=FileAccess.open("res://iso/maps/level2/regions.json",FileAccess.WRITE)
-  file.store_string(FileAccess.get_file_as_string(OS.get_environment("SEVANKLAV_REGIONS_SOURCE")));file.close()
+  var repair_path="res://iso/maps/level2/regions.json" if mode=="critical_missing" else OS.get_environment("SEVANKLAV_REPAIR_PATH")
+  var repair_source=OS.get_environment("SEVANKLAV_REGIONS_SOURCE") if mode=="critical_missing" else OS.get_environment("SEVANKLAV_REPAIR_SOURCE")
+  var file=FileAccess.open(repair_path,FileAccess.WRITE)
+  file.store_string(FileAccess.get_file_as_string(repair_source));file.close()
   var retired=w
   await tap(w.hud.modal.find_child("RetryStartup",true,false));await frames(25);w=main.current_screen
   if not check(w!=retired and w.startup_ready,"Retry does not load the repaired files"):return
  if not check(w.startup_ready and w.custom_layout and w.state_key=="zarya_layout3" and w.rooms.size()==33,"No complete lower bunker after startup"):return
  if not check(w.doors.size()==25 and w.get_node("LevelMinusTwo/Furnishings").authored.size()==145,"Startup lost doors or furnishings"):return
  if not check(w.player_start.distance_to(w.ORIGIN)<60 and w.capsule_node()!=null and w.visibility_controller.ready_complete,"Player/camera bound to an unbuilt scene"):return
+ if mode=="capsule_lifecycle":
+  var capsule=w.capsule_node();var holder=capsule.get_node("Generated")
+  if not check(capsule.ensure_built() and capsule.get_node("Generated")==holder,"Explicit generation recreates an already complete capsule"):return
+  var standalone=load("res://iso/maps/level2/start_capsule.gd").new()
+  if not check(not standalone.is_inside_tree() and standalone.ensure_built(),"Capsule still requires the inherited tree-ready callback"):return
+  var count=standalone.get_node("Generated").get_child_count();standalone._rebuild()
+  if not check(standalone.get_node("Generated").get_child_count()==count and standalone.get_child_count()==1,"Rebuilding duplicates the capsule/colliders"):return
+  standalone.free()
+ if mode=="baked_missing":
+  var references=JSON.parse_string(OS.get_environment("SEVANKLAV_BASE_MESHES"))
+  if not check(w.get_meta("recovered_wall_meshes",[]).size()==3 and w.get_meta("wall_section_map_fallback",false),"Incomplete update did not restore all three wall meshes"):return
+  for name in ["WallMesh","SkirtMesh","CapMesh"]:
+   var actual=w.get_node("LevelMinusTwo/"+name).mesh;var expected=load(references[name])
+   for attribute in [Mesh.ARRAY_VERTEX,Mesh.ARRAY_NORMAL,Mesh.ARRAY_COLOR]:
+    if not check(triangles(actual,attribute)==triangles(expected,attribute),"Restoring a wall changed geometry, normals or cutaway IDs: "+name):return
  if mode=="mask_missing":
   if not check(w.get_meta("wall_section_map_fallback",false),"Missing optional texture did not use baked section IDs"):return
   for name in ["WallMesh","SkirtMesh","CapMesh"]:

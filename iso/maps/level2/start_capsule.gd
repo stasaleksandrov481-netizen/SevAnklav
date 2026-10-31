@@ -1,5 +1,15 @@
 extends "res://iso/capsule.gd"
+func _ready() -> void:
+ ensure_built()
+func ensure_built() -> bool:
+ # The world also calls this explicitly: startup must not depend on an
+ # inherited _ready callback having already generated the capsule.
+ if has_node("Generated/Glass shell") and not get_node("Generated").find_children("*","CollisionShape3D",true,false).is_empty():return true
+ _rebuild()
+ return has_node("Generated/Glass shell") and not get_node("Generated").find_children("*","CollisionShape3D",true,false).is_empty()
 func _rebuild() -> void:
+ var previous=get_node_or_null("Generated")
+ if previous!=null:remove_child(previous);previous.free()
  var generated=Node3D.new();generated.name="Generated";add_child(generated)
  var steel=_mat(Color("#536a77"),0.55);var dark=_mat(Color("#182c35"),0.2);var padding=_mat(Color("#7e9295"));var glass=_mat(Color(.25,.5,.6,.22),0.1,true)
  _box(generated,"Base",Vector3(2.3,.38,1.22),Vector3(0,.35,0),dark)

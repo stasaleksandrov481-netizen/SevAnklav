@@ -1,0 +1,269 @@
+{
+  "base": "0c077f69a63dadb04e860a467786cce114b3d898",
+  "build": "A-03.3",
+  "physical_android_tested": false,
+  "phone_root_cause_confirmed": false,
+  "reproduction": {
+    "condition": "Suppress inherited capsule _ready generation in A-03.2",
+    "rooms": 33,
+    "doors": 25,
+    "capsule_generated": false,
+    "startup_ready": false,
+    "message": "Не удалось полностью загрузить сцену бункера."
+  },
+  "godot46_startup_cases": [
+    {
+      "case": "complete",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: complete / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "mask_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: mask_missing / 14 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "stale_shadow",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: stale_shadow / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "stale_furniture",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: stale_furniture / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "critical_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: critical_missing / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "capsule_lifecycle",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: capsule_lifecycle / 13 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "baked_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: baked_missing / 20 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "malformed_furnishing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: malformed_furnishing / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "invalid_wall_sections",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: invalid_wall_sections / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "duplicate_regions",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: duplicate_regions / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "missing_spawn",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: missing_spawn / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "builder_failure",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: builder_failure / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    }
+  ],
+  "godot47_startup_cases": [
+    {
+      "case": "complete",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: complete / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "mask_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: mask_missing / 14 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "stale_shadow",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: stale_shadow / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "stale_furniture",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: stale_furniture / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "critical_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: critical_missing / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "capsule_lifecycle",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: capsule_lifecycle / 13 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "baked_missing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: baked_missing / 20 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "malformed_furnishing",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: malformed_furnishing / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "invalid_wall_sections",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: invalid_wall_sections / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "duplicate_regions",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: duplicate_regions / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "missing_spawn",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: missing_spawn / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    },
+    {
+      "case": "builder_failure",
+      "exit_code": 0,
+      "passed": true,
+      "result": [
+        "STARTUP ASSETS PASS: builder_failure / 18 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": []
+    }
+  ],
+  "android_data_packs_godot47": [
+    {
+      "preset": "Android APK",
+      "export_exit": 0,
+      "runtime_exit": 0,
+      "passed": true,
+      "checks": [
+        "STARTUP ASSETS PASS: complete / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": [],
+      "empty_working_directory": true
+    },
+    {
+      "preset": "Android",
+      "export_exit": 0,
+      "runtime_exit": 0,
+      "passed": true,
+      "checks": [
+        "STARTUP ASSETS PASS: complete / 10 checks; complete scene, actual touch, retained save, furniture, terminal and inventory"
+      ],
+      "errors": [],
+      "empty_working_directory": true
+    }
+  ],
+  "capsule_regression": {
+    "checks": 97,
+    "passed": true
+  },
+  "door_regression": {
+    "passed": true,
+    "output": [
+      "AUDIT PASS free sweeps=48 sealed gate checks=2 unexpected obstacles=0",
+      "SERVER CORRIDOR PASS: approach and turn into server room"
+    ]
+  }
+}

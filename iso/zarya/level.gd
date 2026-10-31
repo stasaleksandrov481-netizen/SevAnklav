@@ -9,6 +9,7 @@ var state_key := "zarya_layout3"
 var custom_layout := true
 var startup_ready := false
 var startup_error := ""
+var startup_stage := "Подготовка сцены"
 var startup_snapshot:Dictionary={}
 var visibility_controller
 var spawn_recovery_pending := false
@@ -57,6 +58,7 @@ func _ready() -> void:
 	player.restore_capsule_pose()
 	$Camera.position=player.position+$Camera._offset
 	if custom_layout:
+		startup_stage="Отображение помещений"
 		var script=ResourceLoader.load("res://iso/maps/level2/room_visibility.gd","Script",ResourceLoader.CACHE_MODE_IGNORE)
 		if script==null or not script.can_instantiate():
 			startup_error="Не удалось загрузить отображение бункера.";_startup_failed();return
@@ -75,13 +77,13 @@ func _ready() -> void:
 	else: environment.free()
 	for drop in state.data.drops: create_drop(drop)
 	clear_empty_drops()
-	startup_ready=true;startup_snapshot={};paused=false;player.locked=not bool(state.data.awake)
+	startup_ready=true;startup_snapshot={};startup_stage="Готово";paused=false;player.locked=not bool(state.data.awake)
 	if not get_meta("authoring_export",false):
 		call_deferred("_start")
 		if custom_layout:spawn_recovery_pending=bool(state.data.awake)
 func _startup_failed() -> void:
 	startup_ready=false;paused=true;player.locked=true;player.waking=false;player.clear_controls()
-	if startup_error.is_empty():startup_error="Не удалось полностью загрузить сцену бункера."
+	if startup_error.is_empty():startup_error="Не удалось завершить этап: "+startup_stage+"."
 	# A failed scene must neither advance awakening nor overwrite a real save
 	# with its partial room list / origin position.
 	get_node("/root/G").zsave=startup_snapshot
@@ -92,7 +94,9 @@ func _startup_failed() -> void:
 	var log=FileAccess.open("user://bunker_startup.log",FileAccess.WRITE)
 	if log!=null:
 		log.store_line("Engine: "+str(Engine.get_version_info().get("string",""))+" / "+OS.get_name())
+		log.store_line("Build: A-03.3 / Stage: "+startup_stage)
 		log.store_line(startup_error)
+		log.store_line("Rooms: "+str(rooms.size())+" / Doors: "+str(doors.size()))
 	printerr("BUNKER STARTUP: ",startup_error)
 	if not get_meta("authoring_export",false):call_deferred("_start")
 func retry_startup() -> void:
@@ -192,6 +196,7 @@ func cylinder(parent: Node3D, at: Vector3, radius: float, height: float, color: 
 func _build() -> bool:
 	# Read the current script after an in-place update. A cached failed script
 	# must not keep the editor running the old half-initialized world.
+	startup_stage="Загрузка сборщика бункера"
 	var script=ResourceLoader.load("res://iso/maps/level2/runtime.gd","Script",ResourceLoader.CACHE_MODE_IGNORE)
 	if script==null or not script.can_instantiate():
 		startup_error="Не удалось загрузить сборку бункера.";return false
